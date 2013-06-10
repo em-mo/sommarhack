@@ -1,0 +1,14 @@
+*.sln
+*.suo
+*.csproj
+*.contentproj*
+*.cachefile
+*.pfx
+Game.ico
+GameThumbnail.png
+JelloPhysics/
+SommarFenomen/SommarFenomenContent/bin/
+SommarFenomen/SommarFenomenContent/obj/
+SommarFenomen/SommarFenomen/bin/
+SommarFenomen/SommarFenomen/obj/
+SommarFenomen/SommarFenomen/Properties/
