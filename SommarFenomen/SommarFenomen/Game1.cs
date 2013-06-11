@@ -58,18 +58,13 @@ namespace SommarFenomen
         /// </summary>
         protected override void LoadContent()
         {
-            Plant.LoadContent();
-            DeathFactory.LoadContent();
-
-            PoisonCloud.LoadContent();
-
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
-            GameWindow gameWindow = new GameWindow();
-            gameWindow.Initialize(spriteBatch);
-            windowHandler.ChangeWindow(gameWindow);
+            PlayWindow playWindow = new PlayWindow();
+            playWindow.Initialize(GraphicsDevice);
+            windowHandler.ChangeWindow(playWindow);
 
-            kinectHandler = new KinectHandler(gameWindow);
+            kinectHandler = new KinectHandler(playWindow);
             kinectThread = new Thread(() => kinectHandler.run());
             kinectThread.IsBackground = true;
             kinectThread.Start();
@@ -92,27 +87,39 @@ namespace SommarFenomen
         protected override void Update(GameTime gameTime)
         {
             // Allows the game to exit
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
-                this.Exit();
-            // TODO: Add your update logic here
-            windowHandler.UpdateWindow(gameTime);
-            base.Update(gameTime);
+            if (!checkExitKey(Keyboard.GetState(), GamePad.GetState(PlayerIndex.One)))
+            {
+                windowHandler.UpdateWindow(gameTime);
+                base.Update(gameTime);
+            }
         }
 
-        private Stopwatch stopWatch = new Stopwatch();
         /// <summary>
         /// This is called when the game should draw itself.
         /// </summary>
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
-            spriteBatch.Begin();
             GraphicsDevice.Clear(Color.CornflowerBlue);
             windowHandler.DrawWindowGraphics(gameTime);
             base.Draw(gameTime);
-            spriteBatch.End();
+        }
+
+        bool checkExitKey(KeyboardState keyboardState, GamePadState gamePadState)
+        {
+            // Check to see whether ESC was pressed on the keyboard 
+            // or BACK was pressed on the controller.
+            if (keyboardState.IsKeyDown(Keys.Escape) ||
+                gamePadState.Buttons.Back == ButtonState.Pressed)
+            {
+                Exit();
+                return true;
+            }
+            return false;
         }
     }
+    
+
 
     static class Shared
     {

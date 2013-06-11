@@ -45,12 +45,22 @@ namespace SommarFenomen
             }
         }
 
+        private Vector2 scaledSize;
+
+        public Vector2 ScaledSize
+        {
+            get { return scaledSize; }
+            set { scaledSize = value; }
+        }
+        
+
         public Vector2 Size
         {
             get { return size; }
             set
             {
                 size = value;
+                ScaledSize = size * scale;
             }
         }
 
@@ -88,6 +98,7 @@ namespace SommarFenomen
             set 
             { 
                 scale = value;
+                ScaledSize = size * scale;
             }
         }
 

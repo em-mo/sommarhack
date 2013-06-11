@@ -8,6 +8,6 @@ namespace SommarFenomen
 {
     interface IStrategy
     {
-        public Vector2 getAcceleration();
+        Vector2 GetAcceleration();
     }
 }

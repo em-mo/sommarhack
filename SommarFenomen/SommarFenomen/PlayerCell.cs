@@ -15,7 +15,7 @@ namespace SommarFenomen
         private Sprite windPuff;
 
         private const float DRAG_ACCELERATION = -150;
-        private const float MAX_SPEED = 500;
+        private const double MAX_SPEED = 500;
         private const float ARM_SCALE = 0.75f;
         private static float DIRECTION_SPRITE_THRESHOLD = 100;
 
@@ -32,27 +32,25 @@ namespace SommarFenomen
 
         private Dictionary<PlayerSprites, Sprite> spriteDict;
 
-        private Vector2 position;
-
         public readonly object locker = new object();
 
         //Sets position of all sprites
         private void PositionHelper(Vector2 v)
         {
-            Vector2 diffVector = v - position;
+            Vector2 diffVector = v - spriteDict[PlayerSprites.Cloud].Position;
 
             foreach (Sprite sprite in spriteDict.Values)
                 Utils.AddToSpritePosition(sprite, diffVector);
 
             spriteDict[PlayerSprites.Cloud].Position = v;
-            position = v;
         }
 
-        public PlayerCell(Vector2 screenOffset)
+        public PlayerCell() : base(new KinectStrategy(), MAX_SPEED)
         {
             spriteDict = new Dictionary<PlayerSprites, Sprite>();
             InitSprites();
-            Position = new Vector2(600, 100);
+            Position = new Vector2(550, 200);
+            spriteDict[PlayerSprites.Cloud].Position = Position;
             InitArms();
 
             SetLeftArmRotation((float)Math.PI / 2, (float)Math.PI / 2);
@@ -61,6 +59,8 @@ namespace SommarFenomen
 
         private void InitSprites()
         {
+            const float CLOUD_SCALE = 0.6F;
+            const float ARM_SCALE = 1f;
 
             spriteDict = new Dictionary<PlayerSprites, Sprite>();
 
@@ -86,54 +86,55 @@ namespace SommarFenomen
             spriteDict[PlayerSprites.LeftUlna].Texture = Game1.contentManager.Load<Texture2D>(@"Images\Ulna_left");
             spriteDict[PlayerSprites.RightUlna].Texture = Game1.contentManager.Load<Texture2D>(@"Images\Ulna_right");
 
-            spriteDict[PlayerSprites.Cloud].Scale = Vector2.One * 0.6f;
+            spriteDict[PlayerSprites.Cloud].Scale = Vector2.One * CLOUD_SCALE;
+
+
+            //Scale Left
+            spriteDict[PlayerSprites.LeftHumerus].Scale = Vector2.One * ARM_SCALE;
+            spriteDict[PlayerSprites.LeftUlna].Scale = Vector2.One * ARM_SCALE;
+            spriteDict[PlayerSprites.LeftHand].Scale = Vector2.One * ARM_SCALE;
 
             // Origin to right mid
             spriteDict[PlayerSprites.LeftHumerus].Origin = new Vector2(spriteDict[PlayerSprites.LeftHumerus].Size.X, spriteDict[PlayerSprites.LeftHumerus].Size.Y / 2);
             spriteDict[PlayerSprites.LeftUlna].Origin = new Vector2(spriteDict[PlayerSprites.LeftUlna].Size.X, spriteDict[PlayerSprites.LeftUlna].Size.Y / 2);
             spriteDict[PlayerSprites.LeftHand].Origin = new Vector2(spriteDict[PlayerSprites.LeftHand].Size.X, spriteDict[PlayerSprites.LeftHand].Size.Y * 5 / 7);
-            /*
-            //Scale Left
-            spriteDict[PlayerSprites.LeftHumerus].Scale = new Vector2(armScale);
-            spriteDict[PlayerSprites.LeftUlna].Scale = new Vector2(armScale);
-            spriteDict[PlayerSprites.LeftHand].Scale = new Vector2(armScale);
-            */
+
+            //Scale Right
+            spriteDict[PlayerSprites.RightHumerus].Scale = Vector2.One * ARM_SCALE;
+            spriteDict[PlayerSprites.RightUlna].Scale = Vector2.One * ARM_SCALE;
+            spriteDict[PlayerSprites.RightHand].Scale = Vector2.One * ARM_SCALE;
 
             //Origin to left mid
             spriteDict[PlayerSprites.RightHumerus].Origin = new Vector2(0, spriteDict[PlayerSprites.RightHumerus].Size.Y / 2);
             spriteDict[PlayerSprites.RightUlna].Origin = new Vector2(0, spriteDict[PlayerSprites.RightUlna].Size.Y / 2);
             spriteDict[PlayerSprites.RightHand].Origin = new Vector2(0, spriteDict[PlayerSprites.RightHand].Size.Y * 5 / 7);
-            /*
-            //Scale Right
-            spriteDict[PlayerSprites.RightHumerus].Scale = new Vector2(armScale);
-            spriteDict[PlayerSprites.RightUlna].Scale = new Vector2(armScale);
-            spriteDict[PlayerSprites.RightHand].Scale = new Vector2(armScale);
-            */
+            
             //Origin center
             windPuff.Origin = new Vector2(windPuff.Size.X / 2, windPuff.Size.Y / 2);
         }
 
-        public void Update(GameTime gameTime)
+        public override void Update(GameTime gameTime)
         {
-            base.update(gameTime);
+            PositionHelper(Position);
+            base.Update(gameTime);
         }
 
         private void InitArms()
         {
-            leftHumerusOffsetX = (float)(spriteDict[PlayerSprites.Cloud].Size.X * 0.1);
-            leftHumerusOffsetY = (float)(spriteDict[PlayerSprites.Cloud].Size.Y * 0.6);
-            leftUlnaOffset = -(float)(spriteDict[PlayerSprites.LeftHumerus].Size.X * 0.95);
-            leftHandOffset = -(float)(spriteDict[PlayerSprites.LeftUlna].Size.X * 0.97);
+            leftHumerusOffsetX = (float)(spriteDict[PlayerSprites.Cloud].ScaledSize.X * 0.1);
+            leftHumerusOffsetY = (float)(spriteDict[PlayerSprites.Cloud].ScaledSize.Y * 0.6);
+            leftUlnaOffset = -(float)(spriteDict[PlayerSprites.LeftHumerus].ScaledSize.X * 0.95);
+            leftHandOffset = -(float)(spriteDict[PlayerSprites.LeftUlna].ScaledSize.X * 0.97);
 
-            rightHumerusOffsetX = (float)(spriteDict[PlayerSprites.Cloud].Size.X * 0.8);
-            rightHumerusOffsetY = (float)(spriteDict[PlayerSprites.Cloud].Size.Y * 0.6);
-            rightUlnaOffset = (float)(spriteDict[PlayerSprites.RightHumerus].Size.X * 0.95);
-            rightHandOffset = (float)(spriteDict[PlayerSprites.RightUlna].Size.X * 0.97);
+            rightHumerusOffsetX = (float)(spriteDict[PlayerSprites.Cloud].ScaledSize.X * 0.8);
+            rightHumerusOffsetY = (float)(spriteDict[PlayerSprites.Cloud].ScaledSize.Y * 0.6);
+            rightUlnaOffset = (float)(spriteDict[PlayerSprites.RightHumerus].ScaledSize.X * 0.95);
+            rightHandOffset = (float)(spriteDict[PlayerSprites.RightUlna].ScaledSize.X * 0.97);
 
             //Set left
             Vector2 newHumerusPosition = new Vector2();
-            newHumerusPosition.X = position.X + leftHumerusOffsetX;
-            newHumerusPosition.Y = position.Y + leftHumerusOffsetY;
+            newHumerusPosition.X = Position.X + leftHumerusOffsetX;
+            newHumerusPosition.Y = Position.Y + leftHumerusOffsetY;
 
             Vector2 newUlnaPosition = new Vector2();
             newUlnaPosition.X = newHumerusPosition.X + leftUlnaOffset;
@@ -149,8 +150,8 @@ namespace SommarFenomen
 
             //Set right
             newHumerusPosition = new Vector2();
-            newHumerusPosition.X = position.X + rightHumerusOffsetX;
-            newHumerusPosition.Y = position.Y + rightHumerusOffsetY;
+            newHumerusPosition.X = Position.X + rightHumerusOffsetX;
+            newHumerusPosition.Y = Position.Y + rightHumerusOffsetY;
 
             newUlnaPosition = new Vector2();
             newUlnaPosition.X = newHumerusPosition.X + rightUlnaOffset;
@@ -249,7 +250,7 @@ namespace SommarFenomen
 
         
 
-        private void DrawWindPuff(GraphicsHandler g)
+        private void DrawWindPuff(SpriteBatch batch)
         {
             WindPuffMessage puff;
             for (int i = windPuffList.Count - 1; i >= 0; i--)
@@ -259,29 +260,20 @@ namespace SommarFenomen
                 windPuff.Position = puff.Position;
                 windPuff.Rotation = puff.Direction;
 
-                g.DrawSprite(windPuff);
+                GraphicsHandler.DrawSprite(windPuff, batch);
 
                 if (puff.checkAge())
                     windPuffList.RemoveAt(i);
             }
         }
 
-        public void DrawSick(GraphicsHandler g)
-        {
-            Color color = Color.ForestGreen;
-            color.A = 128;
-            spriteDict[PlayerSprites.Cloud].Color = color;
-            g.DrawSprite(spriteDict[PlayerSprites.Cloud]);
-            spriteDict[PlayerSprites.Cloud].Color = Color.White;
-        }
-
-        public void Draw(GraphicsHandler g)
+        public override void Draw(SpriteBatch batch)
         {
             lock (locker)
             {
-                DrawWindPuff(g);
+                DrawWindPuff(batch);
                 foreach (Sprite sprite in spriteDict.Values)
-                    g.DrawSprite(sprite);
+                    GraphicsHandler.DrawSprite(sprite, batch);
             }
         }
     }

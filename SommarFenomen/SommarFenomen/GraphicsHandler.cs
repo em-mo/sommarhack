@@ -9,14 +9,7 @@ namespace SommarFenomen
 {
     class GraphicsHandler
     {
-        SpriteBatch batch;
-
-        public void Initialize(SpriteBatch batch)
-        {
-            this.batch = batch;
-        }
-
-        public void DrawSprites(List<Sprite> spriteList)
+        public static void DrawSprites(List<Sprite> spriteList, SpriteBatch batch)
         {
             foreach (Sprite sprite in spriteList)
 	        {
@@ -27,7 +20,7 @@ namespace SommarFenomen
             }       
         }
 
-        public void DrawSprite(Sprite sprite)
+        public static void DrawSprite(Sprite sprite, SpriteBatch batch)
         {
             if (sprite.Size != Vector2.Zero && sprite.IsShowing)
                 batch.Draw(sprite.Texture, sprite.Position, null, sprite.Color, sprite.Rotation, sprite.Origin, sprite.Scale, sprite.Effects, sprite.Layer);

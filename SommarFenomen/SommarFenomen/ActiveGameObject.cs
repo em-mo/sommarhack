@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace SommarFenomen
 {
@@ -10,10 +11,16 @@ namespace SommarFenomen
     {
         private Vector2 speed = Vector2.Zero;
         private Vector2 position;
+        private Vector2 previousPosition;
         private BoundingRect bounds;
-        private Sprite sprite;
+        public double MaxSpeed { get; set; }
+        public IStrategy Strategy { get; set; }
 
-        private IStrategy strategy;
+        public ActiveGameObject(IStrategy strategy, double maxSpeed)
+        {
+            Strategy = strategy;
+            MaxSpeed = maxSpeed * maxSpeed;
+        }
 
         public Vector2 Speed
         {
@@ -33,14 +40,28 @@ namespace SommarFenomen
             set { this.position = value; }
         }
 
-        public virtual void draw(GraphicsHandler g)
+        public void AddAcceleration(Vector2 acceleration, GameTime gameTime)
         {
-            g.DrawSprite(sprite);
+            speed += acceleration * (float)Utils.TicksToSeconds(gameTime.ElapsedGameTime.Ticks);
+
+            double absoluteSpeed = (Math.Pow(speed.X, 2) + Math.Pow(speed.Y, 2));
+            if (absoluteSpeed > MaxSpeed)
+            {
+                float overRatio = (float)Math.Sqrt(MaxSpeed / absoluteSpeed);
+                speed *= overRatio;
+            }
         }
-        public virtual void update(GameTime gameTime)
+
+        public virtual void Draw(SpriteBatch batch)
         {
-            speed += strategy.getAcceleration() * gameTime.ElapsedGameTime.Seconds;
-            position += speed * gameTime.ElapsedGameTime.Seconds;
+        }
+
+        public virtual void Update(GameTime gameTime)
+        {
+            AddAcceleration(Strategy.GetAcceleration(), gameTime);
+
+            previousPosition = position;
+            position += speed * (float)Utils.TicksToSeconds(gameTime.ElapsedGameTime.Ticks);
         }
     }
 }

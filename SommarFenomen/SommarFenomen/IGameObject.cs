@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace SommarFenomen
 {
     interface IGameObject
     {
-        public void Update(GameTime gameTime);
-        public void Draw(GraphicsHandler g);
+        void Update(GameTime gameTime);
+        void Draw(SpriteBatch batch);
     }
 }

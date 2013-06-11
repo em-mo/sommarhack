@@ -47,11 +47,11 @@ namespace SommarFenomen
         // Chooses algorithm for hand movement
         private bool movementType = true;
 
-        private Player playerCloud;
+        private Player player;
 
-        public Player PlayerCloud
+        public Player Player
         {
-            get { return playerCloud; }
+            get { return player; }
         }
 
         public bool MovmentType
@@ -96,7 +96,7 @@ namespace SommarFenomen
             background.Size = new Vector2(Game1.graphics.PreferredBackBufferWidth, Game1.graphics.PreferredBackBufferHeight);
             background.Layer = 0;
 
-            playerCloud = new Player(background.Size);
+            player = new Player(background.Size);
 
             backgroundSprites.Add(background);
 
@@ -126,7 +126,7 @@ namespace SommarFenomen
 
         public void Update(GameTime gameTime)
         {
-            playerCloud.Update(gameTime);
+            player.Update(gameTime);
             UpdateFallingRaindrops(gameTime);
             UpdateFactories(gameTime);
             UpdatePoisonClouds(gameTime);
@@ -175,7 +175,7 @@ namespace SommarFenomen
         /// </summary>
         private void CheckForCloudCollision()
         {
-            BoundingRect playerRect = playerCloud.GetBounds();
+            BoundingRect playerRect = player.GetBounds();
         }
 
         /// <summary>
@@ -224,8 +224,8 @@ namespace SommarFenomen
                 Sprite drop = new Sprite();
                 drop.Initialize();
                 drop.Texture = Game1.contentManager.Load<Texture2D>(@"Images\Drop");
-                float xValue = rand.Next((int)(playerCloud.Position.X +  0.2*playerCloud.GetSize().X) , (int)(playerCloud.Position.X + (playerCloud.GetSize().X) * 0.8));
-                float yValue = playerCloud.Position.Y + playerCloud.GetSize().Y;
+                float xValue = rand.Next((int)(player.Position.X +  0.2*player.GetSize().X) , (int)(player.Position.X + (player.GetSize().X) * 0.8));
+                float yValue = player.Position.Y + player.GetSize().Y;
                 drop.Position = new Vector2(xValue, yValue);
 
                 lock(dropLock)
@@ -280,34 +280,34 @@ namespace SommarFenomen
 
         public void SwipeUp(Arm arm)
         {
-            lock (playerCloud.locker)
+            lock (player.locker)
             {
-                playerCloud.AddWindPuff((float)Math.PI / 2, arm);
-                playerCloud.Speed += new Vector2(0, MOVE_SPEED);
+                player.AddWindPuff((float)Math.PI / 2, arm);
+                player.Speed += new Vector2(0, MOVE_SPEED);
             }
         }
         public void SwipeDown(Arm arm)
         {
-            lock (playerCloud.locker)
+            lock (player.locker)
             {
-                playerCloud.AddWindPuff((float)-Math.PI / 2, arm);
-                playerCloud.Speed += new Vector2(0, -MOVE_SPEED);
+                player.AddWindPuff((float)-Math.PI / 2, arm);
+                player.Speed += new Vector2(0, -MOVE_SPEED);
             }
         }
         public void SwipeLeft(Arm arm)
         {
-            lock (playerCloud.locker)
+            lock (player.locker)
             {
-                playerCloud.AddWindPuff(0, arm);
-                playerCloud.Speed += new Vector2(MOVE_SPEED, 0);
+                player.AddWindPuff(0, arm);
+                player.Speed += new Vector2(MOVE_SPEED, 0);
             }
         }
         public void SwipeRight(Arm arm)
         {
-            lock (playerCloud.locker)
+            lock (player.locker)
             {
-                playerCloud.AddWindPuff((float)Math.PI, arm);
-                playerCloud.Speed += new Vector2(-MOVE_SPEED, 0);
+                player.AddWindPuff((float)Math.PI, arm);
+                player.Speed += new Vector2(-MOVE_SPEED, 0);
             }
         }
 
@@ -320,34 +320,34 @@ namespace SommarFenomen
         {
             if (direction == Direction.Up)
             {
-                lock (playerCloud.locker)
+                lock (player.locker)
                 {
-                    playerCloud.AddWindPuff((float)Math.PI / 2, arm);
-                    playerCloud.Speed += new Vector2(0, ALTERNATE_MOVE_SPEED);
+                    player.AddWindPuff((float)Math.PI / 2, arm);
+                    player.Speed += new Vector2(0, ALTERNATE_MOVE_SPEED);
                 }
             }
             else if (direction == Direction.Down)
             {
-                lock (playerCloud.locker)
+                lock (player.locker)
                 {
-                    playerCloud.AddWindPuff((float)-Math.PI / 2, arm);
-                    playerCloud.Speed += new Vector2(0, -ALTERNATE_MOVE_SPEED);
+                    player.AddWindPuff((float)-Math.PI / 2, arm);
+                    player.Speed += new Vector2(0, -ALTERNATE_MOVE_SPEED);
                 }
             }
             else if (direction == Direction.Left)
             {
-                lock (playerCloud.locker)
+                lock (player.locker)
                 {
-                    playerCloud.AddWindPuff(0, arm);
-                    playerCloud.Speed += new Vector2(ALTERNATE_MOVE_SPEED, 0);
+                    player.AddWindPuff(0, arm);
+                    player.Speed += new Vector2(ALTERNATE_MOVE_SPEED, 0);
                 }
             }
             else
             {
-                lock (playerCloud.locker)
+                lock (player.locker)
                 {
-                    playerCloud.AddWindPuff((float)Math.PI, arm);
-                    playerCloud.Speed += new Vector2(-ALTERNATE_MOVE_SPEED, 0);
+                    player.AddWindPuff((float)Math.PI, arm);
+                    player.Speed += new Vector2(-ALTERNATE_MOVE_SPEED, 0);
                 }
             }
         }
@@ -362,7 +362,7 @@ namespace SommarFenomen
             
             graphicsHandler.DrawSprites(raindropsList);
             graphicsHandler.DrawSprites(spriteList);
-            playerCloud.Draw(graphicsHandler);
+            player.Draw(graphicsHandler);
 
             foreach (PoisonCloud cloud in poisonCloudList)
             {

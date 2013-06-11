@@ -9,6 +9,8 @@ namespace SommarFenomen
 {
     class Player
     {
+        public IStrategy Strategy { get; set; }
+
         enum PlayerSprites { Cloud, LeftHumerus, LeftUlna, LeftHand, RightHumerus, RightUlna, RightHand };
         private Vector2 speed = new Vector2(0,0);
 
@@ -21,7 +23,7 @@ namespace SommarFenomen
         private const float DRAG_ACCELERATION = -150;
         private const float MAX_SPEED = 500;
         private const float ARM_SCALE = 0.75f;
-        private static float DIRECTION_SPRITE_THRESHOLD = 100;
+        private const float DIRECTION_SPRITE_THRESHOLD = 100;
 
 
         private float rightHumerusOffsetX;
