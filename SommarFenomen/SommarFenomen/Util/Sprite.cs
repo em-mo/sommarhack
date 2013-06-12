@@ -19,7 +19,7 @@ namespace SommarFenomen
         private Vector2 origin;
         private Vector2 scale;
         private float layer;
-        private Vector2 size;
+        private Vector2 originalSize;
         private bool isVisible;
         private SpriteEffects effects;
 
@@ -54,13 +54,13 @@ namespace SommarFenomen
         }
         
 
-        public Vector2 Size
+        public Vector2 OriginalSize
         {
-            get { return size; }
+            get { return originalSize; }
             set
             {
-                size = value;
-                ScaledSize = size * scale;
+                originalSize = value;
+                ScaledSize = originalSize * scale;
             }
         }
 
@@ -70,7 +70,7 @@ namespace SommarFenomen
             set 
             { 
                 texture = value;
-                Size = new Vector2(texture.Width, texture.Height);
+                OriginalSize = new Vector2(texture.Width, texture.Height);
             }
         }
 
@@ -98,7 +98,7 @@ namespace SommarFenomen
             set 
             { 
                 scale = value;
-                ScaledSize = size * scale;
+                ScaledSize = originalSize * scale;
             }
         }
 
@@ -207,7 +207,7 @@ namespace SommarFenomen
             this.scale = Vector2.One;
             this.effects = SpriteEffects.None;
             this.layer = 0.5f;
-            this.size = Vector2.Zero;
+            this.originalSize = Vector2.Zero;
             this.isAnimated = false;
             this.totalFrames = 0;
             this.framesPerSecond = 0f;

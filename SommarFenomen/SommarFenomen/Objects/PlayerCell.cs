@@ -96,9 +96,9 @@ namespace SommarFenomen
             spriteDict[PlayerSprites.LeftHand].Scale = Vector2.One * ARM_SCALE;
 
             // Origin to right mid
-            spriteDict[PlayerSprites.LeftHumerus].Origin = new Vector2(spriteDict[PlayerSprites.LeftHumerus].Size.X, spriteDict[PlayerSprites.LeftHumerus].Size.Y / 2);
-            spriteDict[PlayerSprites.LeftUlna].Origin = new Vector2(spriteDict[PlayerSprites.LeftUlna].Size.X, spriteDict[PlayerSprites.LeftUlna].Size.Y / 2);
-            spriteDict[PlayerSprites.LeftHand].Origin = new Vector2(spriteDict[PlayerSprites.LeftHand].Size.X, spriteDict[PlayerSprites.LeftHand].Size.Y * 5 / 7);
+            spriteDict[PlayerSprites.LeftHumerus].Origin = new Vector2(spriteDict[PlayerSprites.LeftHumerus].OriginalSize.X, spriteDict[PlayerSprites.LeftHumerus].OriginalSize.Y / 2);
+            spriteDict[PlayerSprites.LeftUlna].Origin = new Vector2(spriteDict[PlayerSprites.LeftUlna].OriginalSize.X, spriteDict[PlayerSprites.LeftUlna].OriginalSize.Y / 2);
+            spriteDict[PlayerSprites.LeftHand].Origin = new Vector2(spriteDict[PlayerSprites.LeftHand].OriginalSize.X, spriteDict[PlayerSprites.LeftHand].OriginalSize.Y * 5 / 7);
 
             //Scale Right
             spriteDict[PlayerSprites.RightHumerus].Scale = Vector2.One * ARM_SCALE;
@@ -106,12 +106,12 @@ namespace SommarFenomen
             spriteDict[PlayerSprites.RightHand].Scale = Vector2.One * ARM_SCALE;
 
             //Origin to left mid
-            spriteDict[PlayerSprites.RightHumerus].Origin = new Vector2(0, spriteDict[PlayerSprites.RightHumerus].Size.Y / 2);
-            spriteDict[PlayerSprites.RightUlna].Origin = new Vector2(0, spriteDict[PlayerSprites.RightUlna].Size.Y / 2);
-            spriteDict[PlayerSprites.RightHand].Origin = new Vector2(0, spriteDict[PlayerSprites.RightHand].Size.Y * 5 / 7);
+            spriteDict[PlayerSprites.RightHumerus].Origin = new Vector2(0, spriteDict[PlayerSprites.RightHumerus].OriginalSize.Y / 2);
+            spriteDict[PlayerSprites.RightUlna].Origin = new Vector2(0, spriteDict[PlayerSprites.RightUlna].OriginalSize.Y / 2);
+            spriteDict[PlayerSprites.RightHand].Origin = new Vector2(0, spriteDict[PlayerSprites.RightHand].OriginalSize.Y * 5 / 7);
             
             //Origin center
-            windPuff.Origin = new Vector2(windPuff.Size.X / 2, windPuff.Size.Y / 2);
+            windPuff.Origin = new Vector2(windPuff.OriginalSize.X / 2, windPuff.OriginalSize.Y / 2);
         }
 
         public override void Update(GameTime gameTime)
@@ -236,12 +236,12 @@ namespace SommarFenomen
             if (arm == Arm.Left)
             {
                 hand = spriteDict[PlayerSprites.LeftHand];
-                offset = -hand.Size.X;
+                offset = -hand.OriginalSize.X;
             }
             else
             {
                 hand = spriteDict[PlayerSprites.RightHand];
-                offset = hand.Size.X;
+                offset = hand.OriginalSize.X;
             }
 
             Vector2 position = new Vector2(hand.Position.X + offset, hand.Position.Y);

@@ -59,7 +59,7 @@ namespace SommarFenomen
             background = new Sprite();
             background.Initialize();
             background.Texture = Game1.contentManager.Load<Texture2D>(@"Images\Gradient");
-            background.Size = new Vector2(Game1.graphics.PreferredBackBufferWidth, Game1.graphics.PreferredBackBufferHeight);
+            background.OriginalSize = new Vector2(Game1.graphics.PreferredBackBufferWidth, Game1.graphics.PreferredBackBufferHeight);
             background.Layer = 0;
 
             player = new PlayerCell();

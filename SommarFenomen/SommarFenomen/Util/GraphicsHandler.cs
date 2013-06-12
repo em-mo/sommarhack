@@ -13,7 +13,7 @@ namespace SommarFenomen
         {
             foreach (Sprite sprite in spriteList)
 	        {
-                if(sprite.Size != Vector2.Zero && sprite.IsShowing)
+                if(sprite.OriginalSize != Vector2.Zero && sprite.IsShowing)
                     batch.Draw(sprite.Texture, sprite.Position, null, sprite.Color, sprite.Rotation, sprite.Origin, sprite.Scale, sprite.Effects, sprite.Layer);
                 else if (sprite.IsShowing)
                     batch.Draw(sprite.Texture, sprite.Position, null, sprite.Color, sprite.Rotation, sprite.Origin, sprite.Scale, sprite.Effects, sprite.Layer);
@@ -22,7 +22,7 @@ namespace SommarFenomen
 
         public static void DrawSprite(Sprite sprite, SpriteBatch batch)
         {
-            if (sprite.Size != Vector2.Zero && sprite.IsShowing)
+            if (sprite.OriginalSize != Vector2.Zero && sprite.IsShowing)
                 batch.Draw(sprite.Texture, sprite.Position, null, sprite.Color, sprite.Rotation, sprite.Origin, sprite.Scale, sprite.Effects, sprite.Layer);
             else if (sprite.IsShowing)
                 batch.Draw(sprite.Texture, sprite.Position, null, sprite.Color, sprite.Rotation, sprite.Origin, sprite.Scale, sprite.Effects, sprite.Layer);
