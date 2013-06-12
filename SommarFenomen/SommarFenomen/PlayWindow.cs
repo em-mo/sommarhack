@@ -90,9 +90,8 @@ namespace SommarFenomen
 
         private void MoveCamera()
         {
-            camera.Follow(player.Position);
+            camera.Follow(player.getCenter());
         }
-        
 
         public void Update(GameTime gameTime)
         {

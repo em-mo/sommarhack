@@ -52,6 +52,7 @@ namespace SommarFenomen
             Position = new Vector2(550, 200);
             spriteDict[PlayerSprites.Cloud].Position = Position;
             InitArms();
+            setBoundsFromSprite(spriteDict[PlayerSprites.Cloud]);
 
             SetLeftArmRotation((float)Math.PI / 2, (float)Math.PI / 2);
             SetRightArmRotation(-(float)Math.PI / 2, -(float)Math.PI / 2);
@@ -115,8 +116,8 @@ namespace SommarFenomen
 
         public override void Update(GameTime gameTime)
         {
-            PositionHelper(Position);
             base.Update(gameTime);
+            PositionHelper(Position);
         }
 
         private void InitArms()

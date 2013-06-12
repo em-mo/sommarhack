@@ -10,8 +10,7 @@ namespace SommarFenomen
     class ActiveGameObject : IGameObject
     {
         private Vector2 speed = Vector2.Zero;
-        private Vector2 position;
-        private Vector2 previousPosition;
+        public Vector2 PreviousPosition { get; set; }
         private BoundingRect bounds;
         public double MaxSpeed { get; set; }
         public IStrategy Strategy { get; set; }
@@ -20,6 +19,9 @@ namespace SommarFenomen
         {
             Strategy = strategy;
             MaxSpeed = maxSpeed * maxSpeed;
+
+            bounds.Min = Vector2.Zero;
+            bounds.Max = Utils.AddToVector(Bounds.Min, 1);
         }
 
         public Vector2 Speed
@@ -36,8 +38,13 @@ namespace SommarFenomen
 
         public Vector2 Position
         {
-            get { return position; }
-            set { this.position = value; }
+            get { return bounds.Min; }
+            set { this.bounds.Move(value); }
+        }
+
+        public Vector2 getCenter()
+        {
+            return new Vector2(bounds.Min.X + bounds.Width / 2, Bounds.Min.Y + bounds.Height / 2);
         }
 
         public void AddAcceleration(Vector2 acceleration, GameTime gameTime)
@@ -60,8 +67,14 @@ namespace SommarFenomen
         {
             AddAcceleration(Strategy.GetAcceleration(), gameTime);
 
-            previousPosition = position;
-            position += speed * (float)Utils.TicksToSeconds(gameTime.ElapsedGameTime.Ticks);
+            PreviousPosition = Position;
+            Position += speed * (float)Utils.TicksToSeconds(gameTime.ElapsedGameTime.Ticks);
+        }
+
+        protected void setBoundsFromSprite(Sprite sprite)
+        {
+            bounds.Max.X = bounds.Left + sprite.ScaledSize.X;
+            bounds.Max.Y = bounds.Top + sprite.ScaledSize.Y;
         }
     }
 }

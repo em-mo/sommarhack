@@ -104,7 +104,6 @@ namespace SommarFenomen
         {
             // To add parallax, simply multiply it by the position
             return Matrix.CreateTranslation(new Vector3(-Position * parallax, 0.0f)) *
-                // The next line has a catch. See note below.
                    Matrix.CreateTranslation(new Vector3(-Origin, 0.0f)) *
                    Matrix.CreateRotationZ(Rotation) *
                    Matrix.CreateScale(Zoom, Zoom, 1) *

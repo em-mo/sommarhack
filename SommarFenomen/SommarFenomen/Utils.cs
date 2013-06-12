@@ -81,5 +81,13 @@ namespace SommarFenomen
         {
             return (double)ticks / (double)10000000;
         }
+
+        public static Vector2 AddToVector(Vector2 vector, float x)
+        {
+            vector.X += x;
+            vector.Y += x;
+
+            return vector;
+        }
     }
 }

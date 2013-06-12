@@ -34,6 +34,13 @@ namespace SommarFenomen
             BoundingRect.mMinMax = new BoundingRect(Vector2.One * float.MinValue, Vector2.One * float.MaxValue);
         }
 
+        public void Move(Vector2 newPosition)
+        {
+            Max.X = newPosition.X + Width;
+            Max.Y = newPosition.Y + Height;
+            Min = newPosition;
+        }
+
         public Vector2 Center
         {
             get { return (this.Min + this.Max) / 2; }
@@ -262,7 +269,7 @@ namespace SommarFenomen
                 (a.Min.X != b.Min.X) ||
                 (a.Min.Y != b.Min.Y) ||
                 (a.Max.X != b.Max.X) ||
-                (a.Max.Y != b.Max.Y);
+                (a.Max.Y != b.Max.Y); 
         }
 
         public override bool Equals(object obj)
