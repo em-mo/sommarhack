@@ -8,7 +8,7 @@ using SommarFenomen.Objects.Strategies;
 
 namespace SommarFenomen
 {
-    class ActiveGameObject : IGameObject
+    abstract class ActiveGameObject : IGameObject
     {
         private static readonly float DEFAULT_MAX_SPEED = 250000;
 

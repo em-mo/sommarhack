@@ -23,7 +23,7 @@ namespace SommarFenomen.Objects
             cellTexture = Game1.contentManager.Load<Texture2D>(@"Images\Good_Cell");
         }
 
-        public void Draw(SpriteBatch batch)
+        public override void Draw(SpriteBatch batch)
         {
             GraphicsHandler.DrawSprite(cellSprite, batch);
         }
