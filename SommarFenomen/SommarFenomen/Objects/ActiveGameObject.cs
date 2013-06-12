@@ -4,11 +4,14 @@ using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using SommarFenomen.Objects.Strategies;
 
 namespace SommarFenomen
 {
     class ActiveGameObject : IGameObject
     {
+        private static readonly float DEFAULT_MAX_SPEED = 250000;
+
         private Vector2 speed = Vector2.Zero;
         public Vector2 PreviousPosition { get; set; }
         private BoundingRect bounds;
@@ -19,6 +22,24 @@ namespace SommarFenomen
         {
             Strategy = strategy;
             MaxSpeed = maxSpeed * maxSpeed;
+
+            bounds.Min = Vector2.Zero;
+            bounds.Max = Utils.AddToVector(Bounds.Min, 1);
+        }
+
+        public ActiveGameObject(IStrategy strategy)
+        {
+            Strategy = strategy;
+            MaxSpeed = DEFAULT_MAX_SPEED;
+
+            bounds.Min = Vector2.Zero;
+            bounds.Max = Utils.AddToVector(Bounds.Min, 1);
+        }
+
+        public ActiveGameObject()
+        {
+            Strategy = new StationaryStrategy();
+            MaxSpeed = DEFAULT_MAX_SPEED;
 
             bounds.Min = Vector2.Zero;
             bounds.Max = Utils.AddToVector(Bounds.Min, 1);
@@ -59,9 +80,7 @@ namespace SommarFenomen
             }
         }
 
-        public virtual void Draw(SpriteBatch batch)
-        {
-        }
+        public abstract void Draw(SpriteBatch batch);
 
         public virtual void Update(GameTime gameTime)
         {

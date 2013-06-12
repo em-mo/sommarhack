@@ -68,10 +68,8 @@ namespace SommarFenomen
             foreach (PlayerSprites sprite in Enum.GetValues(typeof(PlayerSprites)))
             {
                 spriteDict.Add(sprite, new Sprite());
-                spriteDict[sprite].Initialize();
             }
             windPuff = new Sprite();
-            windPuff.Initialize();
 
             cloudTextures = new Dictionary<Direction, Texture2D>();
             cloudTextures.Add(Direction.None, Game1.contentManager.Load<Texture2D>(@"Images\Cloud"));

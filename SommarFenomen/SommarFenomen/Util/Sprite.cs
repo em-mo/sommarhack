@@ -198,7 +198,7 @@ namespace SommarFenomen
         #endregion
         #endregion
 
-        public virtual void Initialize()
+        public Sprite()
         {
             this.position = Vector2.Zero;
             this.isVisible = true;
@@ -212,6 +212,24 @@ namespace SommarFenomen
             this.totalFrames = 0;
             this.framesPerSecond = 0f;
             this.isBackwards = false;
+        }
+
+        public Sprite(Texture2D texture)
+        {
+            this.position = Vector2.Zero;
+            this.isVisible = true;
+            this.color = Color.White;
+            this.rotation = 0f;
+            this.scale = Vector2.One;
+            this.effects = SpriteEffects.None;
+            this.layer = 0.5f;
+            this.originalSize = Vector2.Zero;
+            this.isAnimated = false;
+            this.totalFrames = 0;
+            this.framesPerSecond = 0f;
+            this.isBackwards = false;
+
+            Texture = texture;
         }
     }
 }

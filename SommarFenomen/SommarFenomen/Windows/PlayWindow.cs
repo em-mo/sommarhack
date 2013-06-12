@@ -8,6 +8,7 @@ using Microsoft.Xna.Framework.Input;
 using Microsoft.Kinect;
 using System.Diagnostics;
 using Microsoft.Xna.Framework.Audio;
+using SommarFenomen.Objects;
 
 namespace SommarFenomen
 {
@@ -56,14 +57,10 @@ namespace SommarFenomen
             oldState = new KeyboardState();
             camera = new Camera(graphicsDevice.Viewport);
 
-            background = new Sprite();
-            background.Initialize();
-            background.Texture = Game1.contentManager.Load<Texture2D>(@"Images\Gradient");
-            background.OriginalSize = new Vector2(Game1.graphics.PreferredBackBufferWidth, Game1.graphics.PreferredBackBufferHeight);
-            background.Layer = 0;
+            background = new Sprite(Game1.contentManager.Load<Texture2D>(@"Images\Gradient"));
 
             player = new PlayerCell();
-
+            GoodCell.LoadContent();
             backgroundSprites.Add(background);
         }
 

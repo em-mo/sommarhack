@@ -4,6 +4,7 @@
 *.contentproj*
 *.cachefile
 *.pfx
+*.user
 Game.ico
 GameThumbnail.png
 JelloPhysics/
