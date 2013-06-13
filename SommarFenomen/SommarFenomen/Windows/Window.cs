@@ -9,7 +9,7 @@ namespace SommarFenomen
 {
     interface Window
     {
-        void Initialize(GraphicsDevice graphicsDevice);
+        void Initialize();
         void Update(GameTime gameTime);
         void Draw(GameTime gameTime);
     }

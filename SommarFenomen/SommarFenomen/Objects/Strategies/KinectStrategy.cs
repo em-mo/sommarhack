@@ -9,7 +9,7 @@ namespace SommarFenomen
 {
     class KinectStrategy : IStrategy
     {
-        private const float KEY_SPEED = 1500f;
+        private const float KEY_SPEED = 15f;
         public Vector2 CurrentAcceleration { get; set; }
 
         KeyboardState oldState;

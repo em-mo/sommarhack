@@ -10,6 +10,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
 using System.Diagnostics;
+using SommarFenomen.Util;
 
 namespace SommarFenomen
 {
@@ -21,19 +22,19 @@ namespace SommarFenomen
         public static GraphicsDeviceManager graphics;
         public static ContentManager contentManager;
 
-        SpriteBatch spriteBatch;
-        WindowHandler windowHandler;
-        Thread kinectThread;
-        KinectHandler kinectHandler;
+        private SpriteBatch _spriteBatch;
+        private WindowHandler _windowHandler;
+        private Thread _kinectThread;
+        private KinectHandler _kinectHandler;
 
-        private const float FPS = 200;
+        private const float FPS = 60;
 
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this); 
             contentManager = new ContentManager(Services);
             contentManager.RootDirectory = "Content";
-            windowHandler = new WindowHandler();
+            _windowHandler = new WindowHandler(this);
 
             this.TargetElapsedTime = TimeSpan.FromSeconds(1 / FPS);
 
@@ -58,16 +59,18 @@ namespace SommarFenomen
         /// </summary>
         protected override void LoadContent()
         {
-            spriteBatch = new SpriteBatch(GraphicsDevice);
+            ConvertUnits.SetDisplayUnitToSimUnitRatio(24f);
+            
+            _spriteBatch = new SpriteBatch(GraphicsDevice);
 
-            PlayWindow playWindow = new PlayWindow();
-            playWindow.Initialize(GraphicsDevice);
-            windowHandler.ChangeWindow(playWindow);
+            PlayWindow playWindow = new PlayWindow(_windowHandler);
+            playWindow.Initialize();
+            _windowHandler.ChangeWindow(playWindow);
 
-            kinectHandler = new KinectHandler(playWindow);
-            kinectThread = new Thread(() => kinectHandler.run());
-            kinectThread.IsBackground = true;
-            kinectThread.Start();
+            _kinectHandler = new KinectHandler(playWindow);
+            _kinectThread = new Thread(() => _kinectHandler.run());
+            _kinectThread.IsBackground = true;
+            _kinectThread.Start();
         }
 
         /// <summary>
@@ -89,7 +92,7 @@ namespace SommarFenomen
             // Allows the game to exit
             if (!checkExitKey(Keyboard.GetState(), GamePad.GetState(PlayerIndex.One)))
             {
-                windowHandler.UpdateWindow(gameTime);
+                _windowHandler.UpdateWindow(gameTime);
                 base.Update(gameTime);
             }
         }
@@ -101,7 +104,7 @@ namespace SommarFenomen
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
-            windowHandler.DrawWindowGraphics(gameTime);
+            _windowHandler.DrawWindowGraphics(gameTime);
             base.Draw(gameTime);
         }
 

@@ -9,114 +9,148 @@ using Microsoft.Kinect;
 using System.Diagnostics;
 using Microsoft.Xna.Framework.Audio;
 using SommarFenomen.Objects;
+using SommarFenomen.Util;
+using FarseerPhysics.Dynamics;
+using FarseerPhysics.DebugViews;
+using FarseerPhysics;
+using FarseerPhysics.Factories;
 
 namespace SommarFenomen
 {
     class PlayWindow : Window
     {
-        Sprite background;
-        SpriteBatch spriteBatch;
-        GraphicsDevice graphicsDevice;
-        KeyboardState oldState;
-        Camera camera;
+        public World World { get; set; }
+        private DebugViewXNA _debugView;
+        private WindowHandler _windowHandler;
 
-        List<Sprite> spriteList = new List<Sprite>();
-        List<Sprite> backgroundSprites = new List<Sprite>();
+        private Sprite _background;
+        private SpriteBatch _spriteBatch;
+        private GraphicsDevice _graphicsDevice;
+        private Camera _camera;
+        private Camera2D _camera2D;
+        private KeyboardInputHelper _inputHelper;
+
+        private List<Sprite> _spriteList = new List<Sprite>();
+        private List<Sprite> _backgroundSprites = new List<Sprite>();
 
         Random rand = new Random();
 
         // Chooses algorithm for hand movement
-        private bool movementType = true;
+        private bool _movementType = true;
 
-        private PlayerCell player;
+        private PlayerCell _player;
 
+        public PlayWindow(WindowHandler windowHandler)
+        {
+            this._windowHandler = windowHandler;
+        }
+
+        public void Initialize()
+        {
+            _inputHelper = new KeyboardInputHelper();
+            this._graphicsDevice = _windowHandler.Game.GraphicsDevice;
+            _spriteBatch = new SpriteBatch(_graphicsDevice);
+            _camera = new Camera(_graphicsDevice.Viewport);
+            _camera2D = new Camera2D(_graphicsDevice);
+
+            World = new World(Vector2.Zero);
+
+            _debugView = new DebugViewXNA(World);
+            _debugView.RemoveFlags(DebugViewFlags.Shape);
+            _debugView.RemoveFlags(DebugViewFlags.Joint);
+            _debugView.DefaultShapeColor = Color.White;
+            _debugView.SleepingShapeColor = Color.LightGray;
+            _debugView.LoadContent(_graphicsDevice, Game1.contentManager);
+
+            _background = new Sprite(Game1.contentManager.Load<Texture2D>(@"Images\Gradient"));
+            _background.CenterOrigin(); 
+
+            _player = new PlayerCell(this);
+            GoodCell.LoadContent();
+            _backgroundSprites.Add(_background);
+
+            _camera2D.EnableTracking = true;
+            _camera2D.TrackingBody = _player.Body;
+
+            Body body = BodyFactory.CreateRectangle(World, 2, 2, 2);
+            body.BodyType = BodyType.Static;
+        }
+
+        private void LoadContent()
+        {
+
+        }
+
+        
         public PlayerCell Player
         {
-            get { return player; }
+            get { return _player; }
         }
 
         public bool MovmentType
         {
-            get { return movementType; }
+            get { return _movementType; }
         }
 
         private void ToggleMovementType()
         {
-            if (movementType)
-                movementType = false;
+            if (_movementType)
+                _movementType = false;
             else
-                movementType = true;
+                _movementType = true;
 
-            System.Console.WriteLine(movementType);
-        }
-
-        public void Initialize(GraphicsDevice graphicsDevice)
-        {
-            this.graphicsDevice = graphicsDevice;
-            spriteBatch = new SpriteBatch(graphicsDevice);
-            oldState = new KeyboardState();
-            camera = new Camera(graphicsDevice.Viewport);
-
-            background = new Sprite(Game1.contentManager.Load<Texture2D>(@"Images\Gradient"));
-
-            player = new PlayerCell();
-            GoodCell.LoadContent();
-            backgroundSprites.Add(background);
+            System.Console.WriteLine(_movementType);
         }
 
         private void KeyboardInput()
         {
             #region Key States
-            KeyboardState newState = Keyboard.GetState();
 
-            //KEY SPACE
-            if (newState.IsKeyDown(Keys.Space) && !oldState.IsKeyDown(Keys.Space))
+            if (_inputHelper.isKeyPressed(Keys.Space))
             {
                 ToggleMovementType();
             }
-
-            oldState = newState;
+            if (_inputHelper.isKeyPressed(Keys.F1))
+            {
+                _debugView.Flags = _debugView.Flags ^ DebugViewFlags.Shape;
+            }
+            if (_inputHelper.isKeyPressed(Keys.F2))
+            {
+                _debugView.Flags = _debugView.Flags ^ DebugViewFlags.DebugPanel;
+                _debugView.Flags = _debugView.Flags ^ DebugViewFlags.PerformanceGraph;
+            }
             #endregion
-        }
-
-        private void ApplyGlobalForces(GameTime gameTime)
-        {
-            const float DRAG_COEFFICIENT = -1f;
-            player.AddAcceleration(player.Speed * DRAG_COEFFICIENT, gameTime);
         }
 
         private void MoveCamera()
         {
-            camera.Follow(player.getCenter());
+            _camera.Follow(_player.Position);
         }
 
         public void Update(GameTime gameTime)
         {
-            ApplyGlobalForces(gameTime);
+            World.Step(Math.Min((float)gameTime.ElapsedGameTime.TotalSeconds, (1f / 30f)));            
 
-            player.Update(gameTime);
-            CheckForCloudCollision();
+            _inputHelper.update();
+
+            _player.Update(gameTime);
 
             MoveCamera();
+            _camera2D.Update(gameTime);
             KeyboardInput();
         }
 
-        /// <summary>
-        /// Checks for collisions between player and poison clouds
-        /// </summary>
-        private void CheckForCloudCollision()
-        {
-            BoundingRect playerRect = player.Bounds;
-        }
-
-
         public void Draw(GameTime gameTime)
         {
-            spriteBatch.Begin(SpriteSortMode.Deferred, null, null, null, null, null, camera.GetViewMatrix(new Vector2(1, 1)));
-            GraphicsHandler.DrawSprites(backgroundSprites, spriteBatch);
-            GraphicsHandler.DrawSprites(spriteList, spriteBatch);
-            player.Draw(spriteBatch);
-            spriteBatch.End();
+            _spriteBatch.Begin(SpriteSortMode.Deferred, null, null, null, null, null, _camera2D.View);
+            GraphicsHandler.DrawSprites(_backgroundSprites, _spriteBatch);
+            GraphicsHandler.DrawSprites(_spriteList, _spriteBatch);
+            _player.Draw(_spriteBatch);
+            _spriteBatch.End();
+            
+            Matrix projection = _camera2D.SimProjection;
+            Matrix view = _camera2D.SimView;
+            _debugView.RenderDebugData(ref projection, ref view);
         }
     }
 }

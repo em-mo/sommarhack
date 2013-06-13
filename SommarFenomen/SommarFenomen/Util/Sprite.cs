@@ -231,5 +231,10 @@ namespace SommarFenomen
 
             Texture = texture;
         }
+
+        public void CenterOrigin()
+        {
+            Origin = originalSize / 2;
+        }
     }
 }

@@ -5,95 +5,64 @@ using System.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using SommarFenomen.Objects.Strategies;
+using FarseerPhysics.Dynamics;
+using FarseerPhysics.Dynamics.Contacts;
+using SommarFenomen.Util;
 
-namespace SommarFenomen
+namespace SommarFenomen.Objects
 {
     abstract class ActiveGameObject : IGameObject
     {
         private static readonly float DEFAULT_MAX_SPEED = 250000;
 
-        private Vector2 speed = Vector2.Zero;
-        public Vector2 PreviousPosition { get; set; }
-        private BoundingRect bounds;
+        protected PlayWindow PlayWindow;
+
+        public Vector2 Position { get; set; }
         public double MaxSpeed { get; set; }
         public IStrategy Strategy { get; set; }
 
-        public ActiveGameObject(IStrategy strategy, double maxSpeed)
+        public Body Body { get; set; }
+        public Fixture Fixture { get; set; }
+
+        public ActiveGameObject(PlayWindow playWindow, IStrategy strategy, double maxSpeed)
         {
+            PlayWindow = playWindow;
             Strategy = strategy;
             MaxSpeed = maxSpeed * maxSpeed;
-
-            bounds.Min = Vector2.Zero;
-            bounds.Max = Utils.AddToVector(Bounds.Min, 1);
         }
 
-        public ActiveGameObject(IStrategy strategy)
+        public ActiveGameObject(PlayWindow playWindow, IStrategy strategy)
         {
+            PlayWindow = playWindow;
             Strategy = strategy;
             MaxSpeed = DEFAULT_MAX_SPEED;
-
-            bounds.Min = Vector2.Zero;
-            bounds.Max = Utils.AddToVector(Bounds.Min, 1);
         }
 
-        public ActiveGameObject()
+        public ActiveGameObject(PlayWindow playWindow)
         {
+            PlayWindow = playWindow;
             Strategy = new StationaryStrategy();
             MaxSpeed = DEFAULT_MAX_SPEED;
-
-            bounds.Min = Vector2.Zero;
-            bounds.Max = Utils.AddToVector(Bounds.Min, 1);
         }
+
 
         public Vector2 Speed
         {
-            get { return speed; }
-            set { this.speed = value; } 
-        }
-
-        public BoundingRect Bounds
-        {
-            get { return bounds; }
-            set { this.bounds = value; }
-        }
-
-        public Vector2 Position
-        {
-            get { return bounds.Min; }
-            set { this.bounds.Move(value); }
-        }
-
-        public Vector2 getCenter()
-        {
-            return new Vector2(bounds.Min.X + bounds.Width / 2, Bounds.Min.Y + bounds.Height / 2);
-        }
-
-        public void AddAcceleration(Vector2 acceleration, GameTime gameTime)
-        {
-            speed += acceleration * (float)Utils.TicksToSeconds(gameTime.ElapsedGameTime.Ticks);
-
-            double absoluteSpeed = (Math.Pow(speed.X, 2) + Math.Pow(speed.Y, 2));
-            if (absoluteSpeed > MaxSpeed)
-            {
-                float overRatio = (float)Math.Sqrt(MaxSpeed / absoluteSpeed);
-                speed *= overRatio;
-            }
+            get { return Body.LinearVelocity; }
+            set { Body.LinearVelocity = value; } 
         }
 
         public abstract void Draw(SpriteBatch batch);
 
         public virtual void Update(GameTime gameTime)
         {
-            AddAcceleration(Strategy.GetAcceleration(), gameTime);
+            Body.ApplyForce(Strategy.GetAcceleration());
+            Position = ConvertUnits.ToDisplayUnits(Body.Position);
 
-            PreviousPosition = Position;
-            Position += speed * (float)Utils.TicksToSeconds(gameTime.ElapsedGameTime.Ticks);
         }
 
-        protected void setBoundsFromSprite(Sprite sprite)
-        {
-            bounds.Max.X = bounds.Left + sprite.ScaledSize.X;
-            bounds.Max.Y = bounds.Top + sprite.ScaledSize.Y;
-        }
+        public abstract void CreateBody();
+        public abstract bool ObjectCollision(Fixture f1, Fixture f2, Contact contact);
+
     }
 }

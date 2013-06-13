@@ -10,22 +10,32 @@ namespace SommarFenomen.Objects
 {
     class GoodCell : ActiveGameObject
     {
-        static Texture2D cellTexture;
+        static private Texture2D _cellTexture;
 
-        Sprite cellSprite;
-        public GoodCell() : base(new StationaryStrategy())
+        private Sprite _cellSprite;
+        public GoodCell(PlayWindow playWindow) : base(playWindow, new StationaryStrategy())
         {
-            cellSprite = new Sprite(cellTexture);
+            _cellSprite = new Sprite(_cellTexture);
         }
 
         public static void LoadContent()
         {
-            cellTexture = Game1.contentManager.Load<Texture2D>(@"Images\Good_Cell");
+            _cellTexture = Game1.contentManager.Load<Texture2D>(@"Images\Good_Cell");
         }
 
         public override void Draw(SpriteBatch batch)
         {
-            GraphicsHandler.DrawSprite(cellSprite, batch);
+            GraphicsHandler.DrawSprite(_cellSprite, batch);
+        }
+
+        public override void CreateBody()
+        {
+            return;
+        }
+
+        public override bool ObjectCollision(FarseerPhysics.Dynamics.Fixture f1, FarseerPhysics.Dynamics.Fixture f2, FarseerPhysics.Dynamics.Contacts.Contact contact)
+        {
+            return true;
         }
     }
 }

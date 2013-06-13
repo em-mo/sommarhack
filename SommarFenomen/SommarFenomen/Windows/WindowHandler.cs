@@ -10,21 +10,27 @@ namespace SommarFenomen
 
     class WindowHandler
     {
-        private Window currentWindow;
+        private Window _currentWindow;
+        public Game1 Game { get; set; }
+
+        public WindowHandler(Game1 game)
+        {
+            Game = game;
+        }
 
         public void UpdateWindow(GameTime gameTime)
         {
-            currentWindow.Update(gameTime);
+            _currentWindow.Update(gameTime);
         }
 
         public void DrawWindowGraphics(GameTime gameTime)
         {
-            currentWindow.Draw(gameTime);
+            _currentWindow.Draw(gameTime);
         }
         
         public void ChangeWindow(Window newWindow)
         {
-            currentWindow = newWindow;
+            _currentWindow = newWindow;
         }
     }
 }
