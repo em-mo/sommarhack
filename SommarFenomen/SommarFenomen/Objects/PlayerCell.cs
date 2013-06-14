@@ -340,6 +340,7 @@ namespace SommarFenomen.Objects
             Body.Friction = 0.1f;
             Body.FixedRotation = true;
             Body.Mass = 2f;
+            Body.LinearDamping = 1;
         }
 
         public override bool ObjectCollision(Fixture f1, Fixture f2, Contact contact)

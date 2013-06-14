@@ -52,18 +52,20 @@ namespace SommarFenomen.Objects
             set { Body.LinearVelocity = value; } 
         }
 
-        protected void DisplayPositionFromBody(Sprite sprite)
+        protected void UpdateSpriteFromBody(Sprite sprite)
         {
             sprite.Position = ConvertUnits.ToDisplayUnits(Body.Position);
+            Sprite.Rotation = Body.Rotation;
         }
         
-        protected void DisplayPositionFromBody()
+        protected void UpdateSpriteFromBody()
         {
             Sprite.Position = ConvertUnits.ToDisplayUnits(Body.Position);
+            Sprite.Rotation = Body.Rotation;
         }
         public virtual void Draw(SpriteBatch batch)
         {
-            DisplayPositionFromBody();
+            UpdateSpriteFromBody();
             GraphicsHandler.DrawSprite(Sprite, batch);
         }
 

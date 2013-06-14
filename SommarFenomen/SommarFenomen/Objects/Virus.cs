@@ -43,9 +43,25 @@ namespace SommarFenomen.Objects
         public override void CreateBody()
         {
             Body = BodyFactory.CreateBody(PlayWindow.World, ConvertUnits.ToSimUnits(Position));
-            FixtureFactory.AttachCircle(1, 1, Body, new Vector2(0, 1.5f));
-            FixtureFactory.AttachCircle(1, 1, Body, new Vector2(0, -1.5f));
-
+            switch (virusType)
+            {
+                case 0:
+                    FixtureFactory.AttachCircle(ConvertUnits.ToSimUnits(_virusTexture[virusType].Width / 2), 1, Body);
+                    break;
+                case 1:
+                    FixtureFactory.AttachCircle(ConvertUnits.ToSimUnits(_virusTexture[virusType].Width / 2), 1, Body);
+                    break;
+                case 2:
+                    FixtureFactory.AttachCircle(ConvertUnits.ToSimUnits(_virusTexture[virusType].Width / 2), 1, Body, new Vector2(0, ConvertUnits.ToSimUnits(_virusTexture[virusType].Height * 0.16)));
+                    FixtureFactory.AttachCircle(ConvertUnits.ToSimUnits(_virusTexture[virusType].Width * 0.67 / 2), 1, Body, new Vector2(0, ConvertUnits.ToSimUnits(-_virusTexture[virusType].Height * 0.16)));
+                    break;
+                case 3:
+                    FixtureFactory.AttachCircle(ConvertUnits.ToSimUnits(_virusTexture[virusType].Width / 2), 1, Body, new Vector2(0, ConvertUnits.ToSimUnits(_virusTexture[virusType].Height * 0.16)));
+                    FixtureFactory.AttachCircle(ConvertUnits.ToSimUnits(_virusTexture[virusType].Width * 0.67 / 2), 1, Body, new Vector2(0, ConvertUnits.ToSimUnits(-_virusTexture[virusType].Height * 0.16)));
+                    break;
+                default:
+                break;
+            }
             Body.BodyType = FarseerPhysics.Dynamics.BodyType.Dynamic;
         }
 

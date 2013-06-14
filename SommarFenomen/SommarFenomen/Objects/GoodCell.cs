@@ -46,7 +46,7 @@ namespace SommarFenomen.Objects
 
             if (watch.ElapsedMilliseconds > 3000)
             {
-                ChangeSize(1.5f);
+                ChangeSize(1.05f);
                 watch.Restart();
             }
         }
