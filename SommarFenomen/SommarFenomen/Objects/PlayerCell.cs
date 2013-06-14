@@ -54,11 +54,11 @@ namespace SommarFenomen.Objects
             _spriteDict[PlayerSprites.Cloud].Position = v;
         }
 
-        public PlayerCell(PlayWindow playWindow) : base(playWindow, new KinectStrategy(), MAX_SPEED)
+        public PlayerCell(PlayWindow playWindow, Vector2 position) : base(playWindow, new KinectStrategy(), MAX_SPEED)
         {
             _spriteDict = new Dictionary<PlayerSprites, Sprite>();
             InitSprites();
-            Position = new Vector2(240, 240);
+            Position = position;
             _spriteDict[PlayerSprites.Cloud].Position = Position;
             InitArms();
             CreateBody();
@@ -277,12 +277,9 @@ namespace SommarFenomen.Objects
 
         public override void Draw(SpriteBatch batch)
         {
-            lock (locker)
-            {
-                DrawWindPuff(batch);
-                foreach (Sprite sprite in _spriteDict.Values)
-                    GraphicsHandler.DrawSprite(sprite, batch);
-            }
+            DrawWindPuff(batch);
+            foreach (Sprite sprite in _spriteDict.Values)
+                GraphicsHandler.DrawSprite(sprite, batch);
         }
 
         public override void CreateBody()
@@ -343,7 +340,6 @@ namespace SommarFenomen.Objects
             Body.Friction = 0.1f;
             Body.FixedRotation = true;
             Body.Mass = 2f;
-
         }
 
         public override bool ObjectCollision(Fixture f1, Fixture f2, Contact contact)

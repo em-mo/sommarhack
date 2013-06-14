@@ -26,12 +26,13 @@ namespace SommarFenomen
         private Sprite _background;
         private SpriteBatch _spriteBatch;
         private GraphicsDevice _graphicsDevice;
-        private Camera _camera;
         private Camera2D _camera2D;
         private KeyboardInputHelper _inputHelper;
 
         private List<Sprite> _spriteList = new List<Sprite>();
         private List<Sprite> _backgroundSprites = new List<Sprite>();
+
+        private List<ActiveGameObject> _objectList;
 
         Random rand = new Random();
 
@@ -50,37 +51,46 @@ namespace SommarFenomen
             _inputHelper = new KeyboardInputHelper();
             this._graphicsDevice = _windowHandler.Game.GraphicsDevice;
             _spriteBatch = new SpriteBatch(_graphicsDevice);
-            _camera = new Camera(_graphicsDevice.Viewport);
             _camera2D = new Camera2D(_graphicsDevice);
 
             World = new World(Vector2.Zero);
 
+            InitDebug();
+
+            _background = new Sprite(Game1.contentManager.Load<Texture2D>(@"Images\Gradient"));
+            _background.CenterOrigin(); 
+
+            _backgroundSprites.Add(_background);
+
+            _objectList = new List<ActiveGameObject>();
+
+            _player = new PlayerCell(this, new Vector2(0));
+
+            //Body body = BodyFactory.CreateRectangle(World, 2, 2, 2);
+            //body.BodyType = BodyType.Static;
+
+            _objectList.Add(new GoodCell(this, new Vector2(300, 100)));
+            _objectList.Add(new Virus(this, new Vector2(-200)));
+
+            _camera2D.EnableTracking = true;
+            _camera2D.TrackingBody = _player.Body;
+        }
+
+        static public void LoadContent()
+        {
+            GoodCell.LoadContent();
+            Virus.LoadContent();
+        }
+
+        private void InitDebug()
+        {
             _debugView = new DebugViewXNA(World);
             _debugView.RemoveFlags(DebugViewFlags.Shape);
             _debugView.RemoveFlags(DebugViewFlags.Joint);
             _debugView.DefaultShapeColor = Color.White;
             _debugView.SleepingShapeColor = Color.LightGray;
             _debugView.LoadContent(_graphicsDevice, Game1.contentManager);
-
-            _background = new Sprite(Game1.contentManager.Load<Texture2D>(@"Images\Gradient"));
-            _background.CenterOrigin(); 
-
-            _player = new PlayerCell(this);
-            GoodCell.LoadContent();
-            _backgroundSprites.Add(_background);
-
-            _camera2D.EnableTracking = true;
-            _camera2D.TrackingBody = _player.Body;
-
-            Body body = BodyFactory.CreateRectangle(World, 2, 2, 2);
-            body.BodyType = BodyType.Static;
         }
-
-        private void LoadContent()
-        {
-
-        }
-
         
         public PlayerCell Player
         {
@@ -119,12 +129,13 @@ namespace SommarFenomen
                 _debugView.Flags = _debugView.Flags ^ DebugViewFlags.DebugPanel;
                 _debugView.Flags = _debugView.Flags ^ DebugViewFlags.PerformanceGraph;
             }
+            if (_inputHelper.isKeyDown(Keys.Q))
+                _camera2D.Zoom += 0.01f;
+            if (_inputHelper.isKeyDown(Keys.W))
+                _camera2D.Zoom -= 0.01f;
+            if (_inputHelper.isKeyDown(Keys.R))
+                _camera2D.Zoom = 1.0f;
             #endregion
-        }
-
-        private void MoveCamera()
-        {
-            _camera.Follow(_player.Position);
         }
 
         public void Update(GameTime gameTime)
@@ -135,7 +146,11 @@ namespace SommarFenomen
 
             _player.Update(gameTime);
 
-            MoveCamera();
+            foreach (var gameObject in _objectList)
+            {
+                gameObject.Update(gameTime);
+            }
+
             _camera2D.Update(gameTime);
             KeyboardInput();
         }
@@ -146,6 +161,12 @@ namespace SommarFenomen
             GraphicsHandler.DrawSprites(_backgroundSprites, _spriteBatch);
             GraphicsHandler.DrawSprites(_spriteList, _spriteBatch);
             _player.Draw(_spriteBatch);
+
+            foreach (var gameObject in _objectList)
+            {
+                gameObject.Draw(_spriteBatch);
+            }
+
             _spriteBatch.End();
             
             Matrix projection = _camera2D.SimProjection;

@@ -59,10 +59,10 @@ namespace SommarFenomen
         /// </summary>
         protected override void LoadContent()
         {
-            ConvertUnits.SetDisplayUnitToSimUnitRatio(24f);
+            ConvertUnits.SetDisplayUnitToSimUnitRatio(100f);
             
             _spriteBatch = new SpriteBatch(GraphicsDevice);
-
+            PlayWindow.LoadContent();
             PlayWindow playWindow = new PlayWindow(_windowHandler);
             playWindow.Initialize();
             _windowHandler.ChangeWindow(playWindow);

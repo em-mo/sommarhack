@@ -20,6 +20,7 @@ namespace SommarFenomen.Objects
         public Vector2 Position { get; set; }
         public double MaxSpeed { get; set; }
         public IStrategy Strategy { get; set; }
+        public Sprite Sprite { get; set; }
 
         public Body Body { get; set; }
         public Fixture Fixture { get; set; }
@@ -45,14 +46,26 @@ namespace SommarFenomen.Objects
             MaxSpeed = DEFAULT_MAX_SPEED;
         }
 
-
         public Vector2 Speed
         {
             get { return Body.LinearVelocity; }
             set { Body.LinearVelocity = value; } 
         }
 
-        public abstract void Draw(SpriteBatch batch);
+        protected void DisplayPositionFromBody(Sprite sprite)
+        {
+            sprite.Position = ConvertUnits.ToDisplayUnits(Body.Position);
+        }
+        
+        protected void DisplayPositionFromBody()
+        {
+            Sprite.Position = ConvertUnits.ToDisplayUnits(Body.Position);
+        }
+        public virtual void Draw(SpriteBatch batch)
+        {
+            DisplayPositionFromBody();
+            GraphicsHandler.DrawSprite(Sprite, batch);
+        }
 
         public virtual void Update(GameTime gameTime)
         {
