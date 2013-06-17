@@ -32,6 +32,8 @@ namespace SommarFenomen
         private List<Sprite> _spriteList = new List<Sprite>();
         private List<Sprite> _backgroundSprites = new List<Sprite>();
 
+        public List<GoodCell> GoodCellList { get; set; }
+
         private List<ActiveGameObject> _objectList;
 
         Random rand = new Random();

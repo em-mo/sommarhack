@@ -15,24 +15,24 @@ namespace SommarFenomen.Objects
     {
         private static readonly float DEFAULT_MAX_SPEED = 250000;
 
-        protected PlayWindow PlayWindow;
+        public PlayWindow PlayWindow;
 
         public Vector2 Position { get; set; }
         public double MaxSpeed { get; set; }
-        public IStrategy Strategy { get; set; }
+        public Strategy Strategy { get; set; }
         public Sprite Sprite { get; set; }
 
         public Body Body { get; set; }
         public Fixture Fixture { get; set; }
 
-        public ActiveGameObject(PlayWindow playWindow, IStrategy strategy, double maxSpeed)
+        public ActiveGameObject(PlayWindow playWindow, Strategy strategy, double maxSpeed)
         {
             PlayWindow = playWindow;
             Strategy = strategy;
             MaxSpeed = maxSpeed * maxSpeed;
         }
 
-        public ActiveGameObject(PlayWindow playWindow, IStrategy strategy)
+        public ActiveGameObject(PlayWindow playWindow, Strategy strategy)
         {
             PlayWindow = playWindow;
             Strategy = strategy;
@@ -63,6 +63,7 @@ namespace SommarFenomen.Objects
             Sprite.Position = ConvertUnits.ToDisplayUnits(Body.Position);
             Sprite.Rotation = Body.Rotation;
         }
+
         public virtual void Draw(SpriteBatch batch)
         {
             UpdateSpriteFromBody();

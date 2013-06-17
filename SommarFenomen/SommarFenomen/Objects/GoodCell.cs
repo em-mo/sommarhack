@@ -56,6 +56,7 @@ namespace SommarFenomen.Objects
             Body = BodyFactory.CreateCircle(PlayWindow.World, ConvertUnits.ToSimUnits(Sprite.ScaledSize.X / 2), 1);
             Body.BodyType = BodyType.Dynamic;
             Body.Position = ConvertUnits.ToSimUnits(Position);
+            Body.UserData = this;
         }
 
         private void ChangeSize(float percentage)

@@ -7,14 +7,14 @@ using Microsoft.Xna.Framework.Input;
 
 namespace SommarFenomen
 {
-    class KinectStrategy : IStrategy
+    class KinectStrategy : Strategy
     {
         private const float KEY_SPEED = 15f;
         public Vector2 CurrentAcceleration { get; set; }
 
         KeyboardState oldState;
 
-        public virtual Vector2 GetAcceleration() 
+        public override Vector2 GetAcceleration() 
         {
             KeyboardState newState = Keyboard.GetState();
             Vector2 accel = CurrentAcceleration;

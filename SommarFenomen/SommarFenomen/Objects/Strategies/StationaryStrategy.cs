@@ -5,9 +5,9 @@ using System.Text;
 
 namespace SommarFenomen.Objects.Strategies
 {
-    class StationaryStrategy : IStrategy
+    class StationaryStrategy : Strategy
     {
-        public Microsoft.Xna.Framework.Vector2 GetAcceleration()
+        public override Microsoft.Xna.Framework.Vector2 GetAcceleration()
         {
             return Microsoft.Xna.Framework.Vector2.Zero;
         }

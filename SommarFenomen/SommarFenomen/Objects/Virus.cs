@@ -24,11 +24,14 @@ namespace SommarFenomen.Objects
         public Virus(PlayWindow playWindow, Vector2 position)
             : base(playWindow, new VirusStrategy())
         {
+            Strategy.Owner = this;
             virusType = Shared.Random.Next(4);
             Position = position;
             Sprite = new Sprite(_virusTexture[virusType]);
             Sprite.CenterOrigin();
             CreateBody();
+
+
         }
 
         static public void LoadContent()
@@ -52,12 +55,12 @@ namespace SommarFenomen.Objects
                     FixtureFactory.AttachCircle(ConvertUnits.ToSimUnits(_virusTexture[virusType].Width / 2), 1, Body);
                     break;
                 case 2:
-                    FixtureFactory.AttachCircle(ConvertUnits.ToSimUnits(_virusTexture[virusType].Width / 2), 1, Body, new Vector2(0, ConvertUnits.ToSimUnits(_virusTexture[virusType].Height * 0.16)));
-                    FixtureFactory.AttachCircle(ConvertUnits.ToSimUnits(_virusTexture[virusType].Width * 0.67 / 2), 1, Body, new Vector2(0, ConvertUnits.ToSimUnits(-_virusTexture[virusType].Height * 0.16)));
+                    FixtureFactory.AttachCircle(ConvertUnits.ToSimUnits(_virusTexture[virusType].Width * 0.47), 1, Body, new Vector2(0, ConvertUnits.ToSimUnits(_virusTexture[virusType].Height * 0.10)));
+                    FixtureFactory.AttachCircle(ConvertUnits.ToSimUnits(_virusTexture[virusType].Width * 0.67 / 2), 1, Body, new Vector2(0, ConvertUnits.ToSimUnits(-_virusTexture[virusType].Height * 0.18)));
                     break;
                 case 3:
-                    FixtureFactory.AttachCircle(ConvertUnits.ToSimUnits(_virusTexture[virusType].Width / 2), 1, Body, new Vector2(0, ConvertUnits.ToSimUnits(_virusTexture[virusType].Height * 0.16)));
-                    FixtureFactory.AttachCircle(ConvertUnits.ToSimUnits(_virusTexture[virusType].Width * 0.67 / 2), 1, Body, new Vector2(0, ConvertUnits.ToSimUnits(-_virusTexture[virusType].Height * 0.16)));
+                    FixtureFactory.AttachCircle(ConvertUnits.ToSimUnits(_virusTexture[virusType].Width * 0.47), 1, Body, new Vector2(0, ConvertUnits.ToSimUnits(_virusTexture[virusType].Height * 0.10)));
+                    FixtureFactory.AttachCircle(ConvertUnits.ToSimUnits(_virusTexture[virusType].Width * 0.67 / 2), 1, Body, new Vector2(0, ConvertUnits.ToSimUnits(-_virusTexture[virusType].Height * 0.20)));
                     break;
                 default:
                 break;
