@@ -19,31 +19,48 @@ namespace SommarFenomen.Objects
 
         public Vector2 Position { get; set; }
         public double MaxSpeed { get; set; }
-        public Strategy Strategy { get; set; }
         public Sprite Sprite { get; set; }
 
         public Body Body { get; set; }
         public Fixture Fixture { get; set; }
 
+        private Strategy _strategy;
+
+        public Strategy Strategy
+        {
+            get { return _strategy; }
+            set 
+            { 
+                _strategy = value;
+                _strategy.Owner = this;
+            }
+        }
+        
+
         public ActiveGameObject(PlayWindow playWindow, Strategy strategy, double maxSpeed)
         {
-            PlayWindow = playWindow;
+            Init(playWindow);
             Strategy = strategy;
             MaxSpeed = maxSpeed * maxSpeed;
         }
 
         public ActiveGameObject(PlayWindow playWindow, Strategy strategy)
         {
-            PlayWindow = playWindow;
+            Init(playWindow);
             Strategy = strategy;
-            MaxSpeed = DEFAULT_MAX_SPEED;
         }
 
         public ActiveGameObject(PlayWindow playWindow)
         {
+            Init(playWindow);
+        }
+
+        private void Init(PlayWindow playWindow)
+        {
             PlayWindow = playWindow;
             Strategy = new StationaryStrategy();
             MaxSpeed = DEFAULT_MAX_SPEED;
+            Position = Vector2.Zero;
         }
 
         public Vector2 Speed
@@ -72,6 +89,7 @@ namespace SommarFenomen.Objects
 
         public virtual void Update(GameTime gameTime)
         {
+            Strategy.Update(gameTime);
             Body.ApplyForce(Strategy.GetAcceleration());
             Position = ConvertUnits.ToDisplayUnits(Body.Position);
 

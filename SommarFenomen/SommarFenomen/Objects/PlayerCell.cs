@@ -256,8 +256,6 @@ namespace SommarFenomen.Objects
             _windPuffList.Add(new WindPuffMessage(rotation, position));
         }
 
-        
-
         private void DrawWindPuff(SpriteBatch batch)
         {
             WindPuffMessage puff;
@@ -310,7 +308,6 @@ namespace SommarFenomen.Objects
                     continue;
                 else
                 {
-                    Console.WriteLine(_origin);
                     _spriteDict[sprite].Position -= _origin * scale;
                 }
                 

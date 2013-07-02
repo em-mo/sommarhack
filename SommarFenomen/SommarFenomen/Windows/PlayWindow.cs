@@ -34,7 +34,7 @@ namespace SommarFenomen
 
         public List<GoodCell> GoodCellList { get; set; }
 
-        private List<ActiveGameObject> _objectList;
+        private List<ActiveGameObject> _objectList = new List<ActiveGameObject>();
 
         Random rand = new Random();
 
@@ -46,6 +46,7 @@ namespace SommarFenomen
         public PlayWindow(WindowHandler windowHandler)
         {
             this._windowHandler = windowHandler;
+            GoodCellList = new List<GoodCell>();
         }
 
         public void Initialize()
@@ -71,7 +72,9 @@ namespace SommarFenomen
             //Body body = BodyFactory.CreateRectangle(World, 2, 2, 2);
             //body.BodyType = BodyType.Static;
 
-            _objectList.Add(new GoodCell(this, new Vector2(300, 100)));
+            GoodCell goodCell = new GoodCell(this, new Vector2(300, 100));
+            GoodCellList.Add(goodCell);
+            _objectList.Add(goodCell);
             _objectList.Add(new Virus(this, new Vector2(-200)));
 
             _camera2D.EnableTracking = true;

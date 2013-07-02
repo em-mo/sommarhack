@@ -7,7 +7,7 @@ using SommarFenomen.Objects;
 
 namespace SommarFenomen
 {
-    class Strategy
+    abstract class Strategy
     {
         public ActiveGameObject Owner { get; set; }
 

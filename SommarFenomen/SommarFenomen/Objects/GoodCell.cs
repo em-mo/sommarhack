@@ -17,22 +17,28 @@ namespace SommarFenomen.Objects
         static private Texture2D _cellTexture;
         private Stopwatch watch = new Stopwatch();
 
+        private int _virusResistance;
+
         public GoodCell(PlayWindow playWindow) : base(playWindow, new StationaryStrategy())
         {
-            Sprite = new Sprite(_cellTexture);
-            Sprite.CenterOrigin();
-            CreateBody();
+            Init();
         }
 
         public GoodCell(PlayWindow playWindow, Vector2 position)
             : base(playWindow, new StationaryStrategy())
         {
+            Position = position;
+            Init();
+        }
+
+        private void Init()
+        {
             Sprite = new Sprite(_cellTexture);
             Sprite.CenterOrigin();
             Sprite.Scale = new Vector2(0.5f);
-            Position = position;
+            _virusResistance = 5;
             CreateBody();
-            watch.Start();
+            Body.LinearDamping = 1;
         }
 
         public static void LoadContent()
@@ -46,7 +52,6 @@ namespace SommarFenomen.Objects
 
             if (watch.ElapsedMilliseconds > 3000)
             {
-                ChangeSize(1.05f);
                 watch.Restart();
             }
         }
@@ -65,6 +70,16 @@ namespace SommarFenomen.Objects
             Body.DestroyFixture(Body.FixtureList.First());
             FixtureFactory.AttachCircle(oldRadius * percentage, 1, Body);
             Sprite.Scale *= percentage;
+        }
+
+        public bool VirusCollide()
+        {
+            Console.WriteLine("VirusCollide " + _virusResistance);
+            _virusResistance--;
+            if (_virusResistance == 0)
+                return true;
+            else
+               return false;
         }
 
         public override bool ObjectCollision(FarseerPhysics.Dynamics.Fixture f1, FarseerPhysics.Dynamics.Fixture f2, FarseerPhysics.Dynamics.Contacts.Contact contact)
