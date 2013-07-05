@@ -50,7 +50,10 @@ namespace SommarFenomen.Objects.Strategies
 
             if (timer > 5 && _targetDistance > 2)
             {
-                FindTarget(Owner.PlayWindow.World);
+                if (Owner.PlayWindow.GoodCellList.Count > 0)
+                    FindTarget(Owner.PlayWindow.World);
+                else
+                    _target = null;
                 timer = 0;
             }
         }

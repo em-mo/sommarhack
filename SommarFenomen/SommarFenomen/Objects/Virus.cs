@@ -42,8 +42,14 @@ namespace SommarFenomen.Objects
             CreateBody();
             Body.UserData = this;
             _assimilatingCell = false;
-            Body.OnCollision += ObjectCollision;
+            ChangeSize(0.5f);
+            OnChangeSettings();
+        }
 
+        private void OnChangeSettings()
+        {
+            Body.OnCollision += ObjectCollision;
+            Body.Mass = 2.2f;
         }
 
         static public void LoadContent()
@@ -108,6 +114,7 @@ namespace SommarFenomen.Objects
                         ChangeSizeDual(percentage);
                         break;
                 }
+            OnChangeSettings();
         }
 
         private void ChangeSizeSingle(float percentage)
@@ -154,7 +161,8 @@ namespace SommarFenomen.Objects
             else 
                 return true;
 
-            if (goodCell.VirusCollide())
+            // If cell resistance is low enough, enter the cell and go towards the center
+            if (goodCell.VirusCollide(this))
             {
                 _assimilatingCell = true;
                 Body.IgnoreCollisionWith(goodCell.Body);
@@ -167,21 +175,27 @@ namespace SommarFenomen.Objects
         }
 
         private static readonly double SHRINK_TIME = 0.01;
+        private static readonly double EXPLODE_TIME = 2;
         private static readonly float SHRINK_PERCENTAGE = 0.99f;
-        private double _timer = 0;
+        private double _shrinkTimer = 0;
+        private double _explodeTimer = 0;
         public override void Update(GameTime gameTime)
         {
-            Console.WriteLine(Body.Mass);
             if (_assimilatingCell)
             {
-                _timer += gameTime.ElapsedGameTime.TotalSeconds;
-
-                if (_timer > SHRINK_TIME)
+                _shrinkTimer += gameTime.ElapsedGameTime.TotalSeconds;
+                _explodeTimer += gameTime.ElapsedGameTime.TotalSeconds;
+                if (_shrinkTimer > SHRINK_TIME)
                 {
                     ChangeSize(SHRINK_PERCENTAGE);
                     Body.IgnoreCollisionWith(_targetCell.Body);
                     Body.Mass = 2;
-                    _timer = 0;
+                    _shrinkTimer = 0;
+                }
+
+                if (_explodeTimer > EXPLODE_TIME)
+                {
+                    _targetCell.ExplodeByVirus();
                 }
             }
 

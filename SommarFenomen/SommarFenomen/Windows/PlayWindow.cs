@@ -32,8 +32,10 @@ namespace SommarFenomen
         private List<Sprite> _spriteList = new List<Sprite>();
         private List<Sprite> _backgroundSprites = new List<Sprite>();
 
-        public List<GoodCell> GoodCellList { get; set; }
+        private List<ActiveGameObject> _removeList = new List<ActiveGameObject>();
+        private List<ActiveGameObject> _addList = new List<ActiveGameObject>();
 
+        public List<GoodCell> GoodCellList { get; set; }
         private List<ActiveGameObject> _objectList = new List<ActiveGameObject>();
 
         Random rand = new Random();
@@ -117,6 +119,56 @@ namespace SommarFenomen
             System.Console.WriteLine(_movementType);
         }
 
+        public void RegisterVirus(Virus virus)
+        {
+            _addList.Add(virus);
+        }
+
+        public void RemoveVirus(Virus virus)
+        {
+            _removeList.Add(virus);
+            virus.UpForRemoval = true;
+        }
+
+        public void RegisterGoodCell(GoodCell goodCell)
+        {
+            _addList.Add(goodCell);
+        }
+
+        public void RemoveGoodCell(GoodCell goodCell)
+        {
+            GoodCellList.Remove(goodCell);
+            _removeList.Add(goodCell);
+            goodCell.UpForRemoval = true;
+        }
+
+        private void RegisterGameObjects()
+        {
+            foreach (var item in _addList)
+            {
+                if (item is Virus)
+                {
+                    _objectList.Add(item);
+                }
+                else if (item is GoodCell)
+                {
+                    GoodCellList.Add((GoodCell)item);
+                    _objectList.Add(item);
+                }
+            }
+            _addList.Clear();
+        }
+
+        private void DestroyOldGameObjects()
+        {
+            foreach (var item in _removeList)
+            {
+                _objectList.Remove(item);
+                World.RemoveBody(item.Body);
+            }
+            _removeList.Clear();
+        }
+
         private void KeyboardInput()
         {
             #region Key States
@@ -153,11 +205,14 @@ namespace SommarFenomen
 
             foreach (var gameObject in _objectList)
             {
-                gameObject.Update(gameTime);
+                if(gameObject.UpForRemoval == false)
+                    gameObject.Update(gameTime);
             }
 
             _camera2D.Update(gameTime);
             KeyboardInput();
+            DestroyOldGameObjects();
+            RegisterGameObjects();
         }
 
         public void Draw(GameTime gameTime)

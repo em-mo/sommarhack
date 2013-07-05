@@ -26,6 +26,8 @@ namespace SommarFenomen.Objects
 
         private Strategy _strategy;
 
+        public bool UpForRemoval { get; set; }
+
         public Strategy Strategy
         {
             get { return _strategy; }

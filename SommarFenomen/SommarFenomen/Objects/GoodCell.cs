@@ -17,6 +17,7 @@ namespace SommarFenomen.Objects
         static private Texture2D _cellTexture;
         private Stopwatch watch = new Stopwatch();
 
+        private List<Virus> _virusList = new List<Virus>();
         private int _virusResistance;
 
         public GoodCell(PlayWindow playWindow) : base(playWindow, new StationaryStrategy())
@@ -72,14 +73,53 @@ namespace SommarFenomen.Objects
             Sprite.Scale *= percentage;
         }
 
-        public bool VirusCollide()
+        public bool VirusCollide(Virus virus)
         {
-            Console.WriteLine("VirusCollide " + _virusResistance);
             _virusResistance--;
             if (_virusResistance == 0)
+            {
+                _virusList.Add(virus);
                 return true;
+            }
             else
-               return false;
+                return false;
+        }
+
+        public void ExplodeByVirus()
+        {
+            float radius = Body.FixtureList.First().Shape.Radius;
+            for (int i = 0; i < 9 + _virusList.Count; i++)
+            {
+                Vector2 position;
+                position.X = this.Position.X - radius / 2 + (float)Shared.Random.NextDouble() * radius;
+                position.Y = this.Position.Y - radius / 2 + (float)Shared.Random.NextDouble() * radius;
+
+                Virus newVirus = new Virus(PlayWindow, position);
+                PlayWindow.RegisterVirus(newVirus);
+
+                ApplyExplodeForce(newVirus);
+            }
+
+            foreach (var item in _virusList)
+            {
+                PlayWindow.RemoveVirus(item);
+            }
+            PlayWindow.RemoveGoodCell(this);
+        }
+
+        private static readonly float FORCE_FACTOR = 1000;
+        private void ApplyExplodeForce(Virus virus)
+        {
+            float radius = Body.FixtureList.First().Shape.Radius;
+            Vector2 force, direction;
+            force = direction = virus.Position - this.Position;
+
+            direction.Normalize();
+
+            force /= radius * 2;
+            force += direction / 2;
+            Console.WriteLine("Virus force " + force);
+            virus.Body.ApplyForce(force * FORCE_FACTOR);
         }
 
         public override bool ObjectCollision(FarseerPhysics.Dynamics.Fixture f1, FarseerPhysics.Dynamics.Fixture f2, FarseerPhysics.Dynamics.Contacts.Contact contact)
