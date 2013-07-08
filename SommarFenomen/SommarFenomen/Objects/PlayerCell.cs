@@ -16,7 +16,9 @@ namespace SommarFenomen.Objects
 {
     class PlayerCell : ActiveGameObject
     {
-        enum PlayerSprites { Cloud, LeftHumerus, LeftUlna, LeftHand, RightHumerus, RightUlna, RightHand };
+        enum PlayerSprites { Cell, LeftHumerus, LeftUlna, LeftHand, RightHumerus, RightUlna, RightHand };
+
+        private Texture2D _cellTexture;
 
         private Dictionary<Direction, Texture2D> _cloudTextures;
         private Sprite _windPuff;
@@ -46,20 +48,21 @@ namespace SommarFenomen.Objects
         //Sets position of all sprites
         private void PositionHelper(Vector2 v)
         {
-            Vector2 diffVector = v - _spriteDict[PlayerSprites.Cloud].Position;
+            Vector2 diffVector = v - _spriteDict[PlayerSprites.Cell].Position;
 
             foreach (Sprite sprite in _spriteDict.Values)
                 Utils.AddToSpritePosition(sprite, diffVector);
 
-            _spriteDict[PlayerSprites.Cloud].Position = v;
+            _spriteDict[PlayerSprites.Cell].Position = v;
         }
 
         public PlayerCell(PlayWindow playWindow, Vector2 position) : base(playWindow, new KinectStrategy(), MAX_SPEED)
         {
+            _cellTexture = Game1.contentManager.Load<Texture2D>(@"Images\Hero_Cell");
             _spriteDict = new Dictionary<PlayerSprites, Sprite>();
             InitSprites();
             Position = position;
-            _spriteDict[PlayerSprites.Cloud].Position = Position;
+            _spriteDict[PlayerSprites.Cell].Position = Position;
             InitArms();
             CreateBody();
 
@@ -86,7 +89,7 @@ namespace SommarFenomen.Objects
             _cloudTextures.Add(Direction.Right, Game1.contentManager.Load<Texture2D>(@"Images\Cloud_Move_Right"));
 
             _windPuff.Texture = Game1.contentManager.Load<Texture2D>(@"Images\wind");
-            _spriteDict[PlayerSprites.Cloud].Texture = _cloudTextures[Direction.None];
+            _spriteDict[PlayerSprites.Cell].Texture = _cellTexture;
             _spriteDict[PlayerSprites.LeftHumerus].Texture = Game1.contentManager.Load<Texture2D>(@"Images\Humerus_left");
             _spriteDict[PlayerSprites.LeftHand].Texture = Game1.contentManager.Load<Texture2D>(@"Images\Hand_left");
             _spriteDict[PlayerSprites.RightHumerus].Texture = Game1.contentManager.Load<Texture2D>(@"Images\Humerus_right");
@@ -94,7 +97,7 @@ namespace SommarFenomen.Objects
             _spriteDict[PlayerSprites.LeftUlna].Texture = Game1.contentManager.Load<Texture2D>(@"Images\Ulna_left");
             _spriteDict[PlayerSprites.RightUlna].Texture = Game1.contentManager.Load<Texture2D>(@"Images\Ulna_right");
 
-            _spriteDict[PlayerSprites.Cloud].Scale = Vector2.One * CLOUD_SCALE;
+            _spriteDict[PlayerSprites.Cell].Scale = Vector2.One * CLOUD_SCALE;
 
 
             //Scale Left
@@ -129,13 +132,13 @@ namespace SommarFenomen.Objects
 
         private void InitArms()
         {
-            _leftHumerusOffsetX = (float)(_spriteDict[PlayerSprites.Cloud].ScaledSize.X * 0.1);
-            _leftHumerusOffsetY = (float)(_spriteDict[PlayerSprites.Cloud].ScaledSize.Y * 0.6);
+            _leftHumerusOffsetX = (float)(_spriteDict[PlayerSprites.Cell].ScaledSize.X * 0.1);
+            _leftHumerusOffsetY = (float)(_spriteDict[PlayerSprites.Cell].ScaledSize.Y * 0.6);
             _leftUlnaOffset = -(float)(_spriteDict[PlayerSprites.LeftHumerus].ScaledSize.X * 0.95);
             _leftHandOffset = -(float)(_spriteDict[PlayerSprites.LeftUlna].ScaledSize.X * 0.97);
 
-            _rightHumerusOffsetX = (float)(_spriteDict[PlayerSprites.Cloud].ScaledSize.X * 0.8);
-            _rightHumerusOffsetY = (float)(_spriteDict[PlayerSprites.Cloud].ScaledSize.Y * 0.6);
+            _rightHumerusOffsetX = (float)(_spriteDict[PlayerSprites.Cell].ScaledSize.X * 0.8);
+            _rightHumerusOffsetY = (float)(_spriteDict[PlayerSprites.Cell].ScaledSize.Y * 0.6);
             _rightUlnaOffset = (float)(_spriteDict[PlayerSprites.RightHumerus].ScaledSize.X * 0.95);
             _rightHandOffset = (float)(_spriteDict[PlayerSprites.RightUlna].ScaledSize.X * 0.97);
 
@@ -282,12 +285,12 @@ namespace SommarFenomen.Objects
 
         public override void CreateBody()
         {
-            uint[] data = new uint[_cloudTextures[Direction.None].Width * _cloudTextures[Direction.None].Height];
+            uint[] data = new uint[_cellTexture.Width * _cellTexture.Height];
             
-            _cloudTextures[Direction.None].GetData(data);
+            _cellTexture.GetData(data);
 
             //Find the vertices that makes up the outline of the shape in the texture
-            Vertices textureVertices = PolygonTools.CreatePolygon(data, _cloudTextures[Direction.None].Width, false);
+            Vertices textureVertices = PolygonTools.CreatePolygon(data, _cellTexture.Width, false);
 
             //The tool return vertices as they were found in the texture.
             //We need to find the real center (centroid) of the vertices for 2 reasons:
@@ -298,13 +301,13 @@ namespace SommarFenomen.Objects
 
             //2. To draw the texture the correct place.
             _origin = -centroid;
-            _spriteDict[PlayerSprites.Cloud].Origin = _origin;
+            _spriteDict[PlayerSprites.Cell].Origin = _origin;
 
-            float scale = _spriteDict[PlayerSprites.Cloud].Scale.X;
+            float scale = _spriteDict[PlayerSprites.Cell].Scale.X;
 
             foreach (PlayerSprites sprite in Enum.GetValues(typeof(PlayerSprites)))
             {
-                if (sprite == PlayerSprites.Cloud)
+                if (sprite == PlayerSprites.Cell)
                     continue;
                 else
                 {
@@ -338,6 +341,11 @@ namespace SommarFenomen.Objects
             Body.FixedRotation = true;
             Body.Mass = 2f;
             Body.LinearDamping = 1;
+        }
+
+        private void CreateSoftBody()
+        {
+
         }
 
         public override bool ObjectCollision(Fixture f1, Fixture f2, Contact contact)
