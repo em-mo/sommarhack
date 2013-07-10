@@ -11,6 +11,7 @@ using FarseerPhysics.Common.Decomposition;
 using FarseerPhysics.Common.PolygonManipulation;
 using FarseerPhysics.Dynamics;
 using FarseerPhysics.Dynamics.Contacts;
+using FarseerPhysics.Dynamics.Joints;
 
 namespace SommarFenomen.Objects
 {
@@ -65,6 +66,7 @@ namespace SommarFenomen.Objects
             _spriteDict[PlayerSprites.Cell].Position = Position;
             InitArms();
             CreateBody();
+            CreateSoftBody(20, 200, 20, 1, 0.5f, 3);
 
             SetLeftArmRotation((float)Math.PI / 2, (float)Math.PI / 2);
             SetRightArmRotation(-(float)Math.PI / 2, -(float)Math.PI / 2);
@@ -343,9 +345,73 @@ namespace SommarFenomen.Objects
             Body.LinearDamping = 1;
         }
 
-        private void CreateSoftBody()
+        List<Body> _outerBodies;
+        Body centerBody;
+        private void CreateSoftBody(int numberOfOuterBodies, float innerDistance, float radius, float density, float damping, float frequency)
         {
+            innerDistance = ConvertUnits.ToSimUnits(innerDistance);
+            radius = ConvertUnits.ToSimUnits(radius);
+            _outerBodies = new List<Body>();
+            centerBody = BodyFactory.CreateCircle(PlayWindow.World, radius * 2, density);
+            centerBody.Position = ConvertUnits.ToSimUnits(Position);
+            centerBody.BodyType = BodyType.Dynamic;
+            double radianStep = Math.PI * 2 / numberOfOuterBodies;
+            centerBody.LinearDamping = 1;
+            centerBody.Mass = 0.2f;
 
+            Vector2 tmp = centerBody.Position;
+            tmp.Y -= 5;
+            centerBody.Position = tmp;
+
+            for (int i = 0; i < numberOfOuterBodies; i++)
+            {
+                double currentAngle = radianStep * i;
+                Body body = BodyFactory.CreateCircle(PlayWindow.World, radius, density);
+
+                Vector2 direction = new Vector2();
+                direction.X = (float)Math.Cos(currentAngle);
+                direction.Y = (float)Math.Sin(currentAngle);
+
+                body.Position = direction * innerDistance + centerBody.Position;
+                body.BodyType = BodyType.Dynamic;
+                body.Mass = 0.4f;
+                _outerBodies.Add(body);
+            }
+
+            for (int i = 0; i < numberOfOuterBodies; i++)
+            {
+                DistanceJoint joint;
+                // Outer joint
+                Vector2 thisJointPosition, nextJointPosition, direction;
+
+                int next = (i + 1) % numberOfOuterBodies;
+
+                direction = _outerBodies[next].Position - _outerBodies[i].Position;
+                direction.Normalize();
+
+                thisJointPosition = Vector2.Zero;
+                nextJointPosition = -Vector2.Zero;
+
+                joint = JointFactory.CreateDistanceJoint(PlayWindow.World, _outerBodies[i], _outerBodies[next], thisJointPosition, nextJointPosition);
+                joint.DampingRatio = damping;
+                joint.Frequency = frequency;
+                joint.CollideConnected = true;
+
+                // Middle joint
+                Vector2 centerJointPosition;
+
+                direction = centerBody.Position - _outerBodies[i].Position;
+                direction.Normalize();
+
+                thisJointPosition = -Vector2.Zero;
+                centerJointPosition = Vector2.Zero;
+
+                joint = JointFactory.CreateDistanceJoint(PlayWindow.World, _outerBodies[i], centerBody, thisJointPosition, centerJointPosition);
+                joint.DampingRatio = damping;
+                joint.Frequency = frequency;
+                joint.CollideConnected = true;
+
+            }
         }
 
         public override bool ObjectCollision(Fixture f1, Fixture f2, Contact contact)

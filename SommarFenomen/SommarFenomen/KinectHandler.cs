@@ -195,8 +195,8 @@ namespace SommarFenomen
         /// </summary>
         private class HandChecker
         {
-            private const float FORCE_FACTOR = 1000;
-            private const float ALTERNATE_FORCE = 8000;
+            private const float FORCE_FACTOR = 50;
+            private const float ALTERNATE_FORCE = 600;
             private const int BUFFER_LENGTH = 6;
             private readonly int START_POINT_OFFSET = BUFFER_LENGTH / 2;
             private const float MOVEMENT_THRESHOLD = 0.3f;

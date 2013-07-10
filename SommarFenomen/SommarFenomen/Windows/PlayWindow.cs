@@ -186,6 +186,10 @@ namespace SommarFenomen
                 _debugView.Flags = _debugView.Flags ^ DebugViewFlags.DebugPanel;
                 _debugView.Flags = _debugView.Flags ^ DebugViewFlags.PerformanceGraph;
             }
+            if (_inputHelper.isKeyPressed(Keys.F3))
+            {
+                _debugView.Flags = _debugView.Flags ^ DebugViewFlags.Joint;
+            }
             if (_inputHelper.isKeyDown(Keys.Q))
                 _camera2D.Zoom += 0.01f;
             if (_inputHelper.isKeyDown(Keys.W))
