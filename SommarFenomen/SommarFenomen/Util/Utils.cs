@@ -63,6 +63,11 @@ namespace SommarFenomen
             return angle;
         }
 
+        public static double CalculateAngle(Vector2 vector1, Vector2 vector2)
+        {
+            return Math.Atan2(vector2.Y, vector2.X) - Math.Atan2(vector1.Y, vector1.X);
+        }
+
         public static void AddToSpritePosition(Sprite sprite, Vector2 vector)
         {
             Vector2 newPosition = sprite.Position + vector;           

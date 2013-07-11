@@ -423,6 +423,46 @@ namespace SommarFenomen.Objects
             centerBody.AngularVelocity = 1;
         }
 
+        private void getSoftBodyVertices()
+        {
+            VertexPositionTexture[] vertices = new VertexPositionTexture[_outerBodies.Count * 3];
+
+            Vector2 direction = centerBody.Position - _outerBodies[0].Position;
+            direction.Normalize();
+
+            float radianStep = 2 * (float)Math.PI / _outerBodies.Count;
+            float currentAngle = (float)Utils.CalculateAngle(new Vector2(0, 1), direction);
+
+            float radius = _outerBodies[0].FixtureList[0].Shape.Radius;
+
+            for (int i = 0; i < _outerBodies.Count; i++)
+            {
+                int currentVertex = i * 3;
+                int next = (i + 1) % _outerBodies.Count;
+
+                // First corner
+                direction = centerBody.Position - _outerBodies[i].Position;
+                direction.Normalize();
+
+                Vector2 vertex = _outerBodies[i].Position + direction * radius;
+                vertices[currentVertex].Position = new Vector3(vertex, 0);
+                vertices[currentVertex].TextureCoordinate = new Vector2(0.5f + (float)Math.Cos(currentAngle) / 2, 0.5f + (float)Math.Sin(currentAngle) / 2);
+                currentAngle += radianStep;
+
+                // Second corner
+                direction = centerBody.Position - _outerBodies[next].Position;
+                direction.Normalize();
+
+                vertex = _outerBodies[next].Position + direction * radius;
+                vertices[currentVertex + 1].Position = new Vector3(vertex, 0);
+                vertices[currentVertex + 1].TextureCoordinate = new Vector2(0.5f + (float)Math.Cos(currentAngle) / 2, 0.5f + (float)Math.Sin(currentAngle) / 2);
+
+                // Center
+                vertex = centerBody.Position;
+                vertices[currentVertex + 2].Position = new Vector3(vertex, 0);
+                vertices[currentVertex + 2].TextureCoordinate = new Vector2(0.5f, 0.5f);
+            }
+        }
 
         public override bool ObjectCollision(Fixture f1, Fixture f2, Contact contact)
         {
