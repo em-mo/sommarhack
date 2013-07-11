@@ -66,7 +66,7 @@ namespace SommarFenomen.Objects
             _spriteDict[PlayerSprites.Cell].Position = Position;
             InitArms();
             CreateBody();
-            CreateSoftBody(20, 200, 20, 1, 0.5f, 3);
+            CreateSoftBody(20, 200, 30, 1, 0.8f, 1.0f);
 
             SetLeftArmRotation((float)Math.PI / 2, (float)Math.PI / 2);
             SetRightArmRotation(-(float)Math.PI / 2, -(float)Math.PI / 2);
@@ -403,16 +403,26 @@ namespace SommarFenomen.Objects
                 direction = centerBody.Position - _outerBodies[i].Position;
                 direction.Normalize();
 
-                thisJointPosition = -Vector2.Zero;
-                centerJointPosition = Vector2.Zero;
+                thisJointPosition = -direction * radius;
+                centerJointPosition = direction * radius * 2;
 
                 joint = JointFactory.CreateDistanceJoint(PlayWindow.World, _outerBodies[i], centerBody, thisJointPosition, centerJointPosition);
                 joint.DampingRatio = damping;
                 joint.Frequency = frequency;
                 joint.CollideConnected = true;
 
+                thisJointPosition = direction * radius;
+                centerJointPosition = -direction * radius * 2;
+
+                joint = JointFactory.CreateDistanceJoint(PlayWindow.World, _outerBodies[i], centerBody, thisJointPosition, centerJointPosition);
+                joint.DampingRatio = damping;
+                joint.Frequency = frequency;
+                joint.CollideConnected = true;
             }
+            centerBody.FixedRotation = true;
+            centerBody.AngularVelocity = 1;
         }
+
 
         public override bool ObjectCollision(Fixture f1, Fixture f2, Contact contact)
         {
