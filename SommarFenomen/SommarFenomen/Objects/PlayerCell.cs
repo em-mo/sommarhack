@@ -69,8 +69,7 @@ namespace SommarFenomen.Objects
             Position = position;
             _spriteDict[PlayerSprites.Cell].Position = Position;
             InitArms();
-            CreateBody();
-            CreateSoftBody(40, 70, 2f, 1, 0.8f, 3.0f);
+            CreateSoftBody(30, 70, 6f, 1, 0.5f, 3.0f);
 
             _bodyEffect = new BasicEffect(playWindow.GraphicsDevice);
             //_bodyEffect.EnableDefaultLighting();
@@ -110,6 +109,7 @@ namespace SommarFenomen.Objects
             _spriteDict[PlayerSprites.RightUlna].Texture = Game1.contentManager.Load<Texture2D>(@"Images\Ulna_right");
 
             _spriteDict[PlayerSprites.Cell].Scale = Vector2.One * CLOUD_SCALE;
+            _spriteDict[PlayerSprites.Cell].IsShowing = false;
 
 
             //Scale Left
@@ -147,6 +147,12 @@ namespace SommarFenomen.Objects
             _rightHumerusOffsetY = (float)(_spriteDict[PlayerSprites.Cell].ScaledSize.Y * 0.6);
             _rightUlnaOffset = (float)(_spriteDict[PlayerSprites.RightHumerus].ScaledSize.X * 0.95);
             _rightHandOffset = (float)(_spriteDict[PlayerSprites.RightUlna].ScaledSize.X * 0.97);
+
+            _leftHumerusOffsetX = -50;
+            _leftHumerusOffsetY = 10;
+            _rightHumerusOffsetX = 50;
+            _rightHumerusOffsetY = 10;
+
 
             //Set left
             Vector2 newHumerusPosition = new Vector2();
@@ -355,12 +361,8 @@ namespace SommarFenomen.Objects
             _centerBody.Position = ConvertUnits.ToSimUnits(Position);
             _centerBody.BodyType = BodyType.Dynamic;
             double radianStep = Math.PI * 2 / numberOfOuterBodies;
-            _centerBody.LinearDamping = 1;
+            _centerBody.LinearDamping = 2;
             _centerBody.Mass = 0.2f;
-
-            Vector2 tmp = _centerBody.Position;
-            tmp.Y -= 5;
-            _centerBody.Position = tmp;
 
             for (int i = 0; i < numberOfOuterBodies; i++)
             {
@@ -374,6 +376,8 @@ namespace SommarFenomen.Objects
                 body.Position = direction * innerDistance + _centerBody.Position;
                 body.BodyType = BodyType.Dynamic;
                 body.Mass = 0.4f;
+                body.LinearDamping = 1;
+                body.OnCollision += ObjectCollision;
                 _outerBodies.Add(body);
             }
 
@@ -393,7 +397,7 @@ namespace SommarFenomen.Objects
 
                 joint = JointFactory.CreateDistanceJoint(PlayWindow.World, _outerBodies[i], _outerBodies[next], thisJointPosition, nextJointPosition);
                 joint.DampingRatio = damping;
-                joint.Frequency = frequency;
+                joint.Frequency = frequency * 4;
                 joint.CollideConnected = true;
 
                 // Middle joint
@@ -407,9 +411,10 @@ namespace SommarFenomen.Objects
 
                 joint = JointFactory.CreateDistanceJoint(PlayWindow.World, _outerBodies[i], _centerBody, thisJointPosition, centerJointPosition);
                 joint.DampingRatio = damping;
-                joint.Frequency = frequency;
+                joint.Frequency = frequency * 0.7f;
                 joint.CollideConnected = true;
             }
+            Body = _centerBody;
         }
 
         private VertexPositionNormalTexture[] getSoftBodyVertices()
@@ -421,7 +426,6 @@ namespace SommarFenomen.Objects
 
             float radianStep = 2 * (float)Math.PI / _outerBodies.Count;
             float currentAngle = (float)Utils.CalculateAngle(new Vector2(-1, 0), direction);
-            Console.WriteLine("angle " + currentAngle + " step " + radianStep);
 
             float radius = _outerBodies[0].FixtureList[0].Shape.Radius;
 
@@ -522,14 +526,6 @@ namespace SommarFenomen.Objects
                 graphicsDevice.DrawUserPrimitives<VertexPositionNormalTexture>(PrimitiveType.TriangleList, vertices, 0, vertices.Length / 3);
             }
 
-            //foreach (var pass in _bodyEffect.CurrentTechnique.Passes)
-            //{
-            //    pass.Apply();
-
-            //    graphicsDevice.DrawUserPrimitives<VertexPositionColor>(PrimitiveType.TriangleList, verts, 0, vertices.Length / 3);
-            //}
-
-
             batch.Begin(SpriteSortMode.Deferred, null, null, null, null, null, PlayWindow.Camera2D.View);
 
             DrawWindPuff(batch);
@@ -540,6 +536,13 @@ namespace SommarFenomen.Objects
         public override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
+
+            Vector2 force = Strategy.GetAcceleration() * 0.3f;
+            foreach (var item in _outerBodies)
+            {
+                item.ApplyForce(ref force);
+            }
+
             PositionHelper(Position);
         }
     }
