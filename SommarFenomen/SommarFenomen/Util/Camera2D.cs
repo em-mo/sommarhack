@@ -27,6 +27,7 @@ namespace SommarFenomen.Util
         private float _minRotation;
         private bool _positionTracking;
         private Matrix _projection;
+        private Matrix _displayProjection;
         private bool _rotationTracking;
         private Vector2 _targetPosition;
         private float _targetRotation;
@@ -43,6 +44,9 @@ namespace SommarFenomen.Util
             _graphics = graphics;
             _projection = Matrix.CreateOrthographicOffCenter(0f, ConvertUnits.ToSimUnits(_graphics.Viewport.Width),
                                                              ConvertUnits.ToSimUnits(_graphics.Viewport.Height), 0f, 0f,
+                                                             1f);
+            _displayProjection = Matrix.CreateOrthographicOffCenter(0f, _graphics.Viewport.Width,
+                                                             _graphics.Viewport.Height, 0f, 0f,
                                                              1f);
             _view = Matrix.Identity;
             _batchView = Matrix.Identity;
@@ -66,6 +70,10 @@ namespace SommarFenomen.Util
         public Matrix SimProjection
         {
             get { return _projection; }
+        }
+        public Matrix DisplayProjection
+        {
+            get { return _displayProjection; }
         }
 
         /// <summary>

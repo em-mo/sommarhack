@@ -25,8 +25,8 @@ namespace SommarFenomen
 
         private Sprite _background;
         private SpriteBatch _spriteBatch;
-        private GraphicsDevice _graphicsDevice;
-        private Camera2D _camera2D;
+        public GraphicsDevice GraphicsDevice { get; set; }
+        public Camera2D Camera2D;
         private KeyboardInputHelper _inputHelper;
 
         private List<Sprite> _spriteList = new List<Sprite>();
@@ -54,9 +54,9 @@ namespace SommarFenomen
         public void Initialize()
         {
             _inputHelper = new KeyboardInputHelper();
-            this._graphicsDevice = _windowHandler.Game.GraphicsDevice;
-            _spriteBatch = new SpriteBatch(_graphicsDevice);
-            _camera2D = new Camera2D(_graphicsDevice);
+            this.GraphicsDevice = _windowHandler.Game.GraphicsDevice;
+            _spriteBatch = new SpriteBatch(GraphicsDevice);
+            Camera2D = new Camera2D(GraphicsDevice);
 
             World = new World(Vector2.Zero);
 
@@ -79,8 +79,8 @@ namespace SommarFenomen
             _objectList.Add(goodCell);
             _objectList.Add(new Virus(this, new Vector2(-200)));
 
-            _camera2D.EnableTracking = true;
-            _camera2D.TrackingBody = _player.Body;
+            Camera2D.EnableTracking = true;
+            Camera2D.TrackingBody = _player.Body;
         }
 
         static public void LoadContent()
@@ -96,7 +96,7 @@ namespace SommarFenomen
             _debugView.RemoveFlags(DebugViewFlags.Joint);
             _debugView.DefaultShapeColor = Color.White;
             _debugView.SleepingShapeColor = Color.LightGray;
-            _debugView.LoadContent(_graphicsDevice, Game1.contentManager);
+            _debugView.LoadContent(GraphicsDevice, Game1.contentManager);
         }
         
         public PlayerCell Player
@@ -191,11 +191,11 @@ namespace SommarFenomen
                 _debugView.Flags = _debugView.Flags ^ DebugViewFlags.Joint;
             }
             if (_inputHelper.isKeyDown(Keys.Q))
-                _camera2D.Zoom += 0.01f;
+                Camera2D.Zoom += 0.01f;
             if (_inputHelper.isKeyDown(Keys.W))
-                _camera2D.Zoom -= 0.01f;
+                Camera2D.Zoom -= 0.01f;
             if (_inputHelper.isKeyDown(Keys.R))
-                _camera2D.Zoom = 1.0f;
+                Camera2D.Zoom = 1.0f;
             #endregion
         }
 
@@ -213,7 +213,7 @@ namespace SommarFenomen
                     gameObject.Update(gameTime);
             }
 
-            _camera2D.Update(gameTime);
+            Camera2D.Update(gameTime);
             KeyboardInput();
             DestroyOldGameObjects();
             RegisterGameObjects();
@@ -221,7 +221,7 @@ namespace SommarFenomen
 
         public void Draw(GameTime gameTime)
         {
-            _spriteBatch.Begin(SpriteSortMode.Deferred, null, null, null, null, null, _camera2D.View);
+            _spriteBatch.Begin(SpriteSortMode.Deferred, null, null, null, null, null, Camera2D.View);
             GraphicsHandler.DrawSprites(_backgroundSprites, _spriteBatch);
             GraphicsHandler.DrawSprites(_spriteList, _spriteBatch);
             _player.Draw(_spriteBatch);
@@ -233,8 +233,8 @@ namespace SommarFenomen
 
             _spriteBatch.End();
             
-            Matrix projection = _camera2D.SimProjection;
-            Matrix view = _camera2D.SimView;
+            Matrix projection = Camera2D.SimProjection;
+            Matrix view = Camera2D.SimView;
             _debugView.RenderDebugData(ref projection, ref view);
         }
     }

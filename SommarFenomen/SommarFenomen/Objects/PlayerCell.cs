@@ -38,6 +38,10 @@ namespace SommarFenomen.Objects
         private float _leftUlnaOffset;
         private float _leftHandOffset;
 
+        List<Body> _outerBodies;
+        Body _centerBody;
+        BasicEffect _bodyEffect;
+
         private Vector2 _origin;
 
         private List<WindPuffMessage> _windPuffList = new List<WindPuffMessage>();
@@ -59,14 +63,20 @@ namespace SommarFenomen.Objects
 
         public PlayerCell(PlayWindow playWindow, Vector2 position) : base(playWindow, new KinectStrategy(), MAX_SPEED)
         {
-            _cellTexture = Game1.contentManager.Load<Texture2D>(@"Images\Hero_Cell");
+            _cellTexture = Game1.contentManager.Load<Texture2D>(@"Images\Hero_Cell2");
             _spriteDict = new Dictionary<PlayerSprites, Sprite>();
             InitSprites();
             Position = position;
             _spriteDict[PlayerSprites.Cell].Position = Position;
             InitArms();
             CreateBody();
-            CreateSoftBody(20, 200, 30, 1, 0.8f, 1.0f);
+            CreateSoftBody(40, 70, 2f, 1, 0.8f, 3.0f);
+
+            _bodyEffect = new BasicEffect(playWindow.GraphicsDevice);
+            //_bodyEffect.EnableDefaultLighting();
+            _bodyEffect.TextureEnabled = true;
+            _bodyEffect.Texture = _cellTexture;
+            _bodyEffect.World = Matrix.Identity;
 
             SetLeftArmRotation((float)Math.PI / 2, (float)Math.PI / 2);
             SetRightArmRotation(-(float)Math.PI / 2, -(float)Math.PI / 2);
@@ -124,12 +134,6 @@ namespace SommarFenomen.Objects
             
             //Origin center
             _windPuff.Origin = new Vector2(_windPuff.OriginalSize.X / 2, _windPuff.OriginalSize.Y / 2);
-        }
-
-        public override void Update(GameTime gameTime)
-        {
-            base.Update(gameTime);
-            PositionHelper(Position);
         }
 
         private void InitArms()
@@ -278,12 +282,7 @@ namespace SommarFenomen.Objects
             }
         }
 
-        public override void Draw(SpriteBatch batch)
-        {
-            DrawWindPuff(batch);
-            foreach (Sprite sprite in _spriteDict.Values)
-                GraphicsHandler.DrawSprite(sprite, batch);
-        }
+
 
         public override void CreateBody()
         {
@@ -345,23 +344,23 @@ namespace SommarFenomen.Objects
             Body.LinearDamping = 1;
         }
 
-        List<Body> _outerBodies;
-        Body centerBody;
+
+
         private void CreateSoftBody(int numberOfOuterBodies, float innerDistance, float radius, float density, float damping, float frequency)
         {
             innerDistance = ConvertUnits.ToSimUnits(innerDistance);
             radius = ConvertUnits.ToSimUnits(radius);
             _outerBodies = new List<Body>();
-            centerBody = BodyFactory.CreateCircle(PlayWindow.World, radius * 2, density);
-            centerBody.Position = ConvertUnits.ToSimUnits(Position);
-            centerBody.BodyType = BodyType.Dynamic;
+            _centerBody = BodyFactory.CreateCircle(PlayWindow.World, radius * 2, density);
+            _centerBody.Position = ConvertUnits.ToSimUnits(Position);
+            _centerBody.BodyType = BodyType.Dynamic;
             double radianStep = Math.PI * 2 / numberOfOuterBodies;
-            centerBody.LinearDamping = 1;
-            centerBody.Mass = 0.2f;
+            _centerBody.LinearDamping = 1;
+            _centerBody.Mass = 0.2f;
 
-            Vector2 tmp = centerBody.Position;
+            Vector2 tmp = _centerBody.Position;
             tmp.Y -= 5;
-            centerBody.Position = tmp;
+            _centerBody.Position = tmp;
 
             for (int i = 0; i < numberOfOuterBodies; i++)
             {
@@ -372,7 +371,7 @@ namespace SommarFenomen.Objects
                 direction.X = (float)Math.Cos(currentAngle);
                 direction.Y = (float)Math.Sin(currentAngle);
 
-                body.Position = direction * innerDistance + centerBody.Position;
+                body.Position = direction * innerDistance + _centerBody.Position;
                 body.BodyType = BodyType.Dynamic;
                 body.Mass = 0.4f;
                 _outerBodies.Add(body);
@@ -400,34 +399,70 @@ namespace SommarFenomen.Objects
                 // Middle joint
                 Vector2 centerJointPosition;
 
-                direction = centerBody.Position - _outerBodies[i].Position;
+                direction = _centerBody.Position - _outerBodies[i].Position;
                 direction.Normalize();
 
-                thisJointPosition = -direction * radius;
-                centerJointPosition = direction * radius * 2;
+                thisJointPosition = Vector2.Zero;
+                centerJointPosition = Vector2.Zero;
 
-                joint = JointFactory.CreateDistanceJoint(PlayWindow.World, _outerBodies[i], centerBody, thisJointPosition, centerJointPosition);
-                joint.DampingRatio = damping;
-                joint.Frequency = frequency;
-                joint.CollideConnected = true;
-
-                thisJointPosition = direction * radius;
-                centerJointPosition = -direction * radius * 2;
-
-                joint = JointFactory.CreateDistanceJoint(PlayWindow.World, _outerBodies[i], centerBody, thisJointPosition, centerJointPosition);
+                joint = JointFactory.CreateDistanceJoint(PlayWindow.World, _outerBodies[i], _centerBody, thisJointPosition, centerJointPosition);
                 joint.DampingRatio = damping;
                 joint.Frequency = frequency;
                 joint.CollideConnected = true;
             }
-            centerBody.FixedRotation = true;
-            centerBody.AngularVelocity = 1;
         }
 
-        private void getSoftBodyVertices()
+        private VertexPositionNormalTexture[] getSoftBodyVertices()
         {
-            VertexPositionTexture[] vertices = new VertexPositionTexture[_outerBodies.Count * 3];
+            VertexPositionNormalTexture[] vertices = new VertexPositionNormalTexture[_outerBodies.Count * 3];
+            Vector3 normal = new Vector3(0, 0, 1);
+            Vector2 direction = _centerBody.Position - _outerBodies[0].Position;
+            direction.Normalize();
 
-            Vector2 direction = centerBody.Position - _outerBodies[0].Position;
+            float radianStep = 2 * (float)Math.PI / _outerBodies.Count;
+            float currentAngle = (float)Utils.CalculateAngle(new Vector2(-1, 0), direction);
+            Console.WriteLine("angle " + currentAngle + " step " + radianStep);
+
+            float radius = _outerBodies[0].FixtureList[0].Shape.Radius;
+
+            for (int i = 0; i < _outerBodies.Count; i++)
+            {
+                int currentVertex = i * 3;
+                int next = (i + 1) % _outerBodies.Count;
+
+                // First corner
+                direction = _centerBody.Position - _outerBodies[i].Position;
+                direction.Normalize();
+
+                Vector2 vertex = ConvertUnits.ToDisplayUnits(_outerBodies[i].Position - direction * radius);
+                vertices[currentVertex].Position = new Vector3(vertex, 0);
+                vertices[currentVertex].TextureCoordinate = new Vector2(0.5f + (float)Math.Cos(currentAngle) / 2, 0.5f + (float)Math.Sin(currentAngle) / 2);
+                vertices[currentVertex].Normal = normal;
+                currentAngle += radianStep;
+
+                // Second corner
+                direction = _centerBody.Position - _outerBodies[next].Position;
+                direction.Normalize();
+
+                vertex = ConvertUnits.ToDisplayUnits(_outerBodies[next].Position - direction * radius);
+                vertices[currentVertex + 1].Position = new Vector3(vertex, 0);
+                vertices[currentVertex + 1].TextureCoordinate = new Vector2(0.5f + (float)Math.Cos(currentAngle) / 2, 0.5f + (float)Math.Sin(currentAngle) / 2);
+                vertices[currentVertex + 1].Normal = normal;
+
+                // Center
+                vertex = ConvertUnits.ToDisplayUnits(_centerBody.Position);
+                vertices[currentVertex + 2].Position = new Vector3(vertex, 0);
+                vertices[currentVertex + 2].TextureCoordinate = new Vector2(0.5f, 0.5f);
+                vertices[currentVertex + 2].Normal = normal;
+            }
+
+            return vertices;
+        }
+
+        private VertexPositionColor[] getSoftBodyBlueVertices()
+        {
+            VertexPositionColor[] vertices = new VertexPositionColor[_outerBodies.Count * 3];
+            Vector2 direction = _centerBody.Position - _outerBodies[0].Position;
             direction.Normalize();
 
             float radianStep = 2 * (float)Math.PI / _outerBodies.Count;
@@ -441,32 +476,71 @@ namespace SommarFenomen.Objects
                 int next = (i + 1) % _outerBodies.Count;
 
                 // First corner
-                direction = centerBody.Position - _outerBodies[i].Position;
+                direction = _centerBody.Position - _outerBodies[i].Position;
                 direction.Normalize();
 
-                Vector2 vertex = _outerBodies[i].Position + direction * radius;
-                vertices[currentVertex].Position = new Vector3(vertex, 0);
-                vertices[currentVertex].TextureCoordinate = new Vector2(0.5f + (float)Math.Cos(currentAngle) / 2, 0.5f + (float)Math.Sin(currentAngle) / 2);
+                Vector2 vertex = _outerBodies[i].Position - direction * radius;
+                vertices[currentVertex].Position = new Vector3(ConvertUnits.ToDisplayUnits(vertex), 0);
+                vertices[currentVertex].Color = Color.OrangeRed;
                 currentAngle += radianStep;
 
                 // Second corner
-                direction = centerBody.Position - _outerBodies[next].Position;
+                direction = _centerBody.Position - _outerBodies[next].Position;
                 direction.Normalize();
 
-                vertex = _outerBodies[next].Position + direction * radius;
-                vertices[currentVertex + 1].Position = new Vector3(vertex, 0);
-                vertices[currentVertex + 1].TextureCoordinate = new Vector2(0.5f + (float)Math.Cos(currentAngle) / 2, 0.5f + (float)Math.Sin(currentAngle) / 2);
+                vertex = _outerBodies[next].Position - direction * radius;
+                vertices[currentVertex + 1].Position = new Vector3(ConvertUnits.ToDisplayUnits(vertex), 0);
+                vertices[currentVertex + 1].Color = Color.OrangeRed;
 
                 // Center
-                vertex = centerBody.Position;
-                vertices[currentVertex + 2].Position = new Vector3(vertex, 0);
-                vertices[currentVertex + 2].TextureCoordinate = new Vector2(0.5f, 0.5f);
+                vertex = _centerBody.Position;
+                vertices[currentVertex + 2].Position = new Vector3(ConvertUnits.ToDisplayUnits(vertex), 0);
+                vertices[currentVertex + 2].Color = Color.OrangeRed;
             }
+
+            return vertices;
         }
 
         public override bool ObjectCollision(Fixture f1, Fixture f2, Contact contact)
         {
             return true;
+        }
+
+        public override void Draw(SpriteBatch batch)
+        {
+            batch.End();
+            GraphicsDevice graphicsDevice = batch.GraphicsDevice;
+            VertexPositionNormalTexture[] vertices = getSoftBodyVertices();
+            //VertexPositionColor[] verts = getSoftBodyBlueVertices();
+
+            _bodyEffect.View = PlayWindow.Camera2D.View;
+            _bodyEffect.Projection = PlayWindow.Camera2D.DisplayProjection;
+
+            foreach (var pass in _bodyEffect.CurrentTechnique.Passes)
+            {
+                pass.Apply();
+                graphicsDevice.DrawUserPrimitives<VertexPositionNormalTexture>(PrimitiveType.TriangleList, vertices, 0, vertices.Length / 3);
+            }
+
+            //foreach (var pass in _bodyEffect.CurrentTechnique.Passes)
+            //{
+            //    pass.Apply();
+
+            //    graphicsDevice.DrawUserPrimitives<VertexPositionColor>(PrimitiveType.TriangleList, verts, 0, vertices.Length / 3);
+            //}
+
+
+            batch.Begin(SpriteSortMode.Deferred, null, null, null, null, null, PlayWindow.Camera2D.View);
+
+            DrawWindPuff(batch);
+            foreach (Sprite sprite in _spriteDict.Values)
+                GraphicsHandler.DrawSprite(sprite, batch);
+        }
+
+        public override void Update(GameTime gameTime)
+        {
+            base.Update(gameTime);
+            PositionHelper(Position);
         }
     }
 }
