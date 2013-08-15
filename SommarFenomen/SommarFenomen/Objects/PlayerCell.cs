@@ -524,6 +524,8 @@ namespace SommarFenomen.Objects
             {
                 pass.Apply();
                 graphicsDevice.DrawUserPrimitives<VertexPositionNormalTexture>(PrimitiveType.TriangleList, vertices, 0, vertices.Length / 3);
+
+
             }
 
             batch.Begin(SpriteSortMode.Deferred, null, null, null, null, null, PlayWindow.Camera2D.View);

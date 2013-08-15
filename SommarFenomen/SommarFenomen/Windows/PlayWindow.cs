@@ -14,6 +14,7 @@ using FarseerPhysics.Dynamics;
 using FarseerPhysics.DebugViews;
 using FarseerPhysics;
 using FarseerPhysics.Factories;
+using FarseerPhysics.Common;
 
 namespace SommarFenomen
 {
@@ -37,6 +38,8 @@ namespace SommarFenomen
 
         public List<GoodCell> GoodCellList { get; set; }
         private List<ActiveGameObject> _objectList = new List<ActiveGameObject>();
+
+        private List<Wall> _wallList = new List<Wall>();
 
         Random rand = new Random();
 
@@ -71,14 +74,28 @@ namespace SommarFenomen
 
             _player = new PlayerCell(this, new Vector2(0));
 
-            //Body body = BodyFactory.CreateRectangle(World, 2, 2, 2);
-            //body.BodyType = BodyType.Static;
-
             GoodCell goodCell = new GoodCell(this, new Vector2(300, 100));
             GoodCellList.Add(goodCell);
             _objectList.Add(goodCell);
-            _objectList.Add(new Virus(this, new Vector2(-200)));
+            _objectList.Add(new Virus(this, new Vector2(200, -200)));
 
+
+            //Vertices vertices = new Vertices();
+            //vertices.Add(new Vector2(-300, -200));
+            //vertices.Add(new Vector2(-200, -150));
+            //vertices.Add(new Vector2(-100, -200));
+            //vertices.Add(new Vector2(-160, -300));
+            //vertices.Add(new Vector2(-240, -300));
+
+            //_wallList.Add(new Wall(vertices, Wall.WallType.Outer, this));
+            
+            Vertices vertices = new Vertices();
+            vertices.Add(new Vector2(-200, 200));
+            vertices.Add(new Vector2(-100, 200));
+            vertices.Add(new Vector2(-100, 300));
+            vertices.Add(new Vector2(-200, 300));
+
+            _wallList.Add(new Wall(vertices, Wall.WallType.Outer, this));
             Camera2D.EnableTracking = true;
             Camera2D.TrackingBody = _player.Body;
         }
@@ -232,6 +249,11 @@ namespace SommarFenomen
             }
 
             _spriteBatch.End();
+
+            foreach (var item in _wallList)
+            {
+                item.Draw(_spriteBatch);
+            }
             
             Matrix projection = Camera2D.SimProjection;
             Matrix view = Camera2D.SimView;
