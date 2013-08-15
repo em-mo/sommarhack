@@ -75,28 +75,29 @@ namespace SommarFenomen.Objects
         	}
 
             _colorWallVerts = new VertexPositionColor[vertices.Count * 2 + 2];
-            for (int i = 0; i < vertices.Count; i = i + 2)
+            for (int i = 0; i < vertices.Count; ++i)
             {
-                _colorWallVerts[i].Position.X = outerVertices[i].X;
-                _colorWallVerts[i].Position.Y = outerVertices[i].Y;
-                _colorWallVerts[i].Position.Z = 0;
-                _colorWallVerts[i].Color = Color.Black;
+                int j = i * 2;
+                _colorWallVerts[j].Position.X = innerVertices[i].X;
+                _colorWallVerts[j].Position.Y = innerVertices[i].Y;
+                _colorWallVerts[j].Position.Z = 0;
+                _colorWallVerts[j].Color = Color.Black;
 
-                _colorWallVerts[i + 1].Position.X = innerVertices[i].X;
-                _colorWallVerts[i + 1].Position.Y = innerVertices[i].Y;
-                _colorWallVerts[i + 1].Position.Z = 0;
-                _colorWallVerts[i + 1].Color = Color.Black;
+                _colorWallVerts[j + 1].Position.X = outerVertices[i].X;
+                _colorWallVerts[j + 1].Position.Y = outerVertices[i].Y;
+                _colorWallVerts[j + 1].Position.Z = 0;
+                _colorWallVerts[j + 1].Color = Color.Black;
             }
+            int lastIndex = vertices.Count * 2;
+            _colorWallVerts[lastIndex].Position.X = innerVertices[0].X;
+            _colorWallVerts[lastIndex].Position.Y = innerVertices[0].Y;
+            _colorWallVerts[lastIndex].Position.Z = 0;
+            _colorWallVerts[lastIndex].Color = Color.Black;
 
-            _colorWallVerts[vertices.Count].Position.X = outerVertices[0].X;
-            _colorWallVerts[vertices.Count].Position.Y = outerVertices[0].Y;
-            _colorWallVerts[vertices.Count].Position.Z = 0;
-            _colorWallVerts[vertices.Count].Color = Color.Black;
-
-            _colorWallVerts[vertices.Count + 1].Position.X = innerVertices[0].X;
-            _colorWallVerts[vertices.Count + 1].Position.Y = innerVertices[0].Y;
-            _colorWallVerts[vertices.Count + 1].Position.Z = 0;
-            _colorWallVerts[vertices.Count + 1].Color = Color.Black; 
+            _colorWallVerts[lastIndex + 1].Position.X = outerVertices[0].X;
+            _colorWallVerts[lastIndex + 1].Position.Y = outerVertices[0].Y;
+            _colorWallVerts[lastIndex + 1].Position.Z = 0;
+            _colorWallVerts[lastIndex + 1].Color = Color.Black; 
             
         }
 
@@ -169,8 +170,15 @@ namespace SommarFenomen.Objects
             foreach (var pass in _basicEffect.CurrentTechnique.Passes)
             {
                 pass.Apply();
-                //graphicsDevice.DrawUserPrimitives<VertexPositionColor>(PrimitiveType.TriangleStrip, _colorWallVerts, 0, _colorWallVerts.Length / 3);
-                graphicsDevice.DrawUserPrimitives<VertexPositionColor>(PrimitiveType.LineStrip, _colorWallVerts, 0, _colorWallVerts.Length / 2);
+
+                VertexPositionColor[] v = new VertexPositionColor[3];
+
+                v[0] = _colorWallVerts[0];
+                v[1] = _colorWallVerts[1];
+                v[2] = _colorWallVerts[2];
+
+                graphicsDevice.DrawUserPrimitives<VertexPositionColor>(PrimitiveType.TriangleStrip, _colorWallVerts, 0, _colorWallVerts.Length - 2);
+                //graphicsDevice.DrawUserPrimitives<VertexPositionColor>(PrimitiveType.LineStrip, _colorWallVerts, 0, _colorWallVerts.Length - 1);
             }
         }
     }
