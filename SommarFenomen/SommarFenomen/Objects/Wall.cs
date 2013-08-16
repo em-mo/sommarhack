@@ -17,12 +17,8 @@ namespace SommarFenomen.Objects
         private Body _body;
         private BasicEffect _basicEffect;
         private float _thickness;
-        private VertexPositionColorTexture[] _wallVerts;
-        
-        /// <summary>
-        /// Temporary
-        /// </summary>
-        private VertexPositionColor[] _colorWallVerts;
+        private VertexPositionTexture[] _wallVerts;
+        private int _textureScaling = 100;
 
         private PlayWindow _playWindow;
 
@@ -34,7 +30,7 @@ namespace SommarFenomen.Objects
         {
             _playWindow = playWindow;
 
-            _thickness = 10.0f;
+            _thickness = 50.0f;
             
             SimplifyTools.MergeParallelEdges(vertices, 0.001f);
 
@@ -43,9 +39,8 @@ namespace SommarFenomen.Objects
             _body.CollidesWith = Category.All;
 
             _basicEffect = new BasicEffect(_playWindow.GraphicsDevice);
-            _basicEffect.VertexColorEnabled = true;
-            //_basicEffect.TextureEnabled = true;
-            //_basicEffect.Texture = Game1.contentManager.Load<Texture2D>("Wall");
+            _basicEffect.TextureEnabled = true;
+            _basicEffect.Texture = Game1.contentManager.Load<Texture2D>(@"Images\Wall");
 
             InitDrawVertices(vertices, type);
         }
@@ -69,38 +64,47 @@ namespace SommarFenomen.Objects
                 outerVertices = drawingVertices;
             }
             else
-	        {
+            {
                 innerVertices = drawingVertices;
                 outerVertices = vertices;
-        	}
+            }
 
-            _colorWallVerts = new VertexPositionColor[vertices.Count * 2 + 2];
+            _wallVerts = new VertexPositionTexture[vertices.Count * 2 + 2];
             for (int i = 0; i < vertices.Count; ++i)
             {
                 int j = i * 2;
-                _colorWallVerts[j].Position.X = innerVertices[i].X;
-                _colorWallVerts[j].Position.Y = innerVertices[i].Y;
-                _colorWallVerts[j].Position.Z = 0;
-                _colorWallVerts[j].Color = Color.Black;
+                _wallVerts[j].Position.X = innerVertices[i].X;
+                _wallVerts[j].Position.Y = innerVertices[i].Y;
+                _wallVerts[j].Position.Z = 0;
+                _wallVerts[j].TextureCoordinate = innerVertices[i] / _textureScaling;
 
-                _colorWallVerts[j + 1].Position.X = outerVertices[i].X;
-                _colorWallVerts[j + 1].Position.Y = outerVertices[i].Y;
-                _colorWallVerts[j + 1].Position.Z = 0;
-                _colorWallVerts[j + 1].Color = Color.Black;
+                _wallVerts[j + 1].Position.X = outerVertices[i].X;
+                _wallVerts[j + 1].Position.Y = outerVertices[i].Y;
+                _wallVerts[j + 1].Position.Z = 0;
+                _wallVerts[j + 1].TextureCoordinate = outerVertices[i] / _textureScaling;
+
             }
             int lastIndex = vertices.Count * 2;
-            _colorWallVerts[lastIndex].Position.X = innerVertices[0].X;
-            _colorWallVerts[lastIndex].Position.Y = innerVertices[0].Y;
-            _colorWallVerts[lastIndex].Position.Z = 0;
-            _colorWallVerts[lastIndex].Color = Color.Black;
+            _wallVerts[lastIndex].Position.X = innerVertices[0].X;
+            _wallVerts[lastIndex].Position.Y = innerVertices[0].Y;
+            _wallVerts[lastIndex].Position.Z = 0;
+            _wallVerts[lastIndex].TextureCoordinate = innerVertices[0] / _textureScaling;
 
-            _colorWallVerts[lastIndex + 1].Position.X = outerVertices[0].X;
-            _colorWallVerts[lastIndex + 1].Position.Y = outerVertices[0].Y;
-            _colorWallVerts[lastIndex + 1].Position.Z = 0;
-            _colorWallVerts[lastIndex + 1].Color = Color.Black; 
-            
+
+            _wallVerts[lastIndex + 1].Position.X = outerVertices[0].X;
+            _wallVerts[lastIndex + 1].Position.Y = outerVertices[0].Y;
+            _wallVerts[lastIndex + 1].Position.Z = 0;
+            _wallVerts[lastIndex + 1].TextureCoordinate = outerVertices[0] / _textureScaling;
+
+
         }
 
+        /// <summary>
+        /// Get the other set of vertices to get a thickness of the wall
+        /// </summary>
+        /// <param name="vertices"></param>
+        /// <param name="type"></param>
+        /// <returns></returns>
         private Vertices getDrawingVertices(Vertices vertices, WallType type)
         {
             Vector2 previousVertex, currentVertex, nextVertex;
@@ -120,13 +124,14 @@ namespace SommarFenomen.Objects
                 normalisedPrevious.Normalize();
 
                 Vector2 drawVertexDifference = normalisedNext + normalisedPrevious;
-                drawVertexDifference.Normalize();
+                //drawVertexDifference.Normalize();
 
                 double angle = Utils.CalculateAngle(normalisedPrevious, normalisedNext);
 
                 if (angle < 0)
                     angle = angle + Math.PI * 2;
 
+                // Concave or convex corner
                 if (angle > Math.PI && type == WallType.Outer)
                     drawVertexDifference = drawVertexDifference * -1;
                 else if (angle < Math.PI && type == WallType.Inner)
@@ -163,7 +168,8 @@ namespace SommarFenomen.Objects
         public void Draw(SpriteBatch batch)
         {
             GraphicsDevice graphicsDevice = batch.GraphicsDevice;
-
+            graphicsDevice.SamplerStates[0] = SamplerState.AnisotropicWrap;
+            graphicsDevice.RasterizerState = RasterizerState.CullNone;
             _basicEffect.View = _playWindow.Camera2D.View;
             _basicEffect.Projection = _playWindow.Camera2D.DisplayProjection;
 
@@ -171,13 +177,8 @@ namespace SommarFenomen.Objects
             {
                 pass.Apply();
 
-                VertexPositionColor[] v = new VertexPositionColor[3];
-
-                v[0] = _colorWallVerts[0];
-                v[1] = _colorWallVerts[1];
-                v[2] = _colorWallVerts[2];
-
-                graphicsDevice.DrawUserPrimitives<VertexPositionColor>(PrimitiveType.TriangleStrip, _colorWallVerts, 0, _colorWallVerts.Length - 2);
+                //graphicsDevice.DrawUserPrimitives<VertexPositionColor>(PrimitiveType.TriangleStrip, _colorWallVerts, 0, _colorWallVerts.Length - 2);
+                graphicsDevice.DrawUserPrimitives<VertexPositionTexture>(PrimitiveType.TriangleStrip, _wallVerts, 0, _wallVerts.Length - 2);
                 //graphicsDevice.DrawUserPrimitives<VertexPositionColor>(PrimitiveType.LineStrip, _colorWallVerts, 0, _colorWallVerts.Length - 1);
             }
         }

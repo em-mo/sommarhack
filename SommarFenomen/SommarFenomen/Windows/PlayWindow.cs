@@ -91,9 +91,13 @@ namespace SommarFenomen
             
             Vertices vertices = new Vertices();
             vertices.Add(new Vector2(-200, 200));
+            vertices.Add(new Vector2(-150, 225));
             vertices.Add(new Vector2(-100, 200));
+            vertices.Add(new Vector2(-125, 250));
             vertices.Add(new Vector2(-100, 300));
+            vertices.Add(new Vector2(-150, 275));
             vertices.Add(new Vector2(-200, 300));
+            vertices.Add(new Vector2(-175, 250));
 
             _wallList.Add(new Wall(vertices, Wall.WallType.Outer, this));
             Camera2D.EnableTracking = true;
