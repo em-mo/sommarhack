@@ -16,6 +16,7 @@ using FarseerPhysics;
 using FarseerPhysics.Factories;
 using FarseerPhysics.Common;
 using SommarFenomen.LevelHandling;
+using SommarFenomen.Windows;
 
 namespace SommarFenomen
 {
@@ -25,6 +26,7 @@ namespace SommarFenomen
         private DebugViewXNA _debugView;
         private WindowHandler _windowHandler;
 
+        private Background _background2;
         private Sprite _background;
         private SpriteBatch _spriteBatch;
         public GraphicsDevice GraphicsDevice { get; set; }
@@ -72,6 +74,8 @@ namespace SommarFenomen
             _background = new Sprite(Game1.contentManager.Load<Texture2D>(@"Images\Gradient"));
             _background.CenterOrigin();
             _backgroundSprites.Add(_background);
+
+            _background2 = new Background(@"Images\Gradient", this);
 
             //TestInit();
             LoadLevel(@"levels\smalltest");
@@ -271,8 +275,9 @@ namespace SommarFenomen
 
         public void Draw(GameTime gameTime)
         {
+            _background2.Draw(_spriteBatch);
             _spriteBatch.Begin(SpriteSortMode.Deferred, null, null, null, null, null, Camera2D.View);
-            GraphicsHandler.DrawSprites(_backgroundSprites, _spriteBatch);
+            //GraphicsHandler.DrawSprites(_backgroundSprites, _spriteBatch);
             GraphicsHandler.DrawSprites(_spriteList, _spriteBatch);
             _player.Draw(_spriteBatch);
 
