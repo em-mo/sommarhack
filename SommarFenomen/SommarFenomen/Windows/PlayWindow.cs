@@ -15,6 +15,7 @@ using FarseerPhysics.DebugViews;
 using FarseerPhysics;
 using FarseerPhysics.Factories;
 using FarseerPhysics.Common;
+using SommarFenomen.LevelHandling;
 
 namespace SommarFenomen
 {
@@ -41,6 +42,9 @@ namespace SommarFenomen
 
         private List<Wall> _wallList = new List<Wall>();
 
+        private Level _level;
+        private LevelParser _levelParser;
+
         Random rand = new Random();
 
         // Chooses algorithm for hand movement
@@ -52,6 +56,7 @@ namespace SommarFenomen
         {
             this._windowHandler = windowHandler;
             GoodCellList = new List<GoodCell>();
+            _levelParser = new LevelParser(this);
         }
 
         public void Initialize()
@@ -60,15 +65,24 @@ namespace SommarFenomen
             this.GraphicsDevice = _windowHandler.Game.GraphicsDevice;
             _spriteBatch = new SpriteBatch(GraphicsDevice);
             Camera2D = new Camera2D(GraphicsDevice);
-
             World = new World(Vector2.Zero);
 
             InitDebug();
 
             _background = new Sprite(Game1.contentManager.Load<Texture2D>(@"Images\Gradient"));
-            _background.CenterOrigin(); 
-
+            _background.CenterOrigin();
             _backgroundSprites.Add(_background);
+
+            //TestInit();
+            LoadLevel(@"levels\smalltest");
+
+            Camera2D.EnableTracking = true;
+            Camera2D.TrackingBody = _player.Body;
+        }
+
+        private void TestInit()
+        {
+            World = new World(Vector2.Zero);
 
             _objectList = new List<ActiveGameObject>();
 
@@ -88,7 +102,7 @@ namespace SommarFenomen
             //vertices.Add(new Vector2(-240, -300));
 
             //_wallList.Add(new Wall(vertices, Wall.WallType.Outer, this));
-            
+
             Vertices vertices = new Vertices();
             vertices.Add(new Vector2(-200, 200));
             vertices.Add(new Vector2(-150, 225));
@@ -100,8 +114,23 @@ namespace SommarFenomen
             vertices.Add(new Vector2(-175, 250));
 
             _wallList.Add(new Wall(vertices, Wall.WallType.Outer, this));
-            Camera2D.EnableTracking = true;
-            Camera2D.TrackingBody = _player.Body;
+        }
+
+        private void LoadLevel(String file)
+        {
+            World.Clear();
+
+            _level = _levelParser.Parse(Game1.contentManager.Load<Texture2D>(file));
+            _wallList = _level.GetWalls();
+            _objectList = _level.GetFriendlies();
+
+            foreach (var item in _objectList)
+            {
+                GoodCellList.Add((GoodCell)item);
+            }
+            _objectList.AddRange(_level.GetEnemies());
+
+            _player = _level.Player;
         }
 
         static public void LoadContent()

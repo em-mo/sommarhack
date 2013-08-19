@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using SommarFenomen.Objects;
 
-namespace SommarFenomen.Level
+namespace SommarFenomen.LevelHandling
 {
     class Level
     {
@@ -26,14 +26,29 @@ namespace SommarFenomen.Level
             _wallList.Add(wall);
         }
 
+        public List<Wall> GetWalls()
+        {
+            return _wallList;
+        }
+
         public void AddFriendly(ActiveGameObject item)
         {
             _friendlyList.Add(item);
         }
 
+        public List<ActiveGameObject> GetFriendlies()
+        {
+            return _friendlyList;
+        }
+
         public void AddEnemy(ActiveGameObject item)
         {
             _enemyList.Add(item);
+        }
+
+        public List<ActiveGameObject> GetEnemies()
+        {
+            return _enemyList;
         }
 
         public void SetPlayer(PlayerCell player)

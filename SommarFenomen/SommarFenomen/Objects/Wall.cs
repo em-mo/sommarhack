@@ -31,10 +31,10 @@ namespace SommarFenomen.Objects
             _playWindow = playWindow;
 
             _thickness = 50.0f;
-            
-            SimplifyTools.MergeParallelEdges(vertices, 0.001f);
 
-            _body = BodyFactory.CreateLoopShape(_playWindow.World, VerticesToSimUnits(vertices));
+            Vertices wallVertices = SimplifyTools.CollinearSimplify(vertices);
+
+            _body = BodyFactory.CreateLoopShape(_playWindow.World, VerticesToSimUnits(wallVertices));
             _body.CollisionCategories = Category.All;
             _body.CollidesWith = Category.All;
 
@@ -42,7 +42,7 @@ namespace SommarFenomen.Objects
             _basicEffect.TextureEnabled = true;
             _basicEffect.Texture = Game1.contentManager.Load<Texture2D>(@"Images\Wall");
 
-            InitDrawVertices(vertices, type);
+            InitDrawVertices(wallVertices, type);
         }
 
         private void InitDrawVertices(Vertices vertices, WallType type)
