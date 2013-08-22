@@ -94,6 +94,7 @@ namespace SommarFenomen.Objects
             }
             Body.BodyType = FarseerPhysics.Dynamics.BodyType.Dynamic;
             Body.LinearDamping = 1;
+            Body.UserData = this;
         }
 
         private void ChangeSize(float percentage)

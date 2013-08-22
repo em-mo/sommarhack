@@ -40,6 +40,8 @@ namespace SommarFenomen
 
             graphics.PreferredBackBufferWidth = 1280;//GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width *3 / 4;
             graphics.PreferredBackBufferHeight = 720; // GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height * 3 / 4;
+
+            this.IsMouseVisible = true;
         }
 
         /// <summary>

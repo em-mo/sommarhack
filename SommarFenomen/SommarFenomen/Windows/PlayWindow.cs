@@ -49,6 +49,8 @@ namespace SommarFenomen
 
         Random rand = new Random();
 
+        Stopwatch mouseWatch = new Stopwatch();
+
         // Chooses algorithm for hand movement
         private bool _movementType = true;
 
@@ -59,6 +61,8 @@ namespace SommarFenomen
             this._windowHandler = windowHandler;
             GoodCellList = new List<GoodCell>();
             _levelParser = new LevelParser(this);
+
+            mouseWatch.Start();
         }
 
         public void Initialize()
@@ -271,6 +275,17 @@ namespace SommarFenomen
             KeyboardInput();
             DestroyOldGameObjects();
             RegisterGameObjects();
+
+            if (mouseWatch.ElapsedMilliseconds > 1000)
+            {
+                mouseWatch.Restart();
+                var mouseState = Mouse.GetState();
+
+                //Vector2 mousePos = ConvertUnits.ToDisplayUnits(Camera2D.ConvertScreenToWorld(new Vector2(mouseState.X, mouseState.Y)));
+                Vector2 mousePos = Camera2D.ConvertScreenToWorld(new Vector2(mouseState.X, mouseState.Y));
+                
+                //Console.WriteLine("MousePos: " + mousePos);
+            }
         }
 
         public void Draw(GameTime gameTime)
