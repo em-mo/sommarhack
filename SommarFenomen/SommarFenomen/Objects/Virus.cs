@@ -97,6 +97,16 @@ namespace SommarFenomen.Objects
             Body.UserData = this;
         }
 
+        private bool _beingConsumed = false;
+        private Body _consumingBody;
+        public void Consumed(Body centerBody)
+        {
+            Strategy = new StationaryStrategy();
+            _beingConsumed = true;
+            _consumingBody = centerBody;
+            Body.IgnoreCollisionWith(_consumingBody);
+        }
+
         private void ChangeSize(float percentage)
         {
             if (Body.FixtureList.First().Shape.Radius > 0.01f)
@@ -175,6 +185,29 @@ namespace SommarFenomen.Objects
             return true;
         }
 
+        private static readonly double FADE_OUT_TIME = 2000;
+        private static readonly double FADE_STEP_TIME = FADE_OUT_TIME / 256;
+        private double _fadeStepTimer = 0;
+        private double _fadeOutTimer = 0;
+        private void FadeOut(GameTime gameTime)
+        {
+            _fadeStepTimer += gameTime.ElapsedGameTime.TotalSeconds;
+            _fadeOutTimer += gameTime.ElapsedGameTime.TotalSeconds;
+
+            if (_fadeOutTimer > FADE_OUT_TIME)
+            {
+                PlayWindow.RemoveVirus(this);
+            }
+            if (_fadeStepTimer > FADE_STEP_TIME)
+            {
+                Color color = Sprite.Color;
+                color.A -= 1;
+                color.R -= 1;
+                color.G -= 1;
+                color.B -= 1;
+            }
+        }
+
         private static readonly double SHRINK_TIME = 0.01;
         private static readonly double EXPLODE_TIME = 2;
         private static readonly float SHRINK_PERCENTAGE = 0.99f;
@@ -198,6 +231,10 @@ namespace SommarFenomen.Objects
                 {
                     _targetCell.ExplodeByVirus();
                 }
+            }
+            else if (_beingConsumed)
+            {
+                FadeOut(gameTime);
             }
 
             base.Update(gameTime);

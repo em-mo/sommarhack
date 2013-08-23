@@ -40,14 +40,23 @@ namespace SommarFenomen.Objects
         private float _leftUlnaOffset;
         private float _leftHandOffset;
 
-        List<Body> _outerBodies;
-        Body _centerBody;
-        BasicEffect _bodyEffect;
+        private float _bodyRadius;
+        private List<Body> _outerBodies;
+        private Body _centerBody;
+        private BasicEffect _bodyEffect;
 
         private Vector2 _origin;
 
         private List<WindPuffMessage> _windPuffList = new List<WindPuffMessage>();
 
+        private Virus _grabbedVirus;
+
+        private FixedDistanceJoint _leftHandJoint;
+        private FixedDistanceJoint _rightHandJoint;
+
+        //To avoid calculating twice
+        private Vector2 _leftHandCenter;
+        private Vector2 _rightHandCenter;
 
         public readonly object locker = new object();
 
@@ -325,8 +334,7 @@ namespace SommarFenomen.Objects
             {
                 if (_grabbedVirus != null)
                 {
-                    _grabbedVirus = null;
-                    RemoveVirusSprings();
+                    DroppedVirus();
                 }
             }
             else if (!_virusCollisionList.Contains(_grabbedVirus))
@@ -336,14 +344,7 @@ namespace SommarFenomen.Objects
             }
         }
 
-        private Virus _grabbedVirus;
 
-        private FixedDistanceJoint _leftHandJoint;
-        private FixedDistanceJoint _rightHandJoint;
-
-        //To avoid calculating twice
-        private Vector2 _leftHandCenter;
-        private Vector2 _rightHandCenter;
         private void CreateVirusSprings()
         {
             if (_leftHandJoint != null && _rightHandJoint != null)
@@ -357,6 +358,14 @@ namespace SommarFenomen.Objects
         {
             PlayWindow.World.RemoveJoint(_leftHandJoint);
             PlayWindow.World.RemoveJoint(_rightHandJoint);
+        }
+
+        private void DroppedVirus()
+        {
+            RemoveVirusSprings();
+            _grabbedVirus = null;
+            _outerBodyOpen = false;
+            _outerBodyWatch.Reset();
         }
 
         private void HandleVirusSprings()
@@ -423,6 +432,9 @@ namespace SommarFenomen.Objects
             return handAABB;
         }
 
+        /// <summary>
+        /// Old relic before the soft time
+        /// </summary>
         public override void CreateBody()
         {
             uint[] data = new uint[_cellTexture.Width * _cellTexture.Height];
@@ -484,13 +496,13 @@ namespace SommarFenomen.Objects
         }
 
 
-
         private void CreateSoftBody(int numberOfOuterBodies, float innerDistance, float radius, float density, float damping, float frequency)
         {
             innerDistance = ConvertUnits.ToSimUnits(innerDistance);
             radius = ConvertUnits.ToSimUnits(radius);
+            _bodyRadius = radius;
             _outerBodies = new List<Body>();
-            _centerBody = BodyFactory.CreateCircle(PlayWindow.World, radius * 2, density);
+            _centerBody = BodyFactory.CreateCircle(PlayWindow.World, radius * 5, density);
             _centerBody.Position = ConvertUnits.ToSimUnits(Position);
             _centerBody.BodyType = BodyType.Dynamic;
             double radianStep = Math.PI * 2 / numberOfOuterBodies;
@@ -650,6 +662,63 @@ namespace SommarFenomen.Objects
         public override bool ObjectCollision(Fixture f1, Fixture f2, Contact contact)
         {
             return true;
+        }
+
+        private Stopwatch _outerBodyWatch = new Stopwatch();
+        private bool _outerBodyOpen = false;
+        private static readonly int OUTER_BODY_CLOSED_TIME = 100;
+
+        public  bool OuterBodyObjectCollision(Fixture f1, Fixture f2, Contact contact)
+        {
+            Object o1, o2;
+            o1 = f1.Body.UserData;
+            o2 = f2.Body.UserData;
+
+            // If it isn't a collision with the grabbed virus
+            if (_grabbedVirus == null || (o1 != _grabbedVirus && o2 != _grabbedVirus))
+                return true;
+
+            if (_outerBodyOpen)
+                return false;
+
+            if (_outerBodyWatch.ElapsedMilliseconds > OUTER_BODY_CLOSED_TIME)
+            {
+                _outerBodyWatch.Reset();
+                _outerBodyOpen = true;
+                return false;
+            }
+            else
+                _outerBodyWatch.Start();
+
+
+            return true;
+        }
+
+        private static readonly float VIRUS_CENTER_FACTOR = 0.2f;
+        public  bool CenterBodyObjectCollision(Fixture f1, Fixture f2, Contact contact)
+        {
+            Object o1, o2;
+            o1 = f1.Body.UserData;
+            o2 = f2.Body.UserData;
+            Virus virus = null;
+
+            if (o1 is Virus)
+                virus = (Virus)o1;
+            else if (o2 is Virus)
+                virus = (Virus)o2;
+
+            if (_grabbedVirus == null || virus != null)
+                return true;
+
+            Vector2 distanceVector = f1.Body.Position - f2.Body.Position;
+
+            if (distanceVector.Length() < _bodyRadius * VIRUS_CENTER_FACTOR)
+            {
+                DroppedVirus();
+                virus.Consumed(_centerBody);
+            }
+
+            return false;
         }
 
         public override void Draw(SpriteBatch batch)
