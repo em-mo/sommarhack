@@ -367,8 +367,13 @@ namespace SommarFenomen.Objects
         {
             RemoveVirusSprings();
             _grabbedVirus = null;
-            _outerBodyOpen = false;
             _outerBodyWatch.Reset();
+
+            if (_enteringVirus != null)
+            {
+                RestoreOuterCollisions(_enteringVirus.Body);
+                _enteringVirus = null;
+            }
         }
 
         private void HandleVirusSprings()
@@ -528,7 +533,6 @@ namespace SommarFenomen.Objects
                 body.Mass = 0.4f;
                 body.LinearDamping = 1;
                 body.OnCollision += OuterBodyObjectCollision;
-                body.UserData = this;
                 _outerBodies.Add(body);
             }
 
@@ -673,6 +677,7 @@ namespace SommarFenomen.Objects
         private Stopwatch _outerBodyWatch = new Stopwatch();
         private bool _outerBodyOpen = false;
         private static readonly int OUTER_BODY_CLOSED_TIME = 100;
+        private Virus _enteringVirus;
 
         public  bool OuterBodyObjectCollision(Fixture f1, Fixture f2, Contact contact)
         {
@@ -681,17 +686,14 @@ namespace SommarFenomen.Objects
             o2 = f2.Body.UserData;
 
             // If it isn't a collision with the grabbed virus
-            if (_grabbedVirus == null || (o1 != _grabbedVirus && o2 != _grabbedVirus))
+            if (_grabbedVirus == null || o2 != _grabbedVirus)
                 return true;
-
-            if (_outerBodyOpen)
-                return false;
 
             if (_outerBodyWatch.ElapsedMilliseconds > OUTER_BODY_CLOSED_TIME)
             {
-                _outerBodyWatch.Reset();
-                _outerBodyOpen = true;
-                return false;
+                IgnoreOuterCollisions(f2.Body);
+                _enteringVirus = (Virus)o2;
+                return true;
             }
             else
                 _outerBodyWatch.Start();
@@ -700,17 +702,30 @@ namespace SommarFenomen.Objects
             return true;
         }
 
-        private static readonly float VIRUS_CENTER_FACTOR = 0.2f;
+        private void IgnoreOuterCollisions(Body ignoreBody)
+        {
+            foreach (var outerBody in _outerBodies)
+            {
+                outerBody.IgnoreCollisionWith(ignoreBody);
+            }
+        }
+
+        private void RestoreOuterCollisions(Body ignoreBody)
+        {
+            foreach (var outerBody in _outerBodies)
+            {
+                outerBody.RestoreCollisionWith(ignoreBody);
+            }
+        }
+
+        private static readonly float VIRUS_CENTER_FACTOR = 0.4f;
         public  bool CenterBodyObjectCollision(Fixture f1, Fixture f2, Contact contact)
         {
             Object o1, o2;
-            o1 = f1.Body.UserData;
             o2 = f2.Body.UserData;
             Virus virus = null;
 
-            if (o1 is Virus)
-                virus = (Virus)o1;
-            else if (o2 is Virus)
+            if (o2 is Virus)
                 virus = (Virus)o2;
 
             if (_grabbedVirus == null || virus != null)
@@ -720,7 +735,10 @@ namespace SommarFenomen.Objects
 
             if (distanceVector.Length() < _bodyRadius * VIRUS_CENTER_FACTOR)
             {
-                DroppedVirus();
+                if (_enteringVirus == virus)
+                    _enteringVirus = null;
+
+                RestoreOuterCollisions(virus.Body);
                 virus.Consumed(_centerBody);
             }
 

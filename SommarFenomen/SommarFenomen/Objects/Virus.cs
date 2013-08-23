@@ -161,10 +161,10 @@ namespace SommarFenomen.Objects
             o1 = f1.Body.UserData;
             o2 = f2.Body.UserData;
             GoodCell goodCell;
-            if (o1 is GoodCell)
-                goodCell = (GoodCell)o1;
-            else if (o2 is GoodCell)
+            if (o2 is GoodCell)
                 goodCell = (GoodCell)o2;
+            else if (o2 is GoodCell)
+                return false;
             else
                 return true;
 
