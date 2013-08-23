@@ -161,15 +161,11 @@ namespace SommarFenomen.Objects
             o1 = f1.Body.UserData;
             o2 = f2.Body.UserData;
             GoodCell goodCell;
-            if (o1 != null && o1 is GoodCell)
-            {
+            if (o1 is GoodCell)
                 goodCell = (GoodCell)o1;
-            }
-            else if (o2 != null && o2 is GoodCell)
-            {
+            else if (o2 is GoodCell)
                 goodCell = (GoodCell)o2;
-            }
-            else 
+            else
                 return true;
 
             // If cell resistance is low enough, enter the cell and go towards the center

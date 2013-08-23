@@ -308,6 +308,9 @@ namespace SommarFenomen.Objects
             AABB leftHandAABB = GetHandAABB(PlayerSprites.LeftHand);
             AABB rightHandAABB = GetHandAABB(PlayerSprites.RightHand);
 
+            if (float.IsNaN(_leftHandCenter.X))
+                return;
+
             _virusCollisionList.Clear();
             PlayWindow.World.QueryAABB(AABBCollision, ref leftHandAABB);
             List<Virus> leftHandList = new List<Virus>(_virusCollisionList);
@@ -424,8 +427,8 @@ namespace SommarFenomen.Objects
             }
 
             adjustedPosition = ConvertUnits.ToSimUnits(adjustedPosition);
-            height = ConvertUnits.ToSimUnits(height / 2);
-            width = ConvertUnits.ToSimUnits(width / 2);
+            height = ConvertUnits.ToSimUnits(height);
+            width = ConvertUnits.ToSimUnits(width);
 
             handAABB = new AABB(adjustedPosition, width, height);
 
@@ -508,6 +511,8 @@ namespace SommarFenomen.Objects
             double radianStep = Math.PI * 2 / numberOfOuterBodies;
             _centerBody.LinearDamping = 2;
             _centerBody.Mass = 0.2f;
+            _centerBody.OnCollision += CenterBodyObjectCollision;
+            _centerBody.UserData = this;
 
             for (int i = 0; i < numberOfOuterBodies; i++)
             {
@@ -522,7 +527,8 @@ namespace SommarFenomen.Objects
                 body.BodyType = BodyType.Dynamic;
                 body.Mass = 0.4f;
                 body.LinearDamping = 1;
-                body.OnCollision += ObjectCollision;
+                body.OnCollision += OuterBodyObjectCollision;
+                body.UserData = this;
                 _outerBodies.Add(body);
             }
 
