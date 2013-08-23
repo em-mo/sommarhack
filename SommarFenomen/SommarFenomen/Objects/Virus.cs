@@ -37,6 +37,7 @@ namespace SommarFenomen.Objects
         {
             Strategy.Owner = this;
             virusType = Shared.Random.Next(4);
+            virusType = 0;
             Sprite = new Sprite(_virusTexture[virusType]);
             Sprite.CenterOrigin();
             CreateBody();
@@ -104,7 +105,6 @@ namespace SommarFenomen.Objects
             Strategy = new StationaryStrategy();
             _beingConsumed = true;
             _consumingBody = centerBody;
-            Body.IgnoreCollisionWith(_consumingBody);
         }
 
         private void ChangeSize(float percentage)
@@ -163,7 +163,7 @@ namespace SommarFenomen.Objects
             GoodCell goodCell;
             if (o2 is GoodCell)
                 goodCell = (GoodCell)o2;
-            else if (o2 is GoodCell)
+            else if (o2 is PlayerCell)
                 return false;
             else
                 return true;
@@ -181,7 +181,7 @@ namespace SommarFenomen.Objects
             return true;
         }
 
-        private static readonly double FADE_OUT_TIME = 2000;
+        private static readonly double FADE_OUT_TIME = 3;
         private static readonly double FADE_STEP_TIME = FADE_OUT_TIME / 256;
         private double _fadeStepTimer = 0;
         private double _fadeOutTimer = 0;
@@ -201,6 +201,7 @@ namespace SommarFenomen.Objects
                 color.R -= 1;
                 color.G -= 1;
                 color.B -= 1;
+                _fadeStepTimer = 0;
             }
         }
 

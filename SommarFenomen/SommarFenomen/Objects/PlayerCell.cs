@@ -96,7 +96,7 @@ namespace SommarFenomen.Objects
         private void InitSprites()
         {
             const float CLOUD_SCALE = 0.6F;
-            const float ARM_SCALE = 1f;
+            const float ARM_SCALE = 1.5f;
 
             _spriteDict = new Dictionary<PlayerSprites, Sprite>();
 
@@ -371,7 +371,9 @@ namespace SommarFenomen.Objects
 
             if (_enteringVirus != null)
             {
-                RestoreOuterCollisions(_enteringVirus.Body);
+                if (_enteringVirus.Body.FixtureList != null)
+                    RestoreOuterCollisions(_enteringVirus.Body);
+
                 _enteringVirus = null;
             }
         }
@@ -533,6 +535,7 @@ namespace SommarFenomen.Objects
                 body.Mass = 0.4f;
                 body.LinearDamping = 1;
                 body.OnCollision += OuterBodyObjectCollision;
+                body.UserData = this;
                 _outerBodies.Add(body);
             }
 
@@ -718,7 +721,7 @@ namespace SommarFenomen.Objects
             }
         }
 
-        private static readonly float VIRUS_CENTER_FACTOR = 0.4f;
+        private static readonly float VIRUS_CENTER_FACTOR = 1.5f;
         public  bool CenterBodyObjectCollision(Fixture f1, Fixture f2, Contact contact)
         {
             Object o1, o2;
@@ -727,13 +730,12 @@ namespace SommarFenomen.Objects
 
             if (o2 is Virus)
                 virus = (Virus)o2;
-
-            if (_grabbedVirus == null || virus != null)
+            else
                 return true;
 
             Vector2 distanceVector = f1.Body.Position - f2.Body.Position;
 
-            if (distanceVector.Length() < _bodyRadius * VIRUS_CENTER_FACTOR)
+            if ((distanceVector.Length() < _bodyRadius * VIRUS_CENTER_FACTOR))
             {
                 if (_enteringVirus == virus)
                     _enteringVirus = null;
