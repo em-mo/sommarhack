@@ -320,21 +320,9 @@ namespace SommarFenomen.Objects
                 watch.Restart();
             }
 
-            //if (leftHandList.Count > 0)
-            //    Console.WriteLine("vanster!");
-            //if (rightHandList.Count > 0)
-            //    Console.WriteLine("hoger!");
-
             _virusCollisionList = rightHandList.Intersect(leftHandList).ToList();
 
-            if (_virusCollisionList.Count == 0)
-            {
-                if (_grabbedVirus != null)
-                {
-                    DroppedVirus();
-                }
-            }
-            else if (!_virusCollisionList.Contains(_grabbedVirus))
+            if (!_virusCollisionList.Contains(_grabbedVirus) && !(_virusCollisionList.Count == 0))
             {
                 _grabbedVirus = _virusCollisionList.First();
                 CreateVirusSprings();
@@ -349,12 +337,34 @@ namespace SommarFenomen.Objects
 
             _leftHandJoint = JointFactory.CreateFixedDistanceJoint(PlayWindow.World, _grabbedVirus.Body, Vector2.Zero, _leftHandCenter);
             _rightHandJoint = JointFactory.CreateFixedDistanceJoint(PlayWindow.World, _grabbedVirus.Body, Vector2.Zero, _rightHandCenter);
+
+            Vector2 distance = _leftHandCenter - _rightHandCenter;
+            float length = distance.Length() / 2;
+            _leftHandJoint.Length = length * 1.1f;
+            _rightHandJoint.Length = length * 1.1f;
+            _leftHandJoint.Breakpoint = _leftHandJoint.Length * 2;
+            _rightHandJoint.Breakpoint = _rightHandJoint.Length * 2;
+
+            _rightHandJoint.Frequency = 0.5f;
+            _leftHandJoint.Frequency = 0.5f;
+            _rightHandJoint.DampingRatio = 1f;
+            _leftHandJoint.DampingRatio = 1f;
+
+            _leftHandJoint.Broke += VirusSpringBroke;
+            _rightHandJoint.Broke += VirusSpringBroke;
+        }
+
+        private void VirusSpringBroke(Joint joint, float jointError)
+        {
+            DroppedVirus();
         }
 
         private void RemoveVirusSprings()
         {
             PlayWindow.World.RemoveJoint(_leftHandJoint);
             PlayWindow.World.RemoveJoint(_rightHandJoint);
+            _leftHandJoint = null;
+            _rightHandJoint = null;
         }
 
         private void DroppedVirus()
