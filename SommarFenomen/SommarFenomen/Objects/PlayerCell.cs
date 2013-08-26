@@ -73,7 +73,7 @@ namespace SommarFenomen.Objects
 
         public PlayerCell(PlayWindow playWindow, Vector2 position) : base(playWindow, new KinectStrategy(), MAX_SPEED)
         {
-            _cellTexture = Game1.contentManager.Load<Texture2D>(@"Images\Hero_Cell2");
+            InitPlayerSprite();
             _spriteDict = new Dictionary<PlayerSprites, Sprite>();
             InitSprites();
             Position = position;
@@ -93,6 +93,20 @@ namespace SommarFenomen.Objects
             SetRightArmRotation(-(float)Math.PI / 2, -(float)Math.PI / 2);
 
             _virusCollisionList = new List<Virus>();
+        }
+
+        private void InitPlayerSprite()
+        {
+            Texture2D body = Game1.contentManager.Load<Texture2D>(@"Images\Characters\Hjalte\H_body");
+            Texture2D eyes = Game1.contentManager.Load<Texture2D>(@"Images\Characters\Hjalte\H_eye_o");
+            Texture2D mouth = Game1.contentManager.Load<Texture2D>(@"Images\Characters\Hjalte\H_mouth_1");
+            
+            Vector2 offset = new Vector2(body.Width / 2, body.Height / 4);
+            _cellTexture = Utils.MergeTextures(body, eyes, offset, PlayWindow.GraphicsDevice);
+            offset.Y = body.Height * 3 / 4;
+            _cellTexture = Utils.MergeTextures(_cellTexture, mouth, offset, PlayWindow.GraphicsDevice);
+
+            _cellTexture = body;
         }
 
         private void InitSprites()

@@ -40,7 +40,7 @@ namespace SommarFenomen.Objects
 
             _basicEffect = new BasicEffect(_playWindow.GraphicsDevice);
             _basicEffect.TextureEnabled = true;
-            _basicEffect.Texture = Game1.contentManager.Load<Texture2D>(@"Images\Wall");
+            _basicEffect.Texture = Game1.contentManager.Load<Texture2D>(@"Images\Walls\Wall_1");
 
             InitDrawVertices(wallVertices, type);
         }

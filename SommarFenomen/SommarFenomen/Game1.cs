@@ -105,7 +105,13 @@ namespace SommarFenomen
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.CornflowerBlue);
+            Color color = new Color();
+
+            color.R = 120;
+            color.G = 20;
+            color.B = 20;
+
+            GraphicsDevice.Clear(color);
             _windowHandler.DrawWindowGraphics(gameTime);
             base.Draw(gameTime);
         }
