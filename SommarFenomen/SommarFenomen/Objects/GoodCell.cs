@@ -15,6 +15,10 @@ namespace SommarFenomen.Objects
     class GoodCell : ActiveGameObject
     {
         static private Texture2D _cellTexture;
+        static private List<Texture2D> _bodyTextures = new List<Texture2D>();
+        static private List<Texture2D> _mouthTextures = new List<Texture2D>();
+        static private List<Texture2D> _eyeTextures = new List<Texture2D>();
+
         private Stopwatch watch = new Stopwatch();
 
         private List<Virus> _virusList = new List<Virus>();
@@ -34,17 +38,55 @@ namespace SommarFenomen.Objects
 
         private void Init()
         {
-            Sprite = new Sprite(_cellTexture);
+            InitCellTextures();
+            Sprite = new Sprite(_happyTexture);
             Sprite.CenterOrigin();
-            Sprite.Scale = new Vector2(0.5f);
+            Sprite.Scale = new Vector2(0.14f);
             _virusResistance = 5;
             CreateBody();
             Body.LinearDamping = 1;
         }
 
+        private Texture2D _happyTexture;
+        private Texture2D _sadTexture;
+
+        private void InitCellTextures()
+        {
+            Texture2D body = _bodyTextures[Shared.Random.Next(6)];
+            Texture2D eyes = _eyeTextures[Shared.Random.Next(3)];
+            Texture2D mouth = _mouthTextures[Shared.Random.Next(3)];
+
+            _happyTexture = Utils.MergeTextures(body, eyes, PlayWindow.GraphicsDevice);
+
+            _sadTexture = Utils.MergeTextures(_happyTexture, mouth, PlayWindow.GraphicsDevice);
+            
+            _happyTexture = Utils.MergeTextures(_happyTexture, _mouthTextures.Last(), PlayWindow.GraphicsDevice);
+
+        }
+
+        /// <summary>
+        /// Fulhack, hardcoded values
+        /// </summary>
         public static void LoadContent()
         {
             _cellTexture = Game1.contentManager.Load<Texture2D>(@"Images\Good_Cell");
+            string loadString = @"Images\Characters\God\G_body_";
+            for (int i = 1; i <= 6; i++)
+            {
+                _bodyTextures.Add(Game1.contentManager.Load<Texture2D>(loadString + i));
+            }
+
+            loadString = @"Images\Characters\God\G_mouth_";
+            for (int i = 1; i <= 3; i++)
+            {
+                _mouthTextures.Add(Game1.contentManager.Load<Texture2D>(loadString + i));
+            }
+
+            loadString = @"Images\Characters\God\G_eye_";
+            for (int i = 1; i <= 3; i++)
+            {
+                _eyeTextures.Add(Game1.contentManager.Load<Texture2D>(loadString + i));
+            }
         }
 
         public override void Update(GameTime gameTime)

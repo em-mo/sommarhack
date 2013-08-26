@@ -100,13 +100,10 @@ namespace SommarFenomen.Objects
             Texture2D body = Game1.contentManager.Load<Texture2D>(@"Images\Characters\Hjalte\H_body");
             Texture2D eyes = Game1.contentManager.Load<Texture2D>(@"Images\Characters\Hjalte\H_eye_o");
             Texture2D mouth = Game1.contentManager.Load<Texture2D>(@"Images\Characters\Hjalte\H_mouth_1");
-            
-            Vector2 offset = new Vector2(body.Width / 2, body.Height / 4);
-            _cellTexture = Utils.MergeTextures(body, eyes, offset, PlayWindow.GraphicsDevice);
-            offset.Y = body.Height * 3 / 4;
-            _cellTexture = Utils.MergeTextures(_cellTexture, mouth, offset, PlayWindow.GraphicsDevice);
 
-            _cellTexture = body;
+            _cellTexture = Utils.MergeTextures(body, eyes, PlayWindow.GraphicsDevice);
+            _cellTexture = Utils.MergeTextures(_cellTexture, mouth, PlayWindow.GraphicsDevice);
+
         }
 
         private void InitSprites()
@@ -120,14 +117,7 @@ namespace SommarFenomen.Objects
             {
                 _spriteDict.Add(sprite, new Sprite());
             }
-            _windPuff = new Sprite();
 
-            _cloudTextures = new Dictionary<Direction, Texture2D>();
-            _cloudTextures.Add(Direction.None, Game1.contentManager.Load<Texture2D>(@"Images\Cloud"));
-            _cloudTextures.Add(Direction.Left, Game1.contentManager.Load<Texture2D>(@"Images\Cloud_Move_Left"));
-            _cloudTextures.Add(Direction.Right, Game1.contentManager.Load<Texture2D>(@"Images\Cloud_Move_Right"));
-
-            _windPuff.Texture = Game1.contentManager.Load<Texture2D>(@"Images\wind");
             _spriteDict[PlayerSprites.Cell].Texture = _cellTexture;
             _spriteDict[PlayerSprites.LeftHumerus].Texture = Game1.contentManager.Load<Texture2D>(@"Images\Humerus_left");
             _spriteDict[PlayerSprites.LeftHand].Texture = Game1.contentManager.Load<Texture2D>(@"Images\Hand_left");
@@ -161,7 +151,6 @@ namespace SommarFenomen.Objects
             _spriteDict[PlayerSprites.RightHand].Origin = new Vector2(0, _spriteDict[PlayerSprites.RightHand].OriginalSize.Y * 5 / 7);
             
             //Origin center
-            _windPuff.Origin = new Vector2(_windPuff.OriginalSize.X / 2, _windPuff.OriginalSize.Y / 2);
         }
 
         private void InitArms()
@@ -587,7 +576,7 @@ namespace SommarFenomen.Objects
                 joint.Frequency = frequency * 0.7f;
                 joint.CollideConnected = true;
 
-                int thirdNext = (i + 2) % numberOfOuterBodies;
+                int thirdNext = (i + 4) % numberOfOuterBodies;
 
                 joint = JointFactory.CreateDistanceJoint(PlayWindow.World, _outerBodies[i], _outerBodies[thirdNext], Vector2.Zero, Vector2.Zero);
                 joint.DampingRatio = damping;

@@ -96,7 +96,18 @@ namespace SommarFenomen
             return vector;
         }
 
+        public static Texture2D MergeTextures(Texture2D bottomTexture, Texture2D topTexture, GraphicsDevice device)
+        {
+            return MergeTextures(bottomTexture, topTexture, Vector2.Zero, Vector2.Zero, device);
+        }
+
         public static Texture2D MergeTextures(Texture2D bottomTexture, Texture2D topTexture, Vector2 offset, GraphicsDevice device)
+        {
+            Vector2 origin = new Vector2(topTexture.Width / 2, topTexture.Height / 2);
+            return MergeTextures(bottomTexture, topTexture, offset, origin, device);
+        }
+
+        public static Texture2D MergeTextures(Texture2D bottomTexture, Texture2D topTexture, Vector2 offset, Vector2 origin, GraphicsDevice device)
         {
             RenderTarget2D renderTarget = new RenderTarget2D(device, bottomTexture.Bounds.Width, bottomTexture.Bounds.Height);
             device.SetRenderTarget(renderTarget);
@@ -106,8 +117,9 @@ namespace SommarFenomen
             batch.Begin();
             batch.Draw(bottomTexture, Vector2.Zero, Color.White);
 
-            Vector2 origin = new Vector2(topTexture.Width / 2, topTexture.Height / 2);
-            batch.Draw(bottomTexture, offset - origin, Color.White);
+            Console.WriteLine("Top offset " + offset);
+            Console.WriteLine("Top origin " + origin);
+            batch.Draw(topTexture, offset - origin, Color.White);
 
             batch.End();
 
