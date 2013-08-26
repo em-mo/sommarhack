@@ -23,13 +23,12 @@ namespace SommarFenomen.Objects
 
         private Texture2D _cellTexture;
         private Dictionary<PlayerSprites, Sprite> _spriteDict;
-        private Dictionary<Direction, Texture2D> _cloudTextures;
-        private Sprite _windPuff;
+        //Eyes open in 0, eyes closed in 1
+        private Texture2D[] _happyTexture = new Texture2D[2];
+        private Texture2D[] _focusedTexture = new Texture2D[2];
+        private Texture2D[] _currentStateTexture;
 
-        private static readonly float DRAG_ACCELERATION = -150;
         private static readonly double MAX_SPEED = 500;
-        private static readonly float ARM_SCALE = 0.75f;
-        private static float DIRECTION_SPRITE_THRESHOLD = 100;
 
         private float _rightHumerusOffsetX;
         private float _rightHumerusOffsetY;
@@ -98,12 +97,22 @@ namespace SommarFenomen.Objects
         private void InitPlayerSprite()
         {
             Texture2D body = Game1.contentManager.Load<Texture2D>(@"Images\Characters\Hjalte\H_body");
-            Texture2D eyes = Game1.contentManager.Load<Texture2D>(@"Images\Characters\Hjalte\H_eye_o");
-            Texture2D mouth = Game1.contentManager.Load<Texture2D>(@"Images\Characters\Hjalte\H_mouth_1");
+            Texture2D openEyes = Game1.contentManager.Load<Texture2D>(@"Images\Characters\Hjalte\H_eye_o");
+            Texture2D closedEyes = Game1.contentManager.Load<Texture2D>(@"Images\Characters\Hjalte\H_eye_c");
+            Texture2D happyMouth = Game1.contentManager.Load<Texture2D>(@"Images\Characters\Hjalte\H_mouth_1");
+            Texture2D focusedMouth = Game1.contentManager.Load<Texture2D>(@"Images\Characters\Hjalte\H_mouth_2");
 
-            _cellTexture = Utils.MergeTextures(body, eyes, PlayWindow.GraphicsDevice);
-            _cellTexture = Utils.MergeTextures(_cellTexture, mouth, PlayWindow.GraphicsDevice);
 
+            _cellTexture = Utils.MergeTextures(body, happyMouth, PlayWindow.GraphicsDevice);
+            _happyTexture[0] = Utils.MergeTextures(_cellTexture, openEyes, PlayWindow.GraphicsDevice);
+            _happyTexture[1] = Utils.MergeTextures(_cellTexture, closedEyes, PlayWindow.GraphicsDevice);
+
+            _cellTexture = Utils.MergeTextures(body, focusedMouth, PlayWindow.GraphicsDevice);
+            _focusedTexture[0] = Utils.MergeTextures(_cellTexture, openEyes, PlayWindow.GraphicsDevice);
+            _focusedTexture[1] = Utils.MergeTextures(_cellTexture, closedEyes, PlayWindow.GraphicsDevice);
+
+            _cellTexture = _happyTexture[0];
+            _currentStateTexture = _happyTexture;
         }
 
         private void InitSprites()
@@ -287,24 +296,6 @@ namespace SommarFenomen.Objects
 
             _windPuffList.Add(new WindPuffMessage(rotation, position));
         }
-
-        private void DrawWindPuff(SpriteBatch batch)
-        {
-            WindPuffMessage puff;
-            for (int i = _windPuffList.Count - 1; i >= 0; i--)
-            {
-                puff = _windPuffList.ElementAt(i);
-
-                _windPuff.Position = puff.Position;
-                _windPuff.Rotation = puff.Direction;
-
-                GraphicsHandler.DrawSprite(_windPuff, batch);
-
-                if (puff.checkAge())
-                    _windPuffList.RemoveAt(i);
-            }
-        }
-
 
         private void HandCollisions()
         {
@@ -757,26 +748,50 @@ namespace SommarFenomen.Objects
 
             _bodyEffect.View = PlayWindow.Camera2D.View;
             _bodyEffect.Projection = PlayWindow.Camera2D.DisplayProjection;
+            _bodyEffect.Texture = _cellTexture;
 
             foreach (var pass in _bodyEffect.CurrentTechnique.Passes)
             {
                 pass.Apply();
                 graphicsDevice.DrawUserPrimitives<VertexPositionNormalTexture>(PrimitiveType.TriangleList, vertices, 0, vertices.Length / 3);
-
-
             }
 
             batch.Begin(SpriteSortMode.Deferred, null, null, null, null, null, PlayWindow.Camera2D.View);
 
-            DrawWindPuff(batch);
             foreach (Sprite sprite in _spriteDict.Values)
                 GraphicsHandler.DrawSprite(sprite, batch);
+        }
+
+        private bool blinking = false;
+        private double blinkingTimer = BLINK_COOLDOWN;
+        private static readonly double BLINK_DURATION = 0.1;
+        private static readonly double BLINK_COOLDOWN = 6;
+        private static readonly double BLINK_DIFF = 1;
+        private void HandleBlinkState(GameTime gameTime)
+        {
+            blinkingTimer -= gameTime.ElapsedGameTime.TotalSeconds;
+            if (blinkingTimer < 0)
+            {
+                if (blinking)
+                {
+                    _cellTexture = _currentStateTexture[0];
+                    double diff = Shared.Random.NextDouble() * BLINK_DIFF - BLINK_DIFF / 2;
+                    blinkingTimer += BLINK_COOLDOWN + diff;
+                    blinking = false;
+                }
+                else
+                {
+                    _cellTexture = _currentStateTexture[1];
+                    blinkingTimer += BLINK_DURATION;
+                    blinking = true;
+                }
+            }
         }
 
         public override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
-
+            
             Vector2 force = Strategy.GetAcceleration() * 0.3f;
             foreach (var item in _outerBodies)
             {
@@ -787,6 +802,7 @@ namespace SommarFenomen.Objects
 
             HandCollisions();
             HandleVirusSprings();
+            HandleBlinkState(gameTime);
         }
     }
 }
