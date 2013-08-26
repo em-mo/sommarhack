@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using Microsoft.Kinect;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace SommarFenomen
 {
@@ -93,6 +94,25 @@ namespace SommarFenomen
             vector.Y += x;
 
             return vector;
+        }
+
+        public static Texture2D MergeTextures(Texture2D bottomTexture, Texture2D topTexture, Vector2 offset, GraphicsDevice device)
+        {
+            RenderTarget2D renderTarget = new RenderTarget2D(device, bottomTexture.Bounds.Width, bottomTexture.Bounds.Height);
+            device.SetRenderTarget(renderTarget);
+            device.Clear(Color.Transparent);
+
+            SpriteBatch batch = new SpriteBatch(device);
+            batch.Begin();
+            batch.Draw(bottomTexture, Vector2.Zero, Color.White);
+
+            Vector2 origin = new Vector2(topTexture.Width / 2, topTexture.Height / 2);
+            batch.Draw(bottomTexture, offset - origin, Color.White);
+
+            batch.End();
+
+            device.SetRenderTarget(null);
+            return (Texture2D)renderTarget;
         }
     }
 }
