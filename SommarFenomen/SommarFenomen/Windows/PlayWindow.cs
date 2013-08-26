@@ -52,7 +52,7 @@ namespace SommarFenomen
         Stopwatch mouseWatch = new Stopwatch();
 
         // Chooses algorithm for hand movement
-        private bool _movementType = true;
+        private bool _movementType = false;
 
         private PlayerCell _player;
 

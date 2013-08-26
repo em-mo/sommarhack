@@ -339,14 +339,14 @@ namespace SommarFenomen.Objects
             _rightHandJoint = JointFactory.CreateFixedDistanceJoint(PlayWindow.World, _grabbedVirus.Body, Vector2.Zero, _rightHandCenter);
 
             Vector2 distance = _leftHandCenter - _rightHandCenter;
-            float length = distance.Length() / 2;
+            float length = distance.Length() / 4;
             _leftHandJoint.Length = length * 1.1f;
             _rightHandJoint.Length = length * 1.1f;
-            _leftHandJoint.Breakpoint = _leftHandJoint.Length * 2;
-            _rightHandJoint.Breakpoint = _rightHandJoint.Length * 2;
+            //_leftHandJoint.Breakpoint = _leftHandJoint.Length * 2;
+            //_rightHandJoint.Breakpoint = _rightHandJoint.Length * 2;
 
-            _rightHandJoint.Frequency = 0.5f;
-            _leftHandJoint.Frequency = 0.5f;
+            _rightHandJoint.Frequency = 2.1f;
+            _leftHandJoint.Frequency = 2.1f;
             _rightHandJoint.DampingRatio = 1f;
             _leftHandJoint.DampingRatio = 1f;
 
@@ -356,6 +356,11 @@ namespace SommarFenomen.Objects
 
         private void VirusSpringBroke(Joint joint, float jointError)
         {
+            //if (joint == _leftHandJoint)
+            //    PlayWindow.World.RemoveJoint(_rightHandJoint);
+            //else
+            //    PlayWindow.World.RemoveJoint(_leftHandJoint);
+                
             DroppedVirus();
         }
 
@@ -369,7 +374,6 @@ namespace SommarFenomen.Objects
 
         private void DroppedVirus()
         {
-            RemoveVirusSprings();
             _grabbedVirus = null;
             _outerBodyWatch.Reset();
 
@@ -538,7 +542,6 @@ namespace SommarFenomen.Objects
                 body.Mass = 0.4f;
                 body.LinearDamping = 1;
                 body.OnCollision += OuterBodyObjectCollision;
-                body.UserData = this;
                 _outerBodies.Add(body);
             }
 
@@ -680,6 +683,22 @@ namespace SommarFenomen.Objects
             return true;
         }
 
+        private void IgnoreOuterCollisions(Body ignoreBody)
+        {
+            foreach (var outerBody in _outerBodies)
+            {
+                outerBody.IgnoreCollisionWith(ignoreBody);
+            }
+        }
+
+        private void RestoreOuterCollisions(Body ignoreBody)
+        {
+            foreach (var outerBody in _outerBodies)
+            {
+                outerBody.RestoreCollisionWith(ignoreBody);
+            }
+        }
+
         private Stopwatch _outerBodyWatch = new Stopwatch();
         private static readonly int OUTER_BODY_CLOSED_TIME = 100;
         private Virus _enteringVirus;
@@ -707,26 +726,12 @@ namespace SommarFenomen.Objects
             return true;
         }
 
-        private void IgnoreOuterCollisions(Body ignoreBody)
-        {
-            foreach (var outerBody in _outerBodies)
-            {
-                outerBody.IgnoreCollisionWith(ignoreBody);
-            }
-        }
 
-        private void RestoreOuterCollisions(Body ignoreBody)
-        {
-            foreach (var outerBody in _outerBodies)
-            {
-                outerBody.RestoreCollisionWith(ignoreBody);
-            }
-        }
 
         private static readonly float VIRUS_CENTER_FACTOR = 0.5f;
         public  bool CenterBodyObjectCollision(Fixture f1, Fixture f2, Contact contact)
         {
-            Object o1, o2;
+            Object o2;
             o2 = f2.Body.UserData;
             Virus virus = null;
 
@@ -741,6 +746,13 @@ namespace SommarFenomen.Objects
             {
                 if (_enteringVirus == virus)
                     _enteringVirus = null;
+
+                if (_grabbedVirus == virus)
+                {
+                    RemoveVirusSprings();
+                    _grabbedVirus = null;
+                    _outerBodyWatch.Reset();
+                }
 
                 RestoreOuterCollisions(virus.Body);
                 virus.Consumed(_centerBody);

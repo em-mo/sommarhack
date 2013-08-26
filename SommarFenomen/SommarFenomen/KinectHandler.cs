@@ -196,10 +196,10 @@ namespace SommarFenomen
         private class HandChecker
         {
             private const float FORCE_FACTOR = 50;
-            private const float ALTERNATE_FORCE = 600;
+            private const float ALTERNATE_FORCE = 1000;
             private const int BUFFER_LENGTH = 6;
-            private readonly int START_POINT_OFFSET = BUFFER_LENGTH / 2;
-            private const float MOVEMENT_THRESHOLD = 0.3f;
+            private readonly int START_POINT_OFFSET = 1;
+            private const float MOVEMENT_THRESHOLD = 0.1f;
 
             private Arm arm;
             private JointType joint;
@@ -256,8 +256,8 @@ namespace SommarFenomen
 
             public Vector2 AlternateCheckHand(Skeleton currentSkeleton)
             {
-                const int START = 2;
-                const float ALTERNATE_THRESHOLD = 0.08f;
+                const int START = 1;
+                const float ALTERNATE_THRESHOLD = 0.03f * 0.03f;
                 Vector2 force = Vector2.Zero;
 
                 // Add new element to array                
@@ -282,6 +282,11 @@ namespace SommarFenomen
                 }
                 //Average
                 diffVector /= START;
+
+                //Square it
+                diffVector.X *= (diffVector.X < 0) ? -diffVector.X : diffVector.X;
+                diffVector.Y *= (diffVector.Y < 0) ? -diffVector.Y : diffVector.Y;
+
                 // Check thresholds for X and Y
                 if (diffVector.X < -ALTERNATE_THRESHOLD)
                     force.X = -ALTERNATE_FORCE * diffVector.X;
