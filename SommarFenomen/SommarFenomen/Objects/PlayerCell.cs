@@ -79,7 +79,9 @@ namespace SommarFenomen.Objects
             Position = position;
             _spriteDict[PlayerSprites.Cell].Position = Position;
             InitArms();
-            CreateSoftBody(30, 70, 6f, 1, 0.5f, 3.0f);
+
+            _bodyRadius = 70;
+            CreateSoftBody(30, _bodyRadius, 6f, 1, 0.5f, 3.0f);
 
             _bodyEffect = new BasicEffect(playWindow.GraphicsDevice);
             //_bodyEffect.EnableDefaultLighting();
@@ -322,8 +324,6 @@ namespace SommarFenomen.Objects
             if (watch.ElapsedMilliseconds > 1000)
             {
                 watch.Restart();
-                Console.WriteLine("left " + leftHandList.Count);
-                Console.WriteLine("right " + rightHandList.Count);
             }
 
             //if (leftHandList.Count > 0)
@@ -510,7 +510,6 @@ namespace SommarFenomen.Objects
         {
             innerDistance = ConvertUnits.ToSimUnits(innerDistance);
             radius = ConvertUnits.ToSimUnits(radius);
-            _bodyRadius = radius;
             _outerBodies = new List<Body>();
             _centerBody = BodyFactory.CreateCircle(PlayWindow.World, radius * 5, density);
             _centerBody.Position = ConvertUnits.ToSimUnits(Position);
@@ -583,7 +582,7 @@ namespace SommarFenomen.Objects
             }
             Body = _centerBody;
         }
-
+        #region softbodyvertices
         private VertexPositionNormalTexture[] getSoftBodyVertices()
         {
             VertexPositionNormalTexture[] vertices = new VertexPositionNormalTexture[_outerBodies.Count * 3];
@@ -671,14 +670,13 @@ namespace SommarFenomen.Objects
 
             return vertices;
         }
-
+#endregion
         public override bool ObjectCollision(Fixture f1, Fixture f2, Contact contact)
         {
             return true;
         }
 
         private Stopwatch _outerBodyWatch = new Stopwatch();
-        private bool _outerBodyOpen = false;
         private static readonly int OUTER_BODY_CLOSED_TIME = 100;
         private Virus _enteringVirus;
 
@@ -721,7 +719,7 @@ namespace SommarFenomen.Objects
             }
         }
 
-        private static readonly float VIRUS_CENTER_FACTOR = 1.5f;
+        private static readonly float VIRUS_CENTER_FACTOR = 0.5f;
         public  bool CenterBodyObjectCollision(Fixture f1, Fixture f2, Contact contact)
         {
             Object o1, o2;
@@ -735,7 +733,7 @@ namespace SommarFenomen.Objects
 
             Vector2 distanceVector = f1.Body.Position - f2.Body.Position;
 
-            if ((distanceVector.Length() < _bodyRadius * VIRUS_CENTER_FACTOR))
+            if ((distanceVector.Length() < ConvertUnits.ToSimUnits(_bodyRadius) * VIRUS_CENTER_FACTOR))
             {
                 if (_enteringVirus == virus)
                     _enteringVirus = null;

@@ -105,6 +105,7 @@ namespace SommarFenomen.Objects
             Strategy = new StationaryStrategy();
             _beingConsumed = true;
             _consumingBody = centerBody;
+            Console.WriteLine("Eating");
         }
 
         private void ChangeSize(float percentage)
@@ -194,18 +195,19 @@ namespace SommarFenomen.Objects
             {
                 PlayWindow.RemoveVirus(this);
             }
-            if (_fadeStepTimer > FADE_STEP_TIME)
+            while (_fadeStepTimer > FADE_STEP_TIME)
             {
                 Color color = Sprite.Color;
                 color.A -= 1;
                 color.R -= 1;
                 color.G -= 1;
                 color.B -= 1;
-                _fadeStepTimer = 0;
+                Sprite.Color = color;
+                _fadeStepTimer -= FADE_STEP_TIME;
             }
         }
 
-        private static readonly double SHRINK_TIME = 0.01;
+        private static readonly double SHRINK_TIME = 0.015;
         private static readonly double EXPLODE_TIME = 2;
         private static readonly float SHRINK_PERCENTAGE = 0.99f;
         private double _shrinkTimer = 0;
@@ -216,12 +218,12 @@ namespace SommarFenomen.Objects
             {
                 _shrinkTimer += gameTime.ElapsedGameTime.TotalSeconds;
                 _explodeTimer += gameTime.ElapsedGameTime.TotalSeconds;
-                if (_shrinkTimer > SHRINK_TIME)
+                while (_shrinkTimer > SHRINK_TIME)
                 {
                     ChangeSize(SHRINK_PERCENTAGE);
                     Body.IgnoreCollisionWith(_targetCell.Body);
                     Body.Mass = 2;
-                    _shrinkTimer = 0;
+                    _shrinkTimer -= SHRINK_TIME;
                 }
 
                 if (_explodeTimer > EXPLODE_TIME)
