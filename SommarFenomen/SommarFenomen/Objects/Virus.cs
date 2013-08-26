@@ -113,7 +113,7 @@ namespace SommarFenomen.Objects
             switch (_virusType)
             {
                 case 0:
-                    FixtureFactory.AttachCircle(ConvertUnits.ToSimUnits(_virusTextures[_virusType].Width / 2), 1, Body);
+                    FixtureFactory.AttachCircle(ConvertUnits.ToSimUnits(Sprite.ScaledSize.X / 2), 1, Body);
                     break;
                 case 1:
                     FixtureFactory.AttachCircle(ConvertUnits.ToSimUnits(_virusTextures[_virusType].Width / 2), 1, Body);
@@ -141,7 +141,7 @@ namespace SommarFenomen.Objects
             Strategy = new StationaryStrategy();
             _beingConsumed = true;
             _consumingBody = centerBody;
-            Console.WriteLine("Eating");
+            Body.Mass = 1;
         }
 
         private void ChangeSize(float percentage)
@@ -218,7 +218,7 @@ namespace SommarFenomen.Objects
             return true;
         }
 
-        private static readonly double FADE_OUT_TIME = 3;
+        private static readonly double FADE_OUT_TIME = 6;
         private static readonly double FADE_STEP_TIME = FADE_OUT_TIME / 256;
         private double _fadeStepTimer = 0;
         private double _fadeOutTimer = 0;

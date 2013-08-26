@@ -272,31 +272,6 @@ namespace SommarFenomen.Objects
             }
         }
 
-        /// <summary>
-        /// Adds windpuff at selected hand rotated after the direction parameter
-        /// </summary>
-        /// <param name="rotation">The rotation of the puff in radians</param>
-        /// <param name="arm">Arm target for wind puff</param>
-        public void AddWindPuff(float rotation, Arm arm)
-        {
-            Sprite hand;
-            float offset;
-            if (arm == Arm.Left)
-            {
-                hand = _spriteDict[PlayerSprites.LeftHand];
-                offset = -hand.OriginalSize.X;
-            }
-            else
-            {
-                hand = _spriteDict[PlayerSprites.RightHand];
-                offset = hand.OriginalSize.X;
-            }
-
-            Vector2 position = new Vector2(hand.Position.X + offset, hand.Position.Y);
-
-            _windPuffList.Add(new WindPuffMessage(rotation, position));
-        }
-
         private void HandCollisions()
         {
             watch.Start();
@@ -339,16 +314,14 @@ namespace SommarFenomen.Objects
             _rightHandJoint = JointFactory.CreateFixedDistanceJoint(PlayWindow.World, _grabbedVirus.Body, Vector2.Zero, _rightHandCenter);
 
             Vector2 distance = _leftHandCenter - _rightHandCenter;
-            float length = distance.Length() / 4;
-            _leftHandJoint.Length = length * 1.1f;
-            _rightHandJoint.Length = length * 1.1f;
-            //_leftHandJoint.Breakpoint = _leftHandJoint.Length * 2;
-            //_rightHandJoint.Breakpoint = _rightHandJoint.Length * 2;
+            float length = distance.Length() / 16;
+            _leftHandJoint.Length = length;
+            _rightHandJoint.Length = length;
 
-            _rightHandJoint.Frequency = 2.1f;
-            _leftHandJoint.Frequency = 2.1f;
-            _rightHandJoint.DampingRatio = 1f;
-            _leftHandJoint.DampingRatio = 1f;
+            _rightHandJoint.Frequency = 5.0f;
+            _leftHandJoint.Frequency = 5.0f;
+            _rightHandJoint.DampingRatio = 1.5f;
+            _leftHandJoint.DampingRatio = 1.5f;
 
             _leftHandJoint.Broke += VirusSpringBroke;
             _rightHandJoint.Broke += VirusSpringBroke;
@@ -386,12 +359,20 @@ namespace SommarFenomen.Objects
             }
         }
 
+        private static readonly float BREAKING_POINT = 1.0f * 1.0f;
         private void HandleVirusSprings()
         {
             if (_grabbedVirus != null)
             {
                 _leftHandJoint.WorldAnchorB = _leftHandCenter;
                 _rightHandJoint.WorldAnchorB = _rightHandCenter;
+
+                if ((_leftHandJoint.WorldAnchorA - _leftHandJoint.WorldAnchorB).LengthSquared() > BREAKING_POINT &&
+                    (_rightHandJoint.WorldAnchorA - _rightHandJoint.WorldAnchorB).LengthSquared() > BREAKING_POINT)
+                {
+                    RemoveVirusSprings();
+                    DroppedVirus();
+                }
             }
         }
 
