@@ -84,8 +84,20 @@ namespace SommarFenomen
             //TestInit();
             LoadLevel(@"levels\smalltest");
 
+            Camera2D.Position = _player.Position;
+            Camera2D.Jump2Target();
             Camera2D.EnableTracking = true;
             Camera2D.TrackingBody = _player.Body;
+            Camera2D.Zoom = 0.75f;
+        }
+
+        public void OnChange()
+        {
+            LoadLevel(@"levels\smalltest");
+            Camera2D.ResetCamera();
+            Camera2D.EnableTracking = true;
+            Camera2D.TrackingBody = _player.Body;
+            Camera2D.Zoom = 0.75f;
         }
 
         private void TestInit()
@@ -127,6 +139,7 @@ namespace SommarFenomen
         private void LoadLevel(String file)
         {
             World.Clear();
+            GoodCellList.Clear();
 
             _level = _levelParser.Parse(Game1.contentManager.Load<Texture2D>(file));
             _wallList = _level.GetWalls();

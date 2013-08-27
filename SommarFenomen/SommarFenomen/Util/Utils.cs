@@ -117,8 +117,6 @@ namespace SommarFenomen
             batch.Begin();
             batch.Draw(bottomTexture, Vector2.Zero, Color.White);
 
-            Console.WriteLine("Top offset " + offset);
-            Console.WriteLine("Top origin " + origin);
             batch.Draw(topTexture, offset - origin, Color.White);
 
             batch.End();

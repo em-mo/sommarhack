@@ -50,8 +50,7 @@ namespace SommarFenomen.Objects
 
         private Virus _grabbedVirus;
 
-        private FixedDistanceJoint _leftHandJoint;
-        private FixedDistanceJoint _rightHandJoint;
+
 
         //To avoid calculating twice
         private Vector2 _leftHandCenter;
@@ -303,7 +302,8 @@ namespace SommarFenomen.Objects
                 CreateVirusSprings();
             }
         }
-
+        private FixedDistanceJoint _leftHandJoint;
+        private FixedDistanceJoint _rightHandJoint;
 
         private void CreateVirusSprings()
         {
@@ -322,19 +322,6 @@ namespace SommarFenomen.Objects
             _leftHandJoint.Frequency = 5.0f;
             _rightHandJoint.DampingRatio = 1.5f;
             _leftHandJoint.DampingRatio = 1.5f;
-
-            _leftHandJoint.Broke += VirusSpringBroke;
-            _rightHandJoint.Broke += VirusSpringBroke;
-        }
-
-        private void VirusSpringBroke(Joint joint, float jointError)
-        {
-            //if (joint == _leftHandJoint)
-            //    PlayWindow.World.RemoveJoint(_rightHandJoint);
-            //else
-            //    PlayWindow.World.RemoveJoint(_leftHandJoint);
-                
-            DroppedVirus();
         }
 
         private void RemoveVirusSprings()
@@ -429,6 +416,32 @@ namespace SommarFenomen.Objects
             handAABB = new AABB(adjustedPosition, width, height);
 
             return handAABB;
+        }
+
+        private bool blinking = false;
+        private double blinkingTimer = BLINK_COOLDOWN;
+        private static readonly double BLINK_DURATION = 0.1;
+        private static readonly double BLINK_COOLDOWN = 6;
+        private static readonly double BLINK_DIFF = 1;
+        private void HandleBlinkState(GameTime gameTime)
+        {
+            blinkingTimer -= gameTime.ElapsedGameTime.TotalSeconds;
+            if (blinkingTimer < 0)
+            {
+                if (blinking)
+                {
+                    _cellTexture = _currentStateTexture[0];
+                    double diff = Shared.Random.NextDouble() * BLINK_DIFF - BLINK_DIFF / 2;
+                    blinkingTimer += BLINK_COOLDOWN + diff;
+                    blinking = false;
+                }
+                else
+                {
+                    _cellTexture = _currentStateTexture[1];
+                    blinkingTimer += BLINK_DURATION;
+                    blinking = true;
+                }
+            }
         }
 
         /// <summary>
@@ -763,32 +776,6 @@ namespace SommarFenomen.Objects
 
             foreach (Sprite sprite in _spriteDict.Values)
                 GraphicsHandler.DrawSprite(sprite, batch);
-        }
-
-        private bool blinking = false;
-        private double blinkingTimer = BLINK_COOLDOWN;
-        private static readonly double BLINK_DURATION = 0.1;
-        private static readonly double BLINK_COOLDOWN = 6;
-        private static readonly double BLINK_DIFF = 1;
-        private void HandleBlinkState(GameTime gameTime)
-        {
-            blinkingTimer -= gameTime.ElapsedGameTime.TotalSeconds;
-            if (blinkingTimer < 0)
-            {
-                if (blinking)
-                {
-                    _cellTexture = _currentStateTexture[0];
-                    double diff = Shared.Random.NextDouble() * BLINK_DIFF - BLINK_DIFF / 2;
-                    blinkingTimer += BLINK_COOLDOWN + diff;
-                    blinking = false;
-                }
-                else
-                {
-                    _cellTexture = _currentStateTexture[1];
-                    blinkingTimer += BLINK_DURATION;
-                    blinking = true;
-                }
-            }
         }
 
         public override void Update(GameTime gameTime)

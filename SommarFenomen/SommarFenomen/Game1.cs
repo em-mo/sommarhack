@@ -11,13 +11,14 @@ using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
 using System.Diagnostics;
 using SommarFenomen.Util;
+using SommarFenomen.Windows;
 
 namespace SommarFenomen
 {
     /// <summary>
     /// This is the main type for your game
     /// </summary>
-    public class Game1 : Microsoft.Xna.Framework.Game
+    class Game1 : Microsoft.Xna.Framework.Game
     {
         public static GraphicsDeviceManager graphics;
         public static ContentManager contentManager;
@@ -25,7 +26,7 @@ namespace SommarFenomen
         private SpriteBatch _spriteBatch;
         private WindowHandler _windowHandler;
         private Thread _kinectThread;
-        private KinectHandler _kinectHandler;
+        public KinectHandler KinectHandler { get; set; }
 
         private const float FPS = 60;
 
@@ -67,12 +68,24 @@ namespace SommarFenomen
             PlayWindow.LoadContent();
             PlayWindow playWindow = new PlayWindow(_windowHandler);
             playWindow.Initialize();
-            _windowHandler.ChangeWindow(playWindow);
 
-            _kinectHandler = new KinectHandler(playWindow);
-            _kinectThread = new Thread(() => _kinectHandler.run());
+
+
+            KinectHandler = new KinectHandler(playWindow);
+            _kinectThread = new Thread(() => KinectHandler.run());
             _kinectThread.IsBackground = true;
             _kinectThread.Start();
+
+            WaitingWindow waitingWindow = new WaitingWindow(_windowHandler);
+            waitingWindow.Initialize();
+            LevelSelectWindow levelSelectWindow = new LevelSelectWindow(_windowHandler);
+            levelSelectWindow.Initialize();
+
+            _windowHandler.PlayWindow = playWindow;
+            _windowHandler.LevelSelectWindow = levelSelectWindow;
+            _windowHandler.WaitingWindow = waitingWindow;
+
+            _windowHandler.ChangeWindow(waitingWindow);
         }
 
         /// <summary>
@@ -135,5 +148,6 @@ namespace SommarFenomen
     static class Shared
     {
         public static readonly Random Random = new Random();
+
     }
 }

@@ -18,6 +18,9 @@ namespace SommarFenomen
         
         Skeleton currentSkeleton;
 
+        Stopwatch startDelayTimer = new Stopwatch();
+        private static readonly double START_DELAY = 0.5;
+
         HandChecker leftHandChecker;
         HandChecker rightHandChecker;
 
@@ -75,6 +78,11 @@ namespace SommarFenomen
             }
         }
 
+        private enum KinectStates
+        {
+            IDLE, WAITING, RUNNING
+        }
+        private KinectStates currentState = KinectStates.RUNNING;
         private void ProcessSkeletonFrame()
         {
             Skeleton[] skeletons = new Skeleton[0];
@@ -93,9 +101,20 @@ namespace SommarFenomen
 
             if (currentSkeleton != null && currentSkeleton.TrackingState != SkeletonTrackingState.NotTracked)
             {
-                HandleArmAngles();
+                if (currentState == KinectStates.IDLE)
+                {
 
-                HandleSwipes();
+                }
+                else if (currentState == KinectStates.WAITING)
+                {
+                }
+                else
+                {
+                    HandleArmAngles();
+
+                    if (startDelayTimer.Elapsed.TotalSeconds > START_DELAY)
+                        HandleSwipes();
+                }
             }
         }
 
@@ -127,10 +146,11 @@ namespace SommarFenomen
 
                 if (closestID > 0)
                 {
-                    if (currentSkeleton != null && currentSkeleton.TrackingId != closestSkeleton.TrackingId)
+                    if (currentSkeleton == null || currentSkeleton.TrackingId != closestSkeleton.TrackingId)
                     {
-                        leftHandChecker.Initialize(currentSkeleton);
-                        rightHandChecker.Initialize(currentSkeleton);
+                        startDelayTimer.Restart();
+                        leftHandChecker.Initialize(closestSkeleton);
+                        rightHandChecker.Initialize(closestSkeleton);
                     }
                     this.currentSkeleton = closestSkeleton;
                     this.sensor.SkeletonStream.ChooseSkeletons(closestID); // Track this skeleton
@@ -304,158 +324,9 @@ namespace SommarFenomen
             }
         }
 
-        #region regndans
-        private bool inRegndans = false;
-        private bool regndansHasFailed = false;
-        private float armsToHeadDiff = 0;
-        private Stopwatch armsEdgeStopwatch = new Stopwatch();
-        private Stopwatch armsMidStopwatch = new Stopwatch();
-        private Stopwatch startUpDelayStopwatch = new Stopwatch();
-
-        private const int START_UP_DELAY = 700;
-        private const float ARM_TO_HIP_THRESHOLD = 0.4f;
-        private const float HANDS_TOGETHER = 0.55f;
-        private const int EDGE_TIME = 1700;
-        private const int MID_TIME = 1100;
-        /// <summary>
-        /// Checks for arms over head and movement of arms side to side, if yes then rain!
-        /// 
-        /// Waits until the hands are above a point between the head and shoulders then checks for movement.
-        /// Uses timers in two different states to find movement, either hands to the side or hands in the mid.
-        /// If the timers expire, the hands must be brought down to restart the regndans.
-        /// 
-        /// </summary>
-        private bool CheckRegndans()
+        public bool HasSkeleton()
         {
-            var headPositionY = currentSkeleton.Joints[JointType.ShoulderCenter].Position.Y +
-                               (currentSkeleton.Joints[JointType.Head].Position.Y -
-                                currentSkeleton.Joints[JointType.ShoulderCenter].Position.Y) * 0.5;
-            // Hands over head
-            if (currentSkeleton.Joints[JointType.HandRight].Position.Y > headPositionY &&
-                currentSkeleton.Joints[JointType.HandLeft].Position.Y > headPositionY &&
-                currentSkeleton.Joints[JointType.HandRight].Position.X - currentSkeleton.Joints[JointType.HandLeft].Position.X < HANDS_TOGETHER)
-            {
-                armsToHeadDiff = calculateArmsToHipDifferens();
-
-                if (inRegndans)
-                {
-                    // Arms entering edge
-                    if (Math.Abs(armsToHeadDiff) > ARM_TO_HIP_THRESHOLD && armsEdgeStopwatch.IsRunning == false)
-                    {
-                        armsMidStopwatch.Stop();
-                        armsMidStopwatch.Reset();
-
-                        armsEdgeStopwatch.Start();
-                    }
-                    // Arms leaving edge
-                    else if (Math.Abs(armsToHeadDiff) < ARM_TO_HIP_THRESHOLD && armsEdgeStopwatch.IsRunning == true)
-                    {
-                        armsEdgeStopwatch.Stop();
-                        armsEdgeStopwatch.Reset();
-
-                        armsMidStopwatch.Start();
-                    }
-                    // Arms at edge
-                    else if (armsEdgeStopwatch.IsRunning)
-                    {
-                        if (armsEdgeStopwatch.ElapsedMilliseconds > EDGE_TIME)
-                        {
-                            StopRegndans();
-                            regndansHasFailed = true;
-                            System.Console.WriteLine("edge");
-                        }
-                    }
-                    // Arms in middle
-                    else if (armsMidStopwatch.IsRunning == true)
-                    {
-                        if (armsMidStopwatch.ElapsedMilliseconds > MID_TIME)
-                        {
-                            StopRegndans();
-                            regndansHasFailed = true;
-                            System.Console.WriteLine("Mid");
-                        }
-                    }
-                }
-                // Hands in mid before regndans
-                // Start after a delay
-                else if (Math.Abs(armsToHeadDiff) < ARM_TO_HIP_THRESHOLD && !regndansHasFailed)
-                {
-                    if (startUpDelayStopwatch.IsRunning == false)
-                        startUpDelayStopwatch.Start();
-
-                    if (startUpDelayStopwatch.ElapsedMilliseconds > START_UP_DELAY)
-                    {
-                        startUpDelayStopwatch.Stop();
-                        startUpDelayStopwatch.Reset();
-                        StartRegndans();
-                    }
-                }
-                else
-                {
-                    if (startUpDelayStopwatch.IsRunning)
-                    {
-                        startUpDelayStopwatch.Stop();
-                        startUpDelayStopwatch.Reset();
-                    }
-                }
-            }
-                //Hands down or apart
-            else
-            {
-                StopRegndans();
-                regndansHasFailed = false;
-            }
-            return inRegndans;
+            return currentSkeleton != null;
         }
-
-        private void StopRegndans()
-        {
-            if (armsEdgeStopwatch.IsRunning)
-            {
-                armsEdgeStopwatch.Stop();
-                armsEdgeStopwatch.Reset();
-            }
-
-            if (armsMidStopwatch.IsRunning)
-            {
-                armsMidStopwatch.Stop();
-                armsMidStopwatch.Reset();
-            }
-
-            if (startUpDelayStopwatch.IsRunning)
-            {
-                startUpDelayStopwatch.Stop();
-                startUpDelayStopwatch.Reset();
-            }
-
-            inRegndans = false;
-        }
-
-        private void StartRegndans()
-        {
-            armsEdgeStopwatch.Start();
-            inRegndans = true;
-        }
-
-        private const float EXPECTED_NOISE = 0.015f;
-        private const int ARMS_MOVEMENT_RESET_THRESHOLD = 2;
-        private int armsMovementResetCounter = 0;
-
-        /// <summary>
-        /// Produces a float depending on the hands position relative to the head.
-        /// </summary>
-        /// <returns></returns>
-        private float calculateArmsToHipDifferens()
-        {
-            float leftHandDifferens;
-            float rightHandDifferens;
-
-            leftHandDifferens = currentSkeleton.Joints[JointType.HandLeft].Position.X - currentSkeleton.Joints[JointType.HipCenter].Position.X;
-            rightHandDifferens = currentSkeleton.Joints[JointType.HandRight].Position.X - currentSkeleton.Joints[JointType.HipCenter].Position.X;
-
-            return leftHandDifferens + rightHandDifferens;
-
-        }
-        #endregion
     }
 }

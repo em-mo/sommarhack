@@ -4,12 +4,17 @@ using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
+using SommarFenomen.Windows;
 
 namespace SommarFenomen
 {
 
     class WindowHandler
     {
+        public PlayWindow PlayWindow { get; set; }
+        public WaitingWindow WaitingWindow { get; set; }
+        public LevelSelectWindow LevelSelectWindow { get; set; }
+
         private Window _currentWindow;
         public Game1 Game { get; set; }
 
