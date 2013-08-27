@@ -302,35 +302,6 @@ namespace SommarFenomen.Objects
                 CreateVirusSprings();
             }
         }
-        private FixedDistanceJoint _leftHandJoint;
-        private FixedDistanceJoint _rightHandJoint;
-
-        private void CreateVirusSprings()
-        {
-            if (_leftHandJoint != null && _rightHandJoint != null)
-                RemoveVirusSprings();
-
-            _leftHandJoint = JointFactory.CreateFixedDistanceJoint(PlayWindow.World, _grabbedVirus.Body, Vector2.Zero, _leftHandCenter);
-            _rightHandJoint = JointFactory.CreateFixedDistanceJoint(PlayWindow.World, _grabbedVirus.Body, Vector2.Zero, _rightHandCenter);
-
-            Vector2 distance = _leftHandCenter - _rightHandCenter;
-            float length = distance.Length() / 16;
-            _leftHandJoint.Length = length;
-            _rightHandJoint.Length = length;
-
-            _rightHandJoint.Frequency = 5.0f;
-            _leftHandJoint.Frequency = 5.0f;
-            _rightHandJoint.DampingRatio = 1.5f;
-            _leftHandJoint.DampingRatio = 1.5f;
-        }
-
-        private void RemoveVirusSprings()
-        {
-            PlayWindow.World.RemoveJoint(_leftHandJoint);
-            PlayWindow.World.RemoveJoint(_rightHandJoint);
-            _leftHandJoint = null;
-            _rightHandJoint = null;
-        }
 
         private void DroppedVirus()
         {
@@ -346,16 +317,66 @@ namespace SommarFenomen.Objects
             }
         }
 
+        private FixedDistanceJoint[] _leftHandJoint = new FixedDistanceJoint[2];
+        private FixedDistanceJoint[] _rightHandJoint = new FixedDistanceJoint[2];
+        private FixedDistanceJoint[] _allJoints = new FixedDistanceJoint[4];
+        private static readonly Vector2 UP = new Vector2(0f, -0.1f);
+        private static readonly Vector2 DOWN = new Vector2(0f, 0.1f);
+        private void CreateVirusSprings()
+        {
+            if (_allJoints[0] != null)
+                RemoveVirusSprings();
+
+            _leftHandJoint[0] = JointFactory.CreateFixedDistanceJoint(PlayWindow.World, _grabbedVirus.Body, Vector2.Zero, _leftHandCenter + UP);
+            _leftHandJoint[1] = JointFactory.CreateFixedDistanceJoint(PlayWindow.World, _grabbedVirus.Body, Vector2.Zero, _leftHandCenter + DOWN);
+            _rightHandJoint[0] = JointFactory.CreateFixedDistanceJoint(PlayWindow.World, _grabbedVirus.Body, Vector2.Zero, _rightHandCenter + UP);
+            _rightHandJoint[1] = JointFactory.CreateFixedDistanceJoint(PlayWindow.World, _grabbedVirus.Body, Vector2.Zero, _rightHandCenter + DOWN);
+
+            _allJoints[0] = _leftHandJoint[0];
+            _allJoints[1] = _leftHandJoint[1];
+            _allJoints[2] = _rightHandJoint[0];
+            _allJoints[3] = _rightHandJoint[1];
+
+            Vector2 distance = _leftHandCenter - _rightHandCenter;
+            float length = distance.Length() / 16;
+
+            foreach (var joint in _allJoints)
+            {
+                joint.Length = length;
+                joint.Frequency = 10.0f;
+                joint.DampingRatio = 1.5f;
+            }
+
+        }
+
+        private void RemoveVirusSprings()
+        {
+            for (int i = 0; i < 4; i++)
+            {
+                PlayWindow.World.RemoveJoint(_allJoints[i]);
+                _allJoints[i] = null;
+            }
+        }
+
         private static readonly float BREAKING_POINT = 1.0f * 1.0f;
         private void HandleVirusSprings()
         {
             if (_grabbedVirus != null)
             {
-                _leftHandJoint.WorldAnchorB = _leftHandCenter;
-                _rightHandJoint.WorldAnchorB = _rightHandCenter;
+                _leftHandJoint[0].WorldAnchorB = _leftHandCenter + UP;
+                _leftHandJoint[1].WorldAnchorB = _leftHandCenter + DOWN;
 
-                if ((_leftHandJoint.WorldAnchorA - _leftHandJoint.WorldAnchorB).LengthSquared() > BREAKING_POINT &&
-                    (_rightHandJoint.WorldAnchorA - _rightHandJoint.WorldAnchorB).LengthSquared() > BREAKING_POINT)
+                _rightHandJoint[0].WorldAnchorB = _rightHandCenter + UP;
+                _rightHandJoint[1].WorldAnchorB = _rightHandCenter + DOWN;
+                bool broken = false;
+
+                foreach (var joint in _allJoints)
+                {
+                    if ((joint.WorldAnchorA - joint.WorldAnchorB).LengthSquared() > BREAKING_POINT)
+                        broken = true;
+                }
+
+                if (broken)
                 {
                     RemoveVirusSprings();
                     DroppedVirus();

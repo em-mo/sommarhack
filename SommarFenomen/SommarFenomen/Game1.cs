@@ -85,7 +85,7 @@ namespace SommarFenomen
             _windowHandler.LevelSelectWindow = levelSelectWindow;
             _windowHandler.WaitingWindow = waitingWindow;
 
-            _windowHandler.ChangeWindow(waitingWindow);
+            _windowHandler.ChangeWindow(playWindow);
         }
 
         /// <summary>
