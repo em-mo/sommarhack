@@ -86,7 +86,7 @@ namespace SommarFenomen.Objects
             }
 
             loadString = @"Images\Characters\Ond\B_mouth_";
-            for (int i = 1; i <= 4; i++)
+            for (int i = 1; i <= 5; i++)
             {
                 _mouthTextures.Add(Game1.contentManager.Load<Texture2D>(loadString + i));
             }

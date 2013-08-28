@@ -72,6 +72,7 @@ namespace SommarFenomen
 
 
             KinectHandler = new KinectHandler(playWindow);
+            KinectHandler.IdleRestart += KinectRestart;
             _kinectThread = new Thread(() => KinectHandler.run());
             _kinectThread.IsBackground = true;
             _kinectThread.Start();
@@ -95,6 +96,11 @@ namespace SommarFenomen
         protected override void UnloadContent()
         {
             // TODO: Unload any non ContentManager content here
+        }
+
+        public void KinectRestart()
+        {
+            _windowHandler.ChangeWindow(_windowHandler.WaitingWindow, null);
         }
 
         /// <summary>

@@ -170,6 +170,7 @@ namespace SommarFenomen.Objects
             GraphicsDevice graphicsDevice = batch.GraphicsDevice;
             graphicsDevice.SamplerStates[0] = SamplerState.AnisotropicWrap;
             graphicsDevice.RasterizerState = RasterizerState.CullNone;
+
             _basicEffect.View = _playWindow.Camera2D.View;
             _basicEffect.Projection = _playWindow.Camera2D.DisplayProjection;
 

@@ -24,6 +24,8 @@ namespace SommarFenomen
         HandChecker leftHandChecker;
         HandChecker rightHandChecker;
 
+        public event Action IdleRestart;
+
         public KinectHandler(PlayWindow owner)
         {
             game = owner;
@@ -31,6 +33,25 @@ namespace SommarFenomen
             leftHandChecker = new HandChecker(kinectStrategy, Arm.Left, JointType.HandLeft);
             rightHandChecker = new HandChecker(kinectStrategy, Arm.Right, JointType.HandRight);
 
+            FindSensor();
+        }
+
+        public void run()
+        {
+            while (running)
+            {
+                if (sensor != null)
+                    ProcessSkeletonFrame();
+                else
+                {
+                    FindSensor();
+                    System.Threading.Thread.Sleep(10);
+                }
+            }
+        }
+
+        private void FindSensor()
+        {
             foreach (var potentialSensor in KinectSensor.KinectSensors)
             {
                 if (potentialSensor.Status == KinectStatus.Connected)
@@ -64,18 +85,6 @@ namespace SommarFenomen
                     this.sensor = null;
                 }
             }
-            regnStopwatch.Start();
-        }
-
-        public void run()
-        {
-            while (running)
-            {
-                if (sensor != null)
-                    ProcessSkeletonFrame();
-                else
-                    System.Threading.Thread.Sleep(10);
-            }
         }
 
         private enum KinectStates
@@ -83,6 +92,7 @@ namespace SommarFenomen
             IDLE, WAITING, RUNNING
         }
         private KinectStates currentState = KinectStates.RUNNING;
+        private Stopwatch _restartWatch = new Stopwatch();
         private void ProcessSkeletonFrame()
         {
             Skeleton[] skeletons = new Skeleton[0];
@@ -114,6 +124,19 @@ namespace SommarFenomen
 
                     if (startDelayTimer.Elapsed.TotalSeconds > START_DELAY)
                         HandleSwipes();
+                }
+            }
+            else
+            {
+                if (_restartWatch.IsRunning)
+                {
+                    if (_restartWatch.Elapsed.TotalSeconds > 60)
+                        if (IdleRestart != null)
+                            IdleRestart();
+                }
+                else
+                {
+                    _restartWatch.Restart();
                 }
             }
         }

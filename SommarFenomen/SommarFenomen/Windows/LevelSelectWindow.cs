@@ -20,6 +20,16 @@ namespace SommarFenomen.Windows
         private Sprite _background;
         private Sprite _dot;
 
+        private Stopwatch _bodyPartPickTimer = new Stopwatch();
+        private Stopwatch _zoomTimer = new Stopwatch();
+        private Stopwatch _startGameTimer = new Stopwatch();
+        private List<LevelBodyPart> _bodyParts = new List<LevelBodyPart>();
+        private LevelBodyPart _chosenBodyPart;
+        private static readonly float ZOOM_FACTOR = 1.02f;
+        private static readonly double PICK_TIME = 1;
+        private static readonly double ZOOM_TIME = 1;
+        private static readonly double START_GAME_TIME = 3;
+
         public LevelSelectWindow(WindowHandler windowHandler)
         {
             _windowHandler = windowHandler;
@@ -49,7 +59,7 @@ namespace SommarFenomen.Windows
             position.X = _spriteBatch.GraphicsDevice.Viewport.Width / 2;
             position.Y = _spriteBatch.GraphicsDevice.Viewport.Height / 2;
             part.Position = position;
-            part.LevelFiles.Add(@"levels\largetest");
+            part.LevelFiles.Add(@"levels\smalltest");
             _bodyParts.Add(part);
         }
 
@@ -76,15 +86,7 @@ namespace SommarFenomen.Windows
             _windowHandler.ChangeWindow(_windowHandler.PlayWindow, level);
         }
 
-        private Stopwatch _bodyPartPickTimer = new Stopwatch();
-        private Stopwatch _zoomTimer = new Stopwatch();
-        private Stopwatch _startGameTimer = new Stopwatch();
-        private List<LevelBodyPart> _bodyParts = new List<LevelBodyPart>();
-        private LevelBodyPart _chosenBodyPart;
-        private static readonly float ZOOM_FACTOR = 1.02f;
-        private static readonly double PICK_TIME = 1;
-        private static readonly double ZOOM_TIME = 1;
-        private static readonly double START_GAME_TIME = 3;
+
         public void Update(Microsoft.Xna.Framework.GameTime gameTime)
         {
             if (_bodyPartPickTimer.Elapsed.TotalSeconds > PICK_TIME)

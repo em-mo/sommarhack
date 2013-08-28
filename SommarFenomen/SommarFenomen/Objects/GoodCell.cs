@@ -59,11 +59,14 @@ namespace SommarFenomen.Objects
             Texture2D eyes = _eyeTextures[Shared.Random.Next(3)];
             Texture2D mouth = _mouthTextures[Shared.Random.Next(3)];
 
-            _happyTexture = Utils.MergeTextures(body, eyes, PlayWindow.GraphicsDevice);
+            _happyTexture = Utils.MergeTextures(body, _eyeTextures.Last(), PlayWindow.GraphicsDevice);
 
-            _sadTexture = Utils.MergeTextures(_happyTexture, mouth, PlayWindow.GraphicsDevice);
-            
             _happyTexture = Utils.MergeTextures(_happyTexture, _mouthTextures.Last(), PlayWindow.GraphicsDevice);
+            
+            _sadTexture = Utils.MergeTextures(body, eyes, PlayWindow.GraphicsDevice);
+
+            _sadTexture = Utils.MergeTextures(_sadTexture, mouth, PlayWindow.GraphicsDevice);
+            
 
         }
 
@@ -80,13 +83,13 @@ namespace SommarFenomen.Objects
             }
 
             loadString = @"Images\Characters\God\G_mouth_";
-            for (int i = 1; i <= 3; i++)
+            for (int i = 1; i <= 4; i++)
             {
                 _mouthTextures.Add(Game1.contentManager.Load<Texture2D>(loadString + i));
             }
 
             loadString = @"Images\Characters\God\G_eye_";
-            for (int i = 1; i <= 3; i++)
+            for (int i = 1; i <= 4; i++)
             {
                 _eyeTextures.Add(Game1.contentManager.Load<Texture2D>(loadString + i));
             }
