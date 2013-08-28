@@ -33,9 +33,10 @@ namespace SommarFenomen
             _currentWindow.Draw(gameTime);
         }
         
-        public void ChangeWindow(Window newWindow)
+        public void ChangeWindow(Window newWindow, Object o)
         {
             _currentWindow = newWindow;
+            _currentWindow.OnChange(o);
         }
     }
 }

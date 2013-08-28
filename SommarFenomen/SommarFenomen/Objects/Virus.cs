@@ -67,7 +67,7 @@ namespace SommarFenomen.Objects
             Texture2D mouth = _mouthTextures[Shared.Random.Next(4)];
 
             _virusTexture = Utils.MergeTextures(body, eyes, PlayWindow.GraphicsDevice);
-            _virusTexture = Utils.MergeTextures(_virusTexture, _mouthTextures.Last(), PlayWindow.GraphicsDevice);
+            _virusTexture = Utils.MergeTextures(_virusTexture, mouth, PlayWindow.GraphicsDevice);
 
         }
 

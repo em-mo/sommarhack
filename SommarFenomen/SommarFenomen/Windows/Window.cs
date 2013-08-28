@@ -10,7 +10,7 @@ namespace SommarFenomen
     interface Window
     {
         void Initialize();
-        void OnChange();
+        void OnChange(Object o);
         void Update(GameTime gameTime);
         void Draw(GameTime gameTime);
     }

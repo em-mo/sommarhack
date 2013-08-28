@@ -124,5 +124,13 @@ namespace SommarFenomen
             device.SetRenderTarget(null);
             return (Texture2D)renderTarget;
         }
+
+        public static Vector2 GetScreenCenter(GraphicsDevice graphicsDevice)
+        {
+            Vector2 center;
+            center.X = graphicsDevice.Viewport.Width / 2;
+            center.Y = graphicsDevice.Viewport.Height / 2;
+            return center;
+        }
     }
 }

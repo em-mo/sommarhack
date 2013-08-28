@@ -30,7 +30,7 @@ namespace SommarFenomen.Objects
         {
             _playWindow = playWindow;
 
-            _thickness = 50.0f;
+            _thickness = 100.0f;
 
             Vertices wallVertices = SimplifyTools.CollinearSimplify(vertices);
 

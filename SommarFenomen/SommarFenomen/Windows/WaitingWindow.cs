@@ -30,16 +30,16 @@ namespace SommarFenomen.Windows
             startTimer = 0;
         }
 
-        private static readonly double START_TIME = 5;
+        private static readonly double START_TIME = 1;
         private double startTimer;
         public void Update(Microsoft.Xna.Framework.GameTime gameTime)
         {
-            if (_kinectHandler.HasSkeleton())
+            if (!_kinectHandler.HasSkeleton())
             {
                 startTimer += gameTime.ElapsedGameTime.TotalSeconds;
                 if (startTimer > START_TIME)
                 {
-                    _windowHandler.ChangeWindow(_windowHandler.PlayWindow);
+                    _windowHandler.ChangeWindow(_windowHandler.LevelSelectWindow, null);
                 }
             }
             else
@@ -66,7 +66,7 @@ namespace SommarFenomen.Windows
             _spriteBatch.End();
         }
 
-        public void OnChange()
+        public void OnChange(Object o)
         {
             startTimer = 0;
         }

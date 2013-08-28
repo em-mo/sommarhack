@@ -17,6 +17,7 @@ using FarseerPhysics.Factories;
 using FarseerPhysics.Common;
 using SommarFenomen.LevelHandling;
 using SommarFenomen.Windows;
+using SommarFenomen.Stats;
 
 namespace SommarFenomen
 {
@@ -40,14 +41,14 @@ namespace SommarFenomen
         private List<ActiveGameObject> _addList = new List<ActiveGameObject>();
 
         public List<GoodCell> GoodCellList { get; set; }
+        public List<Virus> VirusList { get; set; }
         private List<ActiveGameObject> _objectList = new List<ActiveGameObject>();
 
         private List<Wall> _wallList = new List<Wall>();
 
         private Level _level;
         private LevelParser _levelParser;
-
-        Random rand = new Random();
+        private StatsHandler _statsHandler;
 
         Stopwatch mouseWatch = new Stopwatch();
 
@@ -60,7 +61,9 @@ namespace SommarFenomen
         {
             this._windowHandler = windowHandler;
             GoodCellList = new List<GoodCell>();
+            VirusList = new List<Virus>();
             _levelParser = new LevelParser(this);
+            _statsHandler = new StatsHandler();
 
             mouseWatch.Start();
         }
@@ -89,15 +92,36 @@ namespace SommarFenomen
             Camera2D.EnableTracking = true;
             Camera2D.TrackingBody = _player.Body;
             Camera2D.Zoom = 0.75f;
+
+            _endTimer.Reset();
         }
 
-        public void OnChange()
+        public void EndGame(bool winLoss)
         {
-            LoadLevel(@"levels\smalltest");
+            _statsHandler.EndSession(winLoss);
+            _windowHandler.ChangeWindow(_windowHandler.LevelSelectWindow, null);
+        }
+
+        public void OnChange(Object o)
+        {
+            string level = @"levels\smalltest";
+
+            if (o is string)
+                level = (string)o;
+
+            LoadLevel((string)o);
             Camera2D.ResetCamera();
+            Camera2D.Position = _player.Position;
+            Camera2D.Zoom = 0.75f;
+            Camera2D.Jump2Target();
             Camera2D.EnableTracking = true;
             Camera2D.TrackingBody = _player.Body;
-            Camera2D.Zoom = 0.75f;
+            Camera2D.EnableRotationTracking = false;
+            _endTimer.Reset();
+
+            _timeStepFactor = 1;
+
+            _statsHandler.StartSession();
         }
 
         private void TestInit()
@@ -140,15 +164,23 @@ namespace SommarFenomen
         {
             World.Clear();
             GoodCellList.Clear();
+            VirusList.Clear();
 
             _level = _levelParser.Parse(Game1.contentManager.Load<Texture2D>(file));
             _wallList = _level.GetWalls();
-            _objectList = _level.GetFriendlies();
 
-            foreach (var item in _objectList)
+
+            foreach (var item in _level.GetFriendlies())
             {
                 GoodCellList.Add((GoodCell)item);
             }
+
+            foreach (var item in _level.GetEnemies())
+            {
+                VirusList.Add((Virus)item);
+            }
+
+            _objectList = _level.GetFriendlies();
             _objectList.AddRange(_level.GetEnemies());
 
             _player = _level.Player;
@@ -198,7 +230,14 @@ namespace SommarFenomen
         public void RemoveVirus(Virus virus)
         {
             _removeList.Add(virus);
+            VirusList.Remove(virus);
             virus.UpForRemoval = true;
+        }
+
+        public void KillVirus(Virus virus)
+        {
+            RemoveVirus(virus);
+            _statsHandler.RegisterDeath(virus.GetType());
         }
 
         public void RegisterGoodCell(GoodCell goodCell)
@@ -208,6 +247,7 @@ namespace SommarFenomen
 
         public void RemoveGoodCell(GoodCell goodCell)
         {
+            _lastGoodCellPosition = goodCell.Position;
             GoodCellList.Remove(goodCell);
             _removeList.Add(goodCell);
             goodCell.UpForRemoval = true;
@@ -219,6 +259,7 @@ namespace SommarFenomen
             {
                 if (item is Virus)
                 {
+                    VirusList.Add((Virus)item);
                     _objectList.Add(item);
                 }
                 else if (item is GoodCell)
@@ -238,6 +279,14 @@ namespace SommarFenomen
                 World.RemoveBody(item.Body);
             }
             _removeList.Clear();
+        }
+
+        private void SmileyfyGoodCells()
+        {
+            foreach (var item in GoodCellList)
+            {
+                item.SetHappy();
+            }
         }
 
         private void KeyboardInput()
@@ -270,9 +319,30 @@ namespace SommarFenomen
             #endregion
         }
 
+        private float _timeStepFactor = 1;
+        private Vector2 _lastGoodCellPosition;
+        private Stopwatch _endTimer = new Stopwatch();
+        private static readonly double END_TIME = 5;
+        private bool _winStatus;
+        private void HandleEndConstraints()
+        {
+            if (GoodCellList.Count == 1 && GoodCellList.First().IsInfected())
+            {
+                _winStatus = false;
+                _timeStepFactor = 0.3f;
+                _endTimer.Restart();
+            }
+            else if (VirusList.Count == 0)
+            {
+                _winStatus = true;
+                SmileyfyGoodCells();
+                _endTimer.Restart();
+            }
+        }
+
         public void Update(GameTime gameTime)
         {
-            World.Step(Math.Min((float)gameTime.ElapsedGameTime.TotalSeconds, (1f / 30f)));            
+            World.Step(Math.Min((float)gameTime.ElapsedGameTime.TotalSeconds * _timeStepFactor, (1f / 30f)));            
 
             _inputHelper.update();
 
@@ -288,6 +358,10 @@ namespace SommarFenomen
             KeyboardInput();
             DestroyOldGameObjects();
             RegisterGameObjects();
+            HandleEndConstraints();
+
+            if (_endTimer.Elapsed.TotalSeconds > END_TIME)
+                EndGame(_winStatus);
 
             if (mouseWatch.ElapsedMilliseconds > 1000)
             {

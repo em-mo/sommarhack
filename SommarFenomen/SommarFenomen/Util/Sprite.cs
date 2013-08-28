@@ -69,8 +69,17 @@ namespace SommarFenomen
             get { return texture; }
             set 
             { 
+                if (texture != null)
+                {
+                    float originXPercentage = origin.X / texture.Width;
+                    float originYPercentage = origin.Y / texture.Height;
+                    origin.X = originXPercentage * value.Width;
+                    origin.Y = originYPercentage * value.Height;
+                }
+
                 texture = value;
                 OriginalSize = new Vector2(texture.Width, texture.Height);
+
             }
         }
 

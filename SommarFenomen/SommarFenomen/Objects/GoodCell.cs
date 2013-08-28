@@ -18,11 +18,15 @@ namespace SommarFenomen.Objects
         static private List<Texture2D> _bodyTextures = new List<Texture2D>();
         static private List<Texture2D> _mouthTextures = new List<Texture2D>();
         static private List<Texture2D> _eyeTextures = new List<Texture2D>();
-
+        private Texture2D _happyTexture;
+        private Texture2D _sadTexture;
+        
         private Stopwatch watch = new Stopwatch();
 
         private List<Virus> _virusList = new List<Virus>();
         private int _virusResistance;
+        private bool _infected = false;
+        private static readonly float FORCE_FACTOR = 1000;
 
         public GoodCell(PlayWindow playWindow) : base(playWindow, new StationaryStrategy())
         {
@@ -39,7 +43,7 @@ namespace SommarFenomen.Objects
         private void Init()
         {
             InitCellTextures();
-            Sprite = new Sprite(_happyTexture);
+            Sprite = new Sprite(_sadTexture);
             Sprite.CenterOrigin();
             Sprite.Scale = new Vector2(0.14f);
             _virusResistance = 5;
@@ -47,8 +51,7 @@ namespace SommarFenomen.Objects
             Body.LinearDamping = 1;
         }
 
-        private Texture2D _happyTexture;
-        private Texture2D _sadTexture;
+
 
         private void InitCellTextures()
         {
@@ -115,11 +118,17 @@ namespace SommarFenomen.Objects
             Sprite.Scale *= percentage;
         }
 
+        public bool IsInfected()
+        {
+            return _infected;
+        }
+
         public bool VirusCollide(Virus virus)
         {
             _virusResistance--;
             if (_virusResistance == 0)
             {
+                _infected = true;
                 _virusList.Add(virus);
                 return true;
             }
@@ -130,7 +139,7 @@ namespace SommarFenomen.Objects
         public void ExplodeByVirus()
         {
             float radius = Body.FixtureList.First().Shape.Radius;
-            for (int i = 0; i < 9 + _virusList.Count; i++)
+            for (int i = 0; i < 1 + _virusList.Count; i++)
             {
                 Vector2 position;
                 position.X = this.Position.X - radius / 2 + (float)Shared.Random.NextDouble() * radius;
@@ -149,7 +158,6 @@ namespace SommarFenomen.Objects
             PlayWindow.RemoveGoodCell(this);
         }
 
-        private static readonly float FORCE_FACTOR = 1000;
         private void ApplyExplodeForce(Virus virus)
         {
             float radius = Body.FixtureList.First().Shape.Radius;
@@ -160,8 +168,17 @@ namespace SommarFenomen.Objects
 
             force /= radius * 2;
             force += direction / 2;
-            Console.WriteLine("Virus force " + force);
             virus.Body.ApplyForce(force * FORCE_FACTOR);
+        }
+
+        public void SetHappy()
+        {
+            Sprite.Texture = _happyTexture;
+        }
+
+        public void SetSad()
+        {
+            Sprite.Texture = _sadTexture;
         }
 
         public override bool ObjectCollision(FarseerPhysics.Dynamics.Fixture f1, FarseerPhysics.Dynamics.Fixture f2, FarseerPhysics.Dynamics.Contacts.Contact contact)
