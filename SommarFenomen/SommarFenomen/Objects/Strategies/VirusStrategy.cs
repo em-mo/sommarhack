@@ -74,7 +74,7 @@ namespace SommarFenomen.Objects.Strategies
 
                 world.QueryAABB(AABBCollision, ref boundingBox);
 
-                boxSideStep *= 2;
+                boxSideStep *= 4;
             }
             _target = closestTarget;
         }

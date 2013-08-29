@@ -279,16 +279,16 @@ namespace SommarFenomen.Objects
                 return;
 
             _virusCollisionList.Clear();
-            PlayWindow.World.QueryAABB(AABBCollision, ref leftHandAABB);
+            PlayWindow.World.QueryAABB(AABBVirusHandCollision, ref leftHandAABB);
             List<Virus> leftHandList = new List<Virus>(_virusCollisionList);
 
             _virusCollisionList.Clear();
-            PlayWindow.World.QueryAABB(AABBCollision, ref rightHandAABB);
+            PlayWindow.World.QueryAABB(AABBVirusHandCollision, ref rightHandAABB);
             List<Virus> rightHandList = new List<Virus>(_virusCollisionList);
 
             _virusCollisionList = rightHandList.Intersect(leftHandList).ToList();
 
-            if (!_virusCollisionList.Contains(_grabbedVirus) && !(_virusCollisionList.Count == 0))
+            if (_grabbedVirus == null && !_virusCollisionList.Contains(_grabbedVirus) && !(_virusCollisionList.Count == 0))
             {
                 _grabbedVirus = _virusCollisionList.First();
                 CreateVirusSprings();
@@ -380,10 +380,10 @@ namespace SommarFenomen.Objects
         }
 
         List<Virus> _virusCollisionList;
-        private bool AABBCollision(Fixture f)
+        private bool AABBVirusHandCollision(Fixture f)
         {
             Object o = f.Body.UserData;
-            if (o is Virus)
+            if (o is Virus && ((Virus)o).IsConsumed() == false)
                 _virusCollisionList.Add((Virus)o);
 
             return true;

@@ -144,6 +144,11 @@ namespace SommarFenomen.Objects
             Body.Mass = 1;
         }
 
+        public bool IsConsumed()
+        {
+            return _beingConsumed;
+        }
+
         private void ChangeSize(float percentage)
         {
             if (Body.FixtureList.First().Shape.Radius > 0.01f)
