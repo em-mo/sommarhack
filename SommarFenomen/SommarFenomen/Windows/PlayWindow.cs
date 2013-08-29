@@ -112,6 +112,7 @@ namespace SommarFenomen
                 level = (string)o;
 
             LoadLevel((string)o);
+
             Camera2D.ResetCamera();
             Camera2D.Position = _player.Position;
             Camera2D.Zoom = 0.75f;
@@ -250,7 +251,6 @@ namespace SommarFenomen
 
         public void RemoveGoodCell(GoodCell goodCell)
         {
-            _lastGoodCellPosition = goodCell.Position;
             GoodCellList.Remove(goodCell);
             _removeList.Add(goodCell);
             goodCell.UpForRemoval = true;
@@ -323,7 +323,7 @@ namespace SommarFenomen
         }
 
         private float _timeStepFactor = 1;
-        private Vector2 _lastGoodCellPosition;
+        public Vector2 LastGoodCellPosition { get; set; }
         private Stopwatch _endTimer = new Stopwatch();
         private static readonly double END_TIME = 5;
         private bool _winStatus;
@@ -333,13 +333,15 @@ namespace SommarFenomen
             {
                 _winStatus = false;
                 _timeStepFactor = 0.3f;
-                _endTimer.Restart();
+                Camera2D.EnableTracking = false;
+                Camera2D.Position = LastGoodCellPosition;
+                _endTimer.Start();
             }
             else if (VirusList.Count == 0)
             {
                 _winStatus = true;
                 SmileyfyGoodCells();
-                _endTimer.Restart();
+                _endTimer.Start();
             }
         }
 

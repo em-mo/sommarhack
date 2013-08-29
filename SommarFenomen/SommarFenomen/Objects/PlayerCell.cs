@@ -272,8 +272,6 @@ namespace SommarFenomen.Objects
 
         private void HandCollisions()
         {
-            watch.Start();
-
             AABB leftHandAABB = GetHandAABB(PlayerSprites.LeftHand);
             AABB rightHandAABB = GetHandAABB(PlayerSprites.RightHand);
 
@@ -287,11 +285,6 @@ namespace SommarFenomen.Objects
             _virusCollisionList.Clear();
             PlayWindow.World.QueryAABB(AABBCollision, ref rightHandAABB);
             List<Virus> rightHandList = new List<Virus>(_virusCollisionList);
-
-            if (watch.ElapsedMilliseconds > 1000)
-            {
-                watch.Restart();
-            }
 
             _virusCollisionList = rightHandList.Intersect(leftHandList).ToList();
 
@@ -323,6 +316,9 @@ namespace SommarFenomen.Objects
         private static readonly Vector2 DOWN = new Vector2(0f, 0.1f);
         private void CreateVirusSprings()
         {
+            if (_grabbedVirus.Body.Position.X == float.NaN || _leftHandCenter.X == float.NaN || _rightHandCenter.X == float.NaN)
+                return;
+            
             if (_allJoints[0] != null)
                 RemoveVirusSprings();
 
@@ -392,7 +388,6 @@ namespace SommarFenomen.Objects
 
             return true;
         }
-        Stopwatch watch = new Stopwatch();
 
         private AABB GetHandAABB(PlayerSprites hand)
         {
@@ -416,7 +411,7 @@ namespace SommarFenomen.Objects
             if (hand == PlayerSprites.LeftHand)
             {
                 //Subtraction in the adjust
-                //adjustedPosition.X += halfWidth;
+                adjustedPosition.X -= (float)cosA * width / 2;
                 adjustedPosition.Y -= (float)sinA * height / 2;
 
                 _leftHandCenter = ConvertUnits.ToSimUnits(adjustedPosition);
@@ -424,7 +419,7 @@ namespace SommarFenomen.Objects
             else
             {
                 //Addition in the adjust
-                //adjustedPosition.X += halfWidth;
+                adjustedPosition.X += (float)cosA * width / 2;
                 adjustedPosition.Y += (float)sinA * height / 2;
                 _rightHandCenter = ConvertUnits.ToSimUnits(adjustedPosition);
             }

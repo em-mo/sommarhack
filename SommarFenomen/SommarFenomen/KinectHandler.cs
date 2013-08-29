@@ -112,35 +112,24 @@ namespace SommarFenomen
 
             if (currentSkeleton != null && currentSkeleton.TrackingState != SkeletonTrackingState.NotTracked)
             {
-                if (currentState == KinectStates.IDLE)
-                {
-
-                }
-                else if (currentState == KinectStates.WAITING)
-                {
-                }
-                else
-                {
-                    HandleArmAngles();
-
-                    if (startDelayTimer.Elapsed.TotalSeconds > START_DELAY)
-                        HandleSwipes();
-                }
-            }
-            else
-            {
                 if (_restartWatch.IsRunning)
-                {
-                    if (_restartWatch.Elapsed.TotalSeconds > 60)
-                    {
-                        _restartWatch.Restart();
-                        if (IdleRestart != null)
-                            IdleRestart();
-                    }
-                }
+                    _restartWatch.Reset();
+
+                HandleArmAngles();
+
+                if (startDelayTimer.Elapsed.TotalSeconds > START_DELAY)
+                    HandleSwipes();
                 else
+                    UpdateHandCheckers();
+            }
+            else if (currentSkeleton == null || currentSkeleton.TrackingState != SkeletonTrackingState.Tracked)
+            {
+                _restartWatch.Start();
+                if (_restartWatch.Elapsed.TotalSeconds > 60)
                 {
                     _restartWatch.Restart();
+                    if (IdleRestart != null)
+                        IdleRestart();
                 }
             }
         }
@@ -233,6 +222,12 @@ namespace SommarFenomen
                 force += leftHandChecker.AlternateCheckHand(currentSkeleton);
             }
             kinectStrategy.CurrentAcceleration = force;
+        }
+
+        private void UpdateHandCheckers()
+        {
+            rightHandChecker.UpdateHandPositions(currentSkeleton);
+            leftHandChecker.UpdateHandPositions(currentSkeleton);
         }
         
         /// <summary>
@@ -348,6 +343,13 @@ namespace SommarFenomen
 
                 return force;
             }
+
+            public void UpdateHandPositions(Skeleton currentSkeleton)
+            {
+                handPositions[handPositionsHead] = currentSkeleton.Joints[joint].Position;
+                handPositionsHead = (handPositionsHead + 1) % BUFFER_LENGTH;
+            }
+
         }
 
         public bool HasSkeleton()

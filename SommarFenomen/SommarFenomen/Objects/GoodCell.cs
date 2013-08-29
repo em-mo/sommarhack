@@ -131,6 +131,7 @@ namespace SommarFenomen.Objects
             _virusResistance--;
             if (_virusResistance == 0)
             {
+                PlayWindow.LastGoodCellPosition = Position;
                 _infected = true;
                 _virusList.Add(virus);
                 return true;
