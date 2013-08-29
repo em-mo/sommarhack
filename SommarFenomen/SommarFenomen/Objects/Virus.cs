@@ -143,7 +143,7 @@ namespace SommarFenomen.Objects
             _beingConsumed = true;
             _consumingBody = centerBody;
             Body.Mass = 1;
-            Body.CollisionCategories = Category.All & ~Category.Cat5;
+            Body.CollidesWith = Category.All & ~Category.Cat5;
         }
 
         public bool IsConsumed()
