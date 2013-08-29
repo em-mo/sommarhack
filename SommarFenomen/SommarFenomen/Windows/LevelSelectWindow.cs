@@ -25,6 +25,7 @@ namespace SommarFenomen.Windows
         private Stopwatch _startGameTimer = new Stopwatch();
         private List<LevelBodyPart> _bodyParts = new List<LevelBodyPart>();
         private LevelBodyPart _chosenBodyPart;
+        private static readonly float START_ZOOM = 0.25F;
         private static readonly float ZOOM_FACTOR = 1.02f;
         private static readonly double PICK_TIME = 1;
         private static readonly double ZOOM_TIME = 1;
@@ -40,7 +41,8 @@ namespace SommarFenomen.Windows
             _spriteList = new List<Sprite>();
 
             _background = new Sprite(Game1.contentManager.Load<Texture2D>(@"Images\LevelSelectMan"));
-            _background.Scale = new Vector2(4);
+            float windowScaleRatio = graphicsDevice.Viewport.Height / _background.OriginalSize.Y;
+            _background.Scale = new Vector2(windowScaleRatio / START_ZOOM);
             _background.CenterOrigin();
 
             _background.Position = Utils.GetScreenCenter(graphicsDevice);
@@ -120,7 +122,7 @@ namespace SommarFenomen.Windows
         public void OnChange(Object o)
         {
             _camera.ResetCamera();
-            _camera.Zoom = 0.25f;
+            _camera.Zoom = START_ZOOM;
             _camera.Position = Utils.GetScreenCenter(_spriteBatch.GraphicsDevice);
             _camera.Jump2Target();
 
