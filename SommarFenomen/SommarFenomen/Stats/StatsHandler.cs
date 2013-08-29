@@ -94,8 +94,10 @@ namespace SommarFenomen.Stats
             GlobalStats loadedStats;
             try
             {
-                FileStream ReadFileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
-                loadedStats = (GlobalStats)formatter.Deserialize(ReadFileStream);
+                using (FileStream readFileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+                {
+                    loadedStats = (GlobalStats)formatter.Deserialize(readFileStream);
+                }
             }
             catch (Exception)
             {
@@ -107,8 +109,11 @@ namespace SommarFenomen.Stats
         private void SaveToFile(string filePath, Object o)
         {
             XmlSerializer formatter = new XmlSerializer(typeof(GlobalStats));
-            TextWriter writeFileStream = new StreamWriter(filePath);
-            formatter.Serialize(writeFileStream, o);
+
+            using (TextWriter writeFileStream = new StreamWriter(filePath))
+            {
+                formatter.Serialize(writeFileStream, o);
+            }
         }
 
     }
