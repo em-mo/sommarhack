@@ -29,9 +29,10 @@ namespace SommarFenomen
         public KinectHandler(PlayWindow owner)
         {
             game = owner;
+            game.StartingNewGame += OnNewGame;
             kinectStrategy = (KinectStrategy)game.Player.Strategy;
-            leftHandChecker = new HandChecker(kinectStrategy, Arm.Left, JointType.HandLeft);
-            rightHandChecker = new HandChecker(kinectStrategy, Arm.Right, JointType.HandRight);
+            leftHandChecker = new HandChecker(Arm.Left, JointType.HandLeft);
+            rightHandChecker = new HandChecker(Arm.Right, JointType.HandRight);
 
             FindSensor();
         }
@@ -228,7 +229,6 @@ namespace SommarFenomen
                 force += rightHandChecker.AlternateCheckHand(currentSkeleton);
                 force += leftHandChecker.AlternateCheckHand(currentSkeleton);
             }
-
             kinectStrategy.CurrentAcceleration = force;
         }
         
@@ -250,7 +250,7 @@ namespace SommarFenomen
             private int handPositionsCounter;
             private int handPositionsHead;
             
-            public HandChecker(KinectStrategy kinectStrategy, Arm arm, JointType joint)
+            public HandChecker(Arm arm, JointType joint)
             {
                 this.arm = arm;
                 this.joint = joint;
@@ -350,6 +350,11 @@ namespace SommarFenomen
         public bool HasSkeleton()
         {
             return currentSkeleton != null;
+        }
+
+        private void OnNewGame()
+        {
+            kinectStrategy = (KinectStrategy)game.Player.Strategy;
         }
     }
 }

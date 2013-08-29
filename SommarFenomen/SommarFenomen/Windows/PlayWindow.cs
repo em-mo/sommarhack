@@ -52,6 +52,8 @@ namespace SommarFenomen
 
         Stopwatch mouseWatch = new Stopwatch();
 
+        public event Action StartingNewGame;
+
         // Chooses algorithm for hand movement
         private bool _movementType = false;
 
@@ -122,6 +124,7 @@ namespace SommarFenomen
             _timeStepFactor = 1;
 
             _statsHandler.StartSession();
+            StartingNewGame();
         }
 
         private void TestInit()
