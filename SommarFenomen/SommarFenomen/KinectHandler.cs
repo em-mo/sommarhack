@@ -176,6 +176,8 @@ namespace SommarFenomen
                 else
                 {
                     this.currentSkeleton = null;
+                    if (kinectStrategy != null)
+                        kinectStrategy.CurrentAcceleration = Vector2.Zero;
                 }
             }
         }
@@ -353,7 +355,6 @@ namespace SommarFenomen
                 handPositions[handPositionsHead] = currentSkeleton.Joints[joint].Position;
                 handPositionsHead = (handPositionsHead + 1) % BUFFER_LENGTH;
             }
-
         }
 
         public bool HasSkeleton()
