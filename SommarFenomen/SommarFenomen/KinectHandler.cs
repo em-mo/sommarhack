@@ -132,8 +132,11 @@ namespace SommarFenomen
                 if (_restartWatch.IsRunning)
                 {
                     if (_restartWatch.Elapsed.TotalSeconds > 60)
+                    {
+                        _restartWatch.Restart();
                         if (IdleRestart != null)
                             IdleRestart();
+                    }
                 }
                 else
                 {
