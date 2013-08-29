@@ -30,14 +30,12 @@ namespace SommarFenomen.Objects
 
         private static readonly double MAX_SPEED = 500;
 
-        private float _rightHumerusOffsetX;
-        private float _rightHumerusOffsetY;
-        private float _rightUlnaOffset;
-        private float _rightHandOffset;
-        private float _leftHumerusOffsetX;
-        private float _leftHumerusOffsetY;
-        private float _leftUlnaOffset;
-        private float _leftHandOffset;
+        private Vector2 _rightHumerusOffset = Vector2.Zero;
+        private Vector2 _rightUlnaOffset = Vector2.Zero;
+        private Vector2 _rightHandOffset = Vector2.Zero;
+        private Vector2 _leftHumerusOffset = Vector2.Zero;
+        private Vector2 _leftUlnaOffset = Vector2.Zero;
+        private Vector2 _leftHandOffset = Vector2.Zero;
 
         private float _bodyRadius;
         private List<Body> _outerBodies;
@@ -117,7 +115,7 @@ namespace SommarFenomen.Objects
         private void InitSprites()
         {
             const float CLOUD_SCALE = 0.6F;
-            const float ARM_SCALE = 1.5f;
+            const float ARM_SCALE = 0.20f;
 
             _spriteDict = new Dictionary<PlayerSprites, Sprite>();
 
@@ -127,12 +125,12 @@ namespace SommarFenomen.Objects
             }
 
             _spriteDict[PlayerSprites.Cell].Texture = _cellTexture;
-            _spriteDict[PlayerSprites.LeftHumerus].Texture = Game1.contentManager.Load<Texture2D>(@"Images\Humerus_left");
-            _spriteDict[PlayerSprites.LeftHand].Texture = Game1.contentManager.Load<Texture2D>(@"Images\Hand_left");
-            _spriteDict[PlayerSprites.RightHumerus].Texture = Game1.contentManager.Load<Texture2D>(@"Images\Humerus_right");
-            _spriteDict[PlayerSprites.RightHand].Texture = Game1.contentManager.Load<Texture2D>(@"Images\Hand_right");
-            _spriteDict[PlayerSprites.LeftUlna].Texture = Game1.contentManager.Load<Texture2D>(@"Images\Ulna_left");
-            _spriteDict[PlayerSprites.RightUlna].Texture = Game1.contentManager.Load<Texture2D>(@"Images\Ulna_right");
+            _spriteDict[PlayerSprites.LeftHumerus].Texture = Game1.contentManager.Load<Texture2D>(@"images\Characters\Hjalte\H_arm_1_l");
+            _spriteDict[PlayerSprites.LeftHand].Texture = Game1.contentManager.Load<Texture2D>(@"images\Characters\Hjalte\H_hand_l");
+            _spriteDict[PlayerSprites.RightHumerus].Texture = Game1.contentManager.Load<Texture2D>(@"images\Characters\Hjalte\H_arm_1_r");
+            _spriteDict[PlayerSprites.RightHand].Texture = Game1.contentManager.Load<Texture2D>(@"images\Characters\Hjalte\H_hand_r");
+            _spriteDict[PlayerSprites.LeftUlna].Texture = Game1.contentManager.Load<Texture2D>(@"images\Characters\Hjalte\H_arm_2_l");
+            _spriteDict[PlayerSprites.RightUlna].Texture = Game1.contentManager.Load<Texture2D>(@"images\Characters\Hjalte\H_arm_2_r");
 
             _spriteDict[PlayerSprites.Cell].Scale = Vector2.One * CLOUD_SCALE;
             _spriteDict[PlayerSprites.Cell].IsShowing = false;
@@ -163,34 +161,27 @@ namespace SommarFenomen.Objects
 
         private void InitArms()
         {
-            _leftHumerusOffsetX = (float)(_spriteDict[PlayerSprites.Cell].ScaledSize.X * 0.1);
-            _leftHumerusOffsetY = (float)(_spriteDict[PlayerSprites.Cell].ScaledSize.Y * 0.6);
-            _leftUlnaOffset = -(float)(_spriteDict[PlayerSprites.LeftHumerus].ScaledSize.X * 0.95);
-            _leftHandOffset = -(float)(_spriteDict[PlayerSprites.LeftUlna].ScaledSize.X * 0.97);
+            _leftHumerusOffset.X = -(_spriteDict[PlayerSprites.Cell].ScaledSize.X * 0.08f);
+            _leftHumerusOffset.Y = (_spriteDict[PlayerSprites.Cell].ScaledSize.Y * 0.017f);
+            _leftUlnaOffset.X = -(_spriteDict[PlayerSprites.LeftHumerus].ScaledSize.X * 0.85f);
+            _leftHandOffset.X = -(_spriteDict[PlayerSprites.LeftUlna].ScaledSize.X * 0.87f);
+            _leftHandOffset.Y = -(_spriteDict[PlayerSprites.LeftUlna].ScaledSize.Y * 0.18f);
 
-            _rightHumerusOffsetX = (float)(_spriteDict[PlayerSprites.Cell].ScaledSize.X * 0.8);
-            _rightHumerusOffsetY = (float)(_spriteDict[PlayerSprites.Cell].ScaledSize.Y * 0.6);
-            _rightUlnaOffset = (float)(_spriteDict[PlayerSprites.RightHumerus].ScaledSize.X * 0.95);
-            _rightHandOffset = (float)(_spriteDict[PlayerSprites.RightUlna].ScaledSize.X * 0.97);
-
-            _leftHumerusOffsetX = -50;
-            _leftHumerusOffsetY = 10;
-            _rightHumerusOffsetX = 50;
-            _rightHumerusOffsetY = 10;
-
+            _rightHumerusOffset.X = (_spriteDict[PlayerSprites.Cell].ScaledSize.X * 0.08f);
+            _rightHumerusOffset.Y = (_spriteDict[PlayerSprites.Cell].ScaledSize.Y * 0.017f);
+            _rightUlnaOffset.X = (_spriteDict[PlayerSprites.RightHumerus].ScaledSize.X * 0.85f);
+            _rightHandOffset.X = (_spriteDict[PlayerSprites.RightUlna].ScaledSize.X * 0.87f);
+            _rightHandOffset.Y = -(_spriteDict[PlayerSprites.RightUlna].ScaledSize.Y * 0.18f);
 
             //Set left
             Vector2 newHumerusPosition = new Vector2();
-            newHumerusPosition.X = Position.X + _leftHumerusOffsetX;
-            newHumerusPosition.Y = Position.Y + _leftHumerusOffsetY;
+            newHumerusPosition = Position + _leftHumerusOffset;
 
             Vector2 newUlnaPosition = new Vector2();
-            newUlnaPosition.X = newHumerusPosition.X + _leftUlnaOffset;
-            newUlnaPosition.Y = newHumerusPosition.Y;
+            newUlnaPosition = newHumerusPosition + _leftUlnaOffset;
 
             Vector2 newHandPosition = new Vector2();
-            newHandPosition.X = newUlnaPosition.X + _leftHandOffset;
-            newHandPosition.Y = newUlnaPosition.Y;
+            newHandPosition = newUlnaPosition + _leftHandOffset;
 
             _spriteDict[PlayerSprites.LeftHumerus].Position = newHumerusPosition;
             _spriteDict[PlayerSprites.LeftUlna].Position = newUlnaPosition;
@@ -198,16 +189,13 @@ namespace SommarFenomen.Objects
 
             //Set right
             newHumerusPosition = new Vector2();
-            newHumerusPosition.X = Position.X + _rightHumerusOffsetX;
-            newHumerusPosition.Y = Position.Y + _rightHumerusOffsetY;
+            newHumerusPosition = Position + _rightHumerusOffset;
 
             newUlnaPosition = new Vector2();
-            newUlnaPosition.X = newHumerusPosition.X + _rightUlnaOffset;
-            newUlnaPosition.Y = newHumerusPosition.Y;
+            newUlnaPosition = newHumerusPosition + _rightUlnaOffset;
 
             newHandPosition = new Vector2();
-            newHandPosition.X = newUlnaPosition.X + _rightHandOffset;
-            newHandPosition.Y = newUlnaPosition.Y;
+            newHandPosition = newUlnaPosition + _rightHandOffset;
 
             _spriteDict[PlayerSprites.RightHumerus].Position = newHumerusPosition;
             _spriteDict[PlayerSprites.RightUlna].Position = newUlnaPosition;
@@ -226,12 +214,17 @@ namespace SommarFenomen.Objects
             _spriteDict[PlayerSprites.LeftHumerus].Rotation = humerusRotation;
 
             Vector2 newUlnaPosition = new Vector2();
-            newUlnaPosition.X = _spriteDict[PlayerSprites.LeftHumerus].Position.X + (float)(Math.Cos(humerusRotation) * _leftUlnaOffset);
-            newUlnaPosition.Y = _spriteDict[PlayerSprites.LeftHumerus].Position.Y + (float)(Math.Sin(humerusRotation) * _leftUlnaOffset);
+            newUlnaPosition.X = _spriteDict[PlayerSprites.LeftHumerus].Position.X + (float)(Math.Cos(humerusRotation) * _leftUlnaOffset.X);
+            newUlnaPosition.Y = _spriteDict[PlayerSprites.LeftHumerus].Position.Y + (float)(Math.Sin(humerusRotation) * _leftUlnaOffset.X);
 
             Vector2 newHandPosition = new Vector2();
-            newHandPosition.X = newUlnaPosition.X + (float)(Math.Cos(ulnaRotation) * _leftHandOffset);
-            newHandPosition.Y = newUlnaPosition.Y + (float)(Math.Sin(ulnaRotation) * _leftHandOffset);
+            float cos, sin;
+            cos = (float)(Math.Cos(ulnaRotation));
+            sin = (float)(Math.Sin(ulnaRotation));
+            newHandPosition.X = newUlnaPosition.X + cos * _leftHandOffset.X;
+            newHandPosition.Y = newUlnaPosition.Y + sin * _leftHandOffset.X;
+            newHandPosition.X += sin * _leftHandOffset.Y;
+            newHandPosition.Y += cos * _rightHandOffset.Y;
 
             lock (locker)
             {
@@ -254,12 +247,18 @@ namespace SommarFenomen.Objects
             _spriteDict[PlayerSprites.RightHumerus].Rotation = humerusRotation;
 
             Vector2 newUlnaPosition = new Vector2();
-            newUlnaPosition.X = _spriteDict[PlayerSprites.RightHumerus].Position.X + (float)(Math.Cos(humerusRotation) * _rightUlnaOffset);
-            newUlnaPosition.Y = _spriteDict[PlayerSprites.RightHumerus].Position.Y + (float)(Math.Sin(humerusRotation) * _rightUlnaOffset);
+            newUlnaPosition.X = _spriteDict[PlayerSprites.RightHumerus].Position.X + (float)(Math.Cos(humerusRotation) * _rightUlnaOffset.X);
+            newUlnaPosition.Y = _spriteDict[PlayerSprites.RightHumerus].Position.Y + (float)(Math.Sin(humerusRotation) * _rightUlnaOffset.X);
 
             Vector2 newHandPosition = new Vector2();
-            newHandPosition.X = newUlnaPosition.X + (float)(Math.Cos(ulnaRotation) * _rightHandOffset);
-            newHandPosition.Y = newUlnaPosition.Y + (float)(Math.Sin(ulnaRotation) * _rightHandOffset);
+            float cos, sin;
+            cos = (float)(Math.Cos(ulnaRotation));
+            sin = (float)(Math.Sin(ulnaRotation));
+            newHandPosition.X = newUlnaPosition.X + cos * _rightHandOffset.X;
+            newHandPosition.Y = newUlnaPosition.Y + sin * _rightHandOffset.X;
+            newHandPosition.X += sin * _rightHandOffset.Y;
+            newHandPosition.Y += cos * _rightHandOffset.Y;
+
 
             lock (locker)
             {
