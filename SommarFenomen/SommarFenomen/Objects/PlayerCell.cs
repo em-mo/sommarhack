@@ -46,9 +46,8 @@ namespace SommarFenomen.Objects
 
         private List<WindPuffMessage> _windPuffList = new List<WindPuffMessage>();
 
-        private Virus _grabbedVirus;
-
-
+        private VirusGrabber _leftHandGrabber;
+        private VirusGrabber _rightHandGrabber;
 
         //To avoid calculating twice
         private Vector2 _leftHandCenter;
@@ -88,7 +87,8 @@ namespace SommarFenomen.Objects
             SetLeftArmRotation((float)Math.PI / 2, (float)Math.PI / 2);
             SetRightArmRotation(-(float)Math.PI / 2, -(float)Math.PI / 2);
 
-            _virusCollisionList = new List<Virus>();
+            _leftHandGrabber = new VirusGrabber(VirusGrabber.Hand.LEFT, _spriteDict[PlayerSprites.LeftHand], PlayWindow.World);
+            _rightHandGrabber = new VirusGrabber(VirusGrabber.Hand.RIGHT, _spriteDict[PlayerSprites.RightHand], PlayWindow.World);
         }
 
         private void InitPlayerSprite()
@@ -270,167 +270,12 @@ namespace SommarFenomen.Objects
             }
         }
 
-        private void HandCollisions()
+        private void HandleVirusGrabbing()
         {
-            AABB leftHandAABB = GetHandAABB(PlayerSprites.LeftHand);
-            AABB rightHandAABB = GetHandAABB(PlayerSprites.RightHand);
-
-            if (float.IsNaN(_leftHandCenter.X))
-                return;
-
-            _virusCollisionList.Clear();
-            PlayWindow.World.QueryAABB(AABBVirusHandCollision, ref leftHandAABB);
-            List<Virus> leftHandList = new List<Virus>(_virusCollisionList);
-
-            _virusCollisionList.Clear();
-            PlayWindow.World.QueryAABB(AABBVirusHandCollision, ref rightHandAABB);
-            List<Virus> rightHandList = new List<Virus>(_virusCollisionList);
-
-            _virusCollisionList = rightHandList.Intersect(leftHandList).ToList();
-
-            if (_grabbedVirus == null && !_virusCollisionList.Contains(_grabbedVirus) && !(_virusCollisionList.Count == 0))
-            {
-                _grabbedVirus = _virusCollisionList.First();
-                CreateVirusSprings();
-            }
-        }
-
-        private void DroppedVirus()
-        {
-            _grabbedVirus = null;
-            _outerBodyWatch.Reset();
-
-            if (_enteringVirus != null)
-            {
-                if (_enteringVirus.Body.FixtureList != null)
-                    RestoreOuterCollisions(_enteringVirus.Body);
-
-                _enteringVirus = null;
-            }
-        }
-
-        private FixedDistanceJoint[] _leftHandJoint = new FixedDistanceJoint[2];
-        private FixedDistanceJoint[] _rightHandJoint = new FixedDistanceJoint[2];
-        private FixedDistanceJoint[] _allJoints = new FixedDistanceJoint[4];
-        private static readonly Vector2 UP = new Vector2(0f, -0.1f);
-        private static readonly Vector2 DOWN = new Vector2(0f, 0.1f);
-        private void CreateVirusSprings()
-        {
-            if (_grabbedVirus.Body.Position.X == float.NaN || _leftHandCenter.X == float.NaN || _rightHandCenter.X == float.NaN)
-                return;
-            
-            if (_allJoints[0] != null)
-                RemoveVirusSprings();
-
-            _leftHandJoint[0] = JointFactory.CreateFixedDistanceJoint(PlayWindow.World, _grabbedVirus.Body, Vector2.Zero, _leftHandCenter + UP);
-            _leftHandJoint[1] = JointFactory.CreateFixedDistanceJoint(PlayWindow.World, _grabbedVirus.Body, Vector2.Zero, _leftHandCenter + DOWN);
-            _rightHandJoint[0] = JointFactory.CreateFixedDistanceJoint(PlayWindow.World, _grabbedVirus.Body, Vector2.Zero, _rightHandCenter + UP);
-            _rightHandJoint[1] = JointFactory.CreateFixedDistanceJoint(PlayWindow.World, _grabbedVirus.Body, Vector2.Zero, _rightHandCenter + DOWN);
-
-            _allJoints[0] = _leftHandJoint[0];
-            _allJoints[1] = _leftHandJoint[1];
-            _allJoints[2] = _rightHandJoint[0];
-            _allJoints[3] = _rightHandJoint[1];
-
-            Vector2 distance = _leftHandCenter - _rightHandCenter;
-            float length = distance.Length() / 16;
-
-            foreach (var joint in _allJoints)
-            {
-                joint.Length = length;
-                joint.Frequency = 10.0f;
-                joint.DampingRatio = 1.5f;
-            }
-
-        }
-
-        private void RemoveVirusSprings()
-        {
-            for (int i = 0; i < 4; i++)
-            {
-                PlayWindow.World.RemoveJoint(_allJoints[i]);
-                _allJoints[i] = null;
-            }
-        }
-
-        private static readonly float BREAKING_POINT = 1.0f * 1.0f;
-        private void HandleVirusSprings()
-        {
-            if (_grabbedVirus != null)
-            {
-                _leftHandJoint[0].WorldAnchorB = _leftHandCenter + UP;
-                _leftHandJoint[1].WorldAnchorB = _leftHandCenter + DOWN;
-
-                _rightHandJoint[0].WorldAnchorB = _rightHandCenter + UP;
-                _rightHandJoint[1].WorldAnchorB = _rightHandCenter + DOWN;
-                bool broken = false;
-
-                foreach (var joint in _allJoints)
-                {
-                    if ((joint.WorldAnchorA - joint.WorldAnchorB).LengthSquared() > BREAKING_POINT)
-                        broken = true;
-                }
-
-                if (broken)
-                {
-                    RemoveVirusSprings();
-                    DroppedVirus();
-                }
-            }
-        }
-
-        List<Virus> _virusCollisionList;
-        private bool AABBVirusHandCollision(Fixture f)
-        {
-            Object o = f.Body.UserData;
-            if (o is Virus && ((Virus)o).IsConsumed() == false)
-                _virusCollisionList.Add((Virus)o);
-
-            return true;
-        }
-
-        private AABB GetHandAABB(PlayerSprites hand)
-        {
-            AABB handAABB;
-            Sprite handSprite = _spriteDict[hand];
-
-            Vector2 adjustedPosition = handSprite.Position;
-            //adjustedPosition.X -= handSprite.Origin.X;
-            //adjustedPosition.Y -= handSprite.Origin.Y;
-
-
-            double cosA = Math.Cos(handSprite.Rotation);
-            double sinA = Math.Sin(handSprite.Rotation);
-
-            double ABScosA = (cosA < 0) ? -cosA : cosA;
-            double ABSsinA = (sinA < 0) ? -sinA : sinA;
-
-            float height = (float)(handSprite.ScaledSize.X * ABSsinA + handSprite.ScaledSize.Y * ABScosA);
-            float width = (float)(handSprite.ScaledSize.X * ABScosA + handSprite.ScaledSize.Y * ABSsinA);
-
-            if (hand == PlayerSprites.LeftHand)
-            {
-                //Subtraction in the adjust
-                adjustedPosition.X -= (float)cosA * width / 2;
-                adjustedPosition.Y -= (float)sinA * height / 2;
-
-                _leftHandCenter = ConvertUnits.ToSimUnits(adjustedPosition);
-            }
-            else
-            {
-                //Addition in the adjust
-                adjustedPosition.X += (float)cosA * width / 2;
-                adjustedPosition.Y += (float)sinA * height / 2;
-                _rightHandCenter = ConvertUnits.ToSimUnits(adjustedPosition);
-            }
-
-            adjustedPosition = ConvertUnits.ToSimUnits(adjustedPosition);
-            height = ConvertUnits.ToSimUnits(height);
-            width = ConvertUnits.ToSimUnits(width);
-
-            handAABB = new AABB(adjustedPosition, width, height);
-
-            return handAABB;
+            _leftHandGrabber.HandCollisions();
+            _rightHandGrabber.HandCollisions();
+            _leftHandGrabber.HandleVirusSprings();
+            _rightHandGrabber.HandleVirusSprings();
         }
 
         private bool blinking = false;
@@ -550,6 +395,7 @@ namespace SommarFenomen.Objects
                 body.BodyType = BodyType.Dynamic;
                 body.Mass = 0.4f;
                 body.LinearDamping = 1;
+                body.CollisionCategories = Category.Cat10;
                 body.OnCollision += OuterBodyObjectCollision;
                 _outerBodies.Add(body);
             }
@@ -708,34 +554,27 @@ namespace SommarFenomen.Objects
             }
         }
 
-        private Stopwatch _outerBodyWatch = new Stopwatch();
-        private static readonly int OUTER_BODY_CLOSED_TIME = 100;
-        private Virus _enteringVirus;
-
-        public  bool OuterBodyObjectCollision(Fixture f1, Fixture f2, Contact contact)
+        public bool OuterBodyObjectCollision(Fixture f1, Fixture f2, Contact contact)
         {
             Object o1, o2;
             o1 = f1.Body.UserData;
             o2 = f2.Body.UserData;
 
+            if (o2 == null)
+                return true;
+
             // If it isn't a collision with the grabbed virus
-            if (_grabbedVirus == null || o2 != _grabbedVirus)
-                return true;
-
-            if (_outerBodyWatch.ElapsedMilliseconds > OUTER_BODY_CLOSED_TIME)
+            if (o2 == _leftHandGrabber.GrabbedVirus() )
             {
-                IgnoreOuterCollisions(f2.Body);
-                _enteringVirus = (Virus)o2;
-                return true;
+                _leftHandGrabber.OuterWallCollision();
             }
-            else
-                _outerBodyWatch.Start();
-
+            else if (o2 == _rightHandGrabber.GrabbedVirus())
+            {
+                _rightHandGrabber.OuterWallCollision();
+            }
 
             return true;
         }
-
-
 
         private static readonly float VIRUS_CENTER_FACTOR = 0.5f;
         public  bool CenterBodyObjectCollision(Fixture f1, Fixture f2, Contact contact)
@@ -753,18 +592,16 @@ namespace SommarFenomen.Objects
 
             if ((distanceVector.Length() < ConvertUnits.ToSimUnits(_bodyRadius) * VIRUS_CENTER_FACTOR))
             {
-                if (_enteringVirus == virus)
-                    _enteringVirus = null;
-
-                if (_grabbedVirus == virus)
-                {
-                    RemoveVirusSprings();
-                    _grabbedVirus = null;
-                    _outerBodyWatch.Reset();
-                }
-
-                RestoreOuterCollisions(virus.Body);
                 virus.Consumed(_centerBody);
+
+                if (o2 == _leftHandGrabber.GrabbedVirus())
+                {
+                    _leftHandGrabber.CenterCollision();
+                }
+                if (o2 == _rightHandGrabber.GrabbedVirus())
+                {
+                    _rightHandGrabber.CenterCollision();
+                }
             }
 
             return false;
@@ -805,8 +642,7 @@ namespace SommarFenomen.Objects
 
             PositionHelper(Position);
 
-            HandCollisions();
-            HandleVirusSprings();
+            HandleVirusGrabbing();
             HandleBlinkState(gameTime);
         }
     }

@@ -50,8 +50,6 @@ namespace SommarFenomen.Objects
             CreateBody();
             Body.UserData = this;
             _assimilatingCell = false;
-            //ChangeSize(0.08f);
-            OnChangeSettings();
         }
 
         private void OnChangeSettings()
@@ -131,24 +129,49 @@ namespace SommarFenomen.Objects
             }
             Body.CollisionCategories = Category.Cat5;
             Body.BodyType = FarseerPhysics.Dynamics.BodyType.Dynamic;
+            Body.OnCollision += ObjectCollision;
+            Body.Mass = 2.2f;
             Body.LinearDamping = 1;
             Body.UserData = this;
         }
 
-        private bool _beingConsumed = false;
+        public bool IsConsumed { get; set; }
         private Body _consumingBody;
         public void Consumed(Body centerBody)
         {
             Strategy = new StationaryStrategy();
-            _beingConsumed = true;
+            IsConsumed = true;
             _consumingBody = centerBody;
             Body.Mass = 1;
             Body.CollidesWith = Category.All & ~Category.Cat5;
         }
 
-        public bool IsConsumed()
+
+        public bool IsGrabbed { get; set; }
+        public void Grabbed()
         {
-            return _beingConsumed;
+            IsGrabbed = true;
+            Body.Mass = 0.1f;
+        }
+
+        public void EnteringPlayerCell()
+        {
+            Body.CollidesWith = Category.All & ~Category.Cat10;
+        }
+
+        public void Dropped()
+        {
+            IsGrabbed = false;
+            if (IsConsumed)
+            {
+                Body.Mass = 1.0f;
+                Body.CollidesWith = Category.All & ~Category.Cat5;
+            }
+            else
+            {
+                Body.Mass = 2.2f;
+                Body.CollidesWith = Category.All;
+            }
         }
 
         private void ChangeSize(float percentage)
@@ -274,7 +297,7 @@ namespace SommarFenomen.Objects
                     _targetCell.ExplodeByVirus();
                 }
             }
-            else if (_beingConsumed)
+            else if (IsConsumed)
             {
                 FadeOut(gameTime);
             }
