@@ -110,7 +110,7 @@ namespace SommarFenomen
 
             TrackClosestSkeleton(skeletons);
 
-            if (currentSkeleton != null && currentSkeleton.TrackingState != SkeletonTrackingState.NotTracked)
+            if (currentSkeleton != null && currentSkeleton.TrackingState == SkeletonTrackingState.Tracked)
             {
                 if (_restartWatch.IsRunning)
                     _restartWatch.Reset();
@@ -122,7 +122,7 @@ namespace SommarFenomen
                 else
                     UpdateHandCheckers();
             }
-            else if (currentSkeleton == null || currentSkeleton.TrackingState != SkeletonTrackingState.Tracked)
+            else
             {
                 _restartWatch.Start();
                 if (_restartWatch.Elapsed.TotalSeconds > 60)
@@ -171,7 +171,11 @@ namespace SommarFenomen
                     this.currentSkeleton = closestSkeleton;
                     this.sensor.SkeletonStream.ChooseSkeletons(closestID); // Track this skeleton
 
-                    
+
+                }
+                else
+                {
+                    this.currentSkeleton = null;
                 }
             }
         }
