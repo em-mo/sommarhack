@@ -102,6 +102,12 @@ namespace SommarFenomen.Util
 
             if (_grabbedVirus != null)
             {
+                if (_grabbedVirus.IsAssimilating)
+                {
+                    DroppedVirus();
+                    return true;
+                }
+
                 for (int i = 0; i < _joints.Count(); i++)
                 {
                     _joints[i].WorldAnchorB = _handCenter + _jointOffsets[i];

@@ -25,7 +25,7 @@ namespace SommarFenomen.Objects
         private float[] _bodyOffsets = new float[2];
 
         private GoodCell _targetCell;
-        private bool _assimilatingCell;
+        public bool IsAssimilating { get; set; }
 
         public Virus(PlayWindow playWindow) : base(playWindow, new VirusStrategy())
         {
@@ -50,7 +50,7 @@ namespace SommarFenomen.Objects
             Sprite.Scale = new Vector2(0.08f);
             CreateBody();
             Body.UserData = this;
-            _assimilatingCell = false;
+            IsAssimilating = false;
         }
 
         private void OnChangeSettings()
@@ -257,7 +257,7 @@ namespace SommarFenomen.Objects
             // If cell resistance is low enough, enter the cell and go towards the center
             if (goodCell.VirusCollide(this))
             {
-                _assimilatingCell = true;
+                IsAssimilating = true;
                 Body.IgnoreCollisionWith(goodCell.Body);
                 _targetCell = goodCell;
                 Strategy = new VirusAssimilateStrategy(goodCell);
@@ -299,7 +299,7 @@ namespace SommarFenomen.Objects
         private double _explodeTimer = 0;
         public override void Update(GameTime gameTime)
         {
-            if (_assimilatingCell)
+            if (IsAssimilating)
             {
                 _shrinkTimer += gameTime.ElapsedGameTime.TotalSeconds;
                 _explodeTimer += gameTime.ElapsedGameTime.TotalSeconds;
