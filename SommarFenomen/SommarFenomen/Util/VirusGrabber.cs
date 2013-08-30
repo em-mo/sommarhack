@@ -112,7 +112,7 @@ namespace SommarFenomen.Util
                 {
                     _joints[i].WorldAnchorB = _handCenter + _jointOffsets[i];
                     if ((_joints[i].WorldAnchorA - _joints[i].WorldAnchorB).LengthSquared() > BREAKING_POINT)
-                        broken = false;
+                        broken = true;
                 }
 
                 if (broken)

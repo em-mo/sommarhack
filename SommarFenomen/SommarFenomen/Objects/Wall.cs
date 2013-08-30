@@ -8,7 +8,7 @@ using Microsoft.Xna.Framework.Graphics;
 using FarseerPhysics.Factories;
 using Microsoft.Xna.Framework;
 using FarseerPhysics.Common.PolygonManipulation;
-using FarseerPhysics.SamplesFramework;
+using SommarFenomen.Util;
 
 namespace SommarFenomen.Objects
 {
