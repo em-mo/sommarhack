@@ -190,10 +190,10 @@ namespace SommarFenomen
             _player = _level.Player;
         }
 
-        static public void LoadContent()
+        static public void LoadContent(GraphicsDevice graphicsDevice)
         {
             GoodCell.LoadContent();
-            Virus.LoadContent();
+            Virus.LoadContent(graphicsDevice);
         }
 
         private void InitDebug()

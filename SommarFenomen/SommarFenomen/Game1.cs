@@ -65,7 +65,7 @@ namespace SommarFenomen
             ConvertUnits.SetDisplayUnitToSimUnitRatio(100f);
             
             _spriteBatch = new SpriteBatch(GraphicsDevice);
-            PlayWindow.LoadContent();
+            PlayWindow.LoadContent(GraphicsDevice);
             PlayWindow playWindow = new PlayWindow(_windowHandler);
             playWindow.Initialize();
 

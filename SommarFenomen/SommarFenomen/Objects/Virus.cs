@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections;
 using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework.Graphics;
@@ -18,7 +19,7 @@ namespace SommarFenomen.Objects
         static private List<Texture2D> _mouthTextures = new List<Texture2D>();
         static private List<Texture2D> _eyeTextures = new List<Texture2D>();
         static private List<Texture2D> _virusTextures = new List<Texture2D>();
-
+        static private List<Texture2D> _virusTextureCombinations = new List<Texture2D>();
         private Texture2D _virusTexture;
         private int _virusType;
         private float[] _bodyOffsets = new float[2];
@@ -60,16 +61,16 @@ namespace SommarFenomen.Objects
 
         private void InitCellTextures()
         {
-            Texture2D body = _bodyTextures[Shared.Random.Next(6)];
-            Texture2D eyes = _eyeTextures[Shared.Random.Next(2)];
-            Texture2D mouth = _mouthTextures[Shared.Random.Next(4)];
+            //Texture2D body = _bodyTextures[Shared.Random.Next(6)];
+            //Texture2D eyes = _eyeTextures[Shared.Random.Next(2)];
+            //Texture2D mouth = _mouthTextures[Shared.Random.Next(4)];
 
-            _virusTexture = Utils.MergeTextures(body, eyes, PlayWindow.GraphicsDevice);
-            _virusTexture = Utils.MergeTextures(_virusTexture, mouth, PlayWindow.GraphicsDevice);
-
+            //_virusTexture = Utils.MergeTextures(body, eyes, PlayWindow.GraphicsDevice);
+            //_virusTexture = Utils.MergeTextures(_virusTexture, mouth, PlayWindow.GraphicsDevice);
+            _virusTexture = _virusTextureCombinations[Shared.Random.Next(_virusTextureCombinations.Count())];
         }
 
-        static public void LoadContent()
+        static public void LoadContent(GraphicsDevice graphicsDevice)
         {
             for (int i = 1; i <= 4; i++)
             {
@@ -93,6 +94,24 @@ namespace SommarFenomen.Objects
             for (int i = 1; i <= 2; i++)
             {
                 _eyeTextures.Add(Game1.contentManager.Load<Texture2D>(loadString + i));
+            }
+            CombineAllTextures(graphicsDevice);
+        }
+
+        static public void CombineAllTextures(GraphicsDevice graphicsDevice)
+        {
+            for (int bodyCounter = 0; bodyCounter < _bodyTextures.Count(); bodyCounter++)
+            {
+                for (int eyeCounter = 0; eyeCounter < _eyeTextures.Count(); eyeCounter++)
+                {
+                    for (int mouthCounter = 0; mouthCounter < _mouthTextures.Count(); mouthCounter++)
+                    {
+                        Texture2D combinedTexture;
+                        combinedTexture = Utils.MergeTextures(_bodyTextures[bodyCounter], _eyeTextures[eyeCounter], graphicsDevice);
+                        combinedTexture = Utils.MergeTextures(combinedTexture, _mouthTextures[mouthCounter], graphicsDevice);
+                        _virusTextureCombinations.Add(combinedTexture);
+                    }
+                }
             }
         }
 
