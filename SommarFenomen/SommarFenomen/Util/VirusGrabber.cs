@@ -17,7 +17,7 @@ namespace SommarFenomen.Util
         private Vector2 _handCenter;
         private Virus _grabbedVirus;
         public enum Hand { LEFT, RIGHT }
-        private Hand _hand;
+        private int _handAdjustmentFactor;
         private Sprite _handSprite;
         private World _world;
         
@@ -27,7 +27,11 @@ namespace SommarFenomen.Util
 
         public VirusGrabber(Hand hand, Sprite handSprite, World world)
         {
-            _hand = hand;
+            if (hand == Hand.LEFT)
+                _handAdjustmentFactor = -1;
+            else
+                _handAdjustmentFactor = 1;
+
             _handSprite = handSprite;
             _world = world;
 
@@ -172,30 +176,19 @@ namespace SommarFenomen.Util
             double ABScosA = (cosA < 0) ? -cosA : cosA;
             double ABSsinA = (sinA < 0) ? -sinA : sinA;
 
-            float height = (float)(_handSprite.ScaledSize.X * ABSsinA + _handSprite.ScaledSize.Y * ABScosA);
-            float width = (float)(_handSprite.ScaledSize.X * ABScosA + _handSprite.ScaledSize.Y * ABSsinA);
+            float halfHeight = (float)(_handSprite.ScaledSize.X * ABSsinA + _handSprite.ScaledSize.Y * ABScosA) / 2;
+            float halfWidth = (float)(_handSprite.ScaledSize.X * ABScosA + _handSprite.ScaledSize.Y * ABSsinA) / 2;
 
-            if (_hand == Hand.LEFT)
-            {
                 //Subtraction in the adjust
-                adjustedPosition.X -= (float)cosA * width / 2;
-                adjustedPosition.Y -= (float)sinA * height / 2;
-
-                _handCenter = ConvertUnits.ToSimUnits(adjustedPosition);
-            }
-            else
-            {
-                //Addition in the adjust
-                adjustedPosition.X += (float)cosA * width / 2;
-                adjustedPosition.Y += (float)sinA * height / 2;
-                _handCenter = ConvertUnits.ToSimUnits(adjustedPosition);
-            }
+            adjustedPosition.X += (float)cosA * halfWidth * _handAdjustmentFactor;
+            adjustedPosition.Y += (float)sinA * halfHeight * _handAdjustmentFactor;
 
             adjustedPosition = ConvertUnits.ToSimUnits(adjustedPosition);
-            height = ConvertUnits.ToSimUnits(height);
-            width = ConvertUnits.ToSimUnits(width);
+            halfHeight = ConvertUnits.ToSimUnits(halfHeight);
+            halfWidth = ConvertUnits.ToSimUnits(halfWidth);
 
-            handAABB = new AABB(adjustedPosition, width, height);
+            handAABB = new AABB(adjustedPosition, halfWidth, halfHeight);
+            _handCenter = adjustedPosition;
 
             return handAABB;
         }
