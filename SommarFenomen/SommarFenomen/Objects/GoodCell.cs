@@ -18,6 +18,8 @@ namespace SommarFenomen.Objects
         static private List<Texture2D> _bodyTextures = new List<Texture2D>();
         static private List<Texture2D> _mouthTextures = new List<Texture2D>();
         static private List<Texture2D> _eyeTextures = new List<Texture2D>();
+        static private List<Texture2D> _allTextureCombinations = new List<Texture2D>();
+        static private List<Texture2D> _happyTextureCombinations = new List<Texture2D>();
         private Texture2D _happyTexture;
         private Texture2D _sadTexture;
         
@@ -55,25 +57,17 @@ namespace SommarFenomen.Objects
 
         private void InitCellTextures()
         {
-            Texture2D body = _bodyTextures[Shared.Random.Next(6)];
-            Texture2D eyes = _eyeTextures[Shared.Random.Next(3)];
-            Texture2D mouth = _mouthTextures[Shared.Random.Next(3)];
-
-            _happyTexture = Utils.MergeTextures(body, _eyeTextures.Last(), PlayWindow.GraphicsDevice);
-
-            _happyTexture = Utils.MergeTextures(_happyTexture, _mouthTextures.Last(), PlayWindow.GraphicsDevice);
-            
-            _sadTexture = Utils.MergeTextures(body, eyes, PlayWindow.GraphicsDevice);
-
-            _sadTexture = Utils.MergeTextures(_sadTexture, mouth, PlayWindow.GraphicsDevice);
-            
-
+            int randomNumber = Shared.Random.Next(_allTextureCombinations.Count());
+            int happyNumber = randomNumber / ((_mouthTextures.Count() - 1) * (_eyeTextures.Count() - 1));
+            Console.WriteLine("Sad " + randomNumber + " Happy " + happyNumber);
+            _happyTexture = _happyTextureCombinations[happyNumber];
+            _sadTexture = _allTextureCombinations[randomNumber];
         }
 
         /// <summary>
         /// Fulhack, hardcoded values
         /// </summary>
-        public static void LoadContent()
+        public static void LoadContent(GraphicsDevice graphicsDevice)
         {
             _cellTexture = Game1.contentManager.Load<Texture2D>(@"Images\Good_Cell");
             string loadString = @"Images\Characters\God\G_body_";
@@ -92,6 +86,28 @@ namespace SommarFenomen.Objects
             for (int i = 1; i <= 4; i++)
             {
                 _eyeTextures.Add(Game1.contentManager.Load<Texture2D>(loadString + i));
+            }
+            CombineAllTextures(graphicsDevice);
+        }
+
+        static public void CombineAllTextures(GraphicsDevice graphicsDevice)
+        {
+            for (int bodyCounter = 0; bodyCounter < _bodyTextures.Count(); bodyCounter++)
+            {
+                for (int eyeCounter = 0; eyeCounter < _eyeTextures.Count() - 1; eyeCounter++)
+                {
+                    for (int mouthCounter = 0; mouthCounter < _mouthTextures.Count() - 1; mouthCounter++)
+                    {
+                        Texture2D combinedTexture;
+                        combinedTexture = Utils.MergeTextures(_bodyTextures[bodyCounter], _eyeTextures[eyeCounter], graphicsDevice);
+                        combinedTexture = Utils.MergeTextures(combinedTexture, _mouthTextures[mouthCounter], graphicsDevice);
+                        _allTextureCombinations.Add(combinedTexture);
+                    }
+                }
+                Texture2D happyTexture;
+                happyTexture = Utils.MergeTextures(_bodyTextures[bodyCounter], _eyeTextures.Last(), graphicsDevice);
+                happyTexture = Utils.MergeTextures(happyTexture, _mouthTextures.Last(), graphicsDevice);
+                _happyTextureCombinations.Add(happyTexture);
             }
         }
 
