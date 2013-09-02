@@ -136,6 +136,43 @@ namespace SommarFenomen.LevelHandling
             return found;
         }
 
+        private Point GetCenterPoint(Point firstPoint, Color pointColor, Color[] colorData)
+        {
+            Stack<Point> points = new Stack<Point>();
+            Point upperLeft, lowerRight;
+            
+            points.Push(firstPoint);
+            colorData[ToArrayIndex(firstPoint)] = Color.White;
+            upperLeft = lowerRight = firstPoint;
+
+            while (points.Count > 0)
+            {
+                Point currentPoint = points.Pop();
+                Point adjacentPoint = Point.Zero;
+
+                if (currentPoint.X < upperLeft.X)
+                    upperLeft.X = currentPoint.X;
+                else if (currentPoint.X > lowerRight.X)
+                    lowerRight.X = currentPoint.X;
+
+                if (currentPoint.Y < upperLeft.Y)
+                    upperLeft.Y = currentPoint.Y;
+                else if (currentPoint.Y > lowerRight.Y)
+                    lowerRight.Y = currentPoint.Y;
+
+                while (GetAdjacent(currentPoint, pointColor, colorData, ref adjacentPoint))
+                {
+                    points.Push(adjacentPoint);
+                    colorData[ToArrayIndex(adjacentPoint)] = Color.White;
+                }
+            }
+
+            Point centerPoint;
+            centerPoint.X = (upperLeft.X + lowerRight.X) / 2;
+            centerPoint.Y = (upperLeft.Y + lowerRight.Y) / 2;
+            return centerPoint;
+        }
+
         private float AdjustX(int x)
         {
             return (x - _imageWidth / 2) * _levelScaleFactor;
@@ -149,6 +186,11 @@ namespace SommarFenomen.LevelHandling
         private int ToArrayIndex(int x, int y)
         {
             return y * _imageWidth + x;
+        }
+
+        private int ToArrayIndex(Point point)
+        {
+            return point.X * _imageWidth + point.X;
         }
 
         private Vector2 PointToPosition(Point point)
