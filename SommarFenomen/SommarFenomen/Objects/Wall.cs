@@ -30,10 +30,7 @@ namespace SommarFenomen.Objects
         {
             _playWindow = playWindow;
 
-            if (vertices.GetRadius() < 100)
-                _thickness = vertices.GetRadius() / 3;
-            else
-                _thickness = 100.0f;
+            _thickness = 100.0f;
 
             Vertices wallVertices = SimplifyTools.CollinearSimplify(vertices);
             _body = BodyFactory.CreateLoopShape(_playWindow.World, VerticesToSimUnits(wallVertices));
@@ -49,106 +46,92 @@ namespace SommarFenomen.Objects
 
         private void InitDrawVertices(Vertices vertices, WallType type)
         {
+            if (type == WallType.Inner)
+                InitInnerWall(vertices);
+            else
+                InitOuterWall(vertices);
+        }
+
+        private void InitInnerWall(Vertices vertices)
+        {
             if (vertices.Count < 3)
             {
                 Console.WriteLine("Too few vertices " + vertices.Count);
                 return;
             }
 
-            Vertices drawingVertices = getDrawingVertices(vertices, type);
-
-            Vertices innerVertices, outerVertices;
-
-
-            if (type == WallType.Outer)
-            {
-                innerVertices = vertices;
-                outerVertices = drawingVertices;
-            }
-            else
-            {
-                innerVertices = drawingVertices;
-                outerVertices = vertices;
-            }
+            Vector2 center = vertices.GetCentroid();
 
             _wallVerts = new VertexPositionTexture[vertices.Count * 2 + 2];
             for (int i = 0; i < vertices.Count; ++i)
             {
                 int j = i * 2;
-                _wallVerts[j].Position.X = innerVertices[i].X;
-                _wallVerts[j].Position.Y = innerVertices[i].Y;
+                _wallVerts[j].Position.X = vertices[i].X;
+                _wallVerts[j].Position.Y = vertices[i].Y;
                 _wallVerts[j].Position.Z = 0;
-                _wallVerts[j].TextureCoordinate = innerVertices[i] / _textureScaling;
+                _wallVerts[j].TextureCoordinate = vertices[i] / _textureScaling;
 
-                _wallVerts[j + 1].Position.X = outerVertices[i].X;
-                _wallVerts[j + 1].Position.Y = outerVertices[i].Y;
+                _wallVerts[j + 1].Position.X = center.X;
+                _wallVerts[j + 1].Position.Y = center.Y;
                 _wallVerts[j + 1].Position.Z = 0;
-                _wallVerts[j + 1].TextureCoordinate = outerVertices[i] / _textureScaling;
+                _wallVerts[j + 1].TextureCoordinate = center / _textureScaling;
 
             }
             int lastIndex = vertices.Count * 2;
-            _wallVerts[lastIndex].Position.X = innerVertices[0].X;
-            _wallVerts[lastIndex].Position.Y = innerVertices[0].Y;
+            _wallVerts[lastIndex].Position.X = vertices[0].X;
+            _wallVerts[lastIndex].Position.Y = vertices[0].Y;
             _wallVerts[lastIndex].Position.Z = 0;
-            _wallVerts[lastIndex].TextureCoordinate = innerVertices[0] / _textureScaling;
+            _wallVerts[lastIndex].TextureCoordinate = vertices[0] / _textureScaling;
 
 
-            _wallVerts[lastIndex + 1].Position.X = outerVertices[0].X;
-            _wallVerts[lastIndex + 1].Position.Y = outerVertices[0].Y;
+            _wallVerts[lastIndex + 1].Position.X = center.X;
+            _wallVerts[lastIndex + 1].Position.Y = center.Y;
             _wallVerts[lastIndex + 1].Position.Z = 0;
-            _wallVerts[lastIndex + 1].TextureCoordinate = outerVertices[0] / _textureScaling;
-
-
+            _wallVerts[lastIndex + 1].TextureCoordinate = center / _textureScaling;
         }
 
-        /// <summary>
-        /// Get the other set of vertices to get a thickness of the wall
-        /// </summary>
-        /// <param name="vertices"></param>
-        /// <param name="type"></param>
-        /// <returns></returns>
-        private Vertices getDrawingVertices(Vertices vertices, WallType type)
+        private void InitOuterWall(Vertices vertices)
         {
-            Vector2 previousVertex, currentVertex, nextVertex;
-            Vertices drawingVertices = new Vertices();
-
-
-
-            previousVertex = vertices.Last();
-            currentVertex = vertices.First();
-            nextVertex = vertices.NextVertex(0);
-
-            for (int i = 0; i < vertices.Count; i++)
+            if (vertices.Count < 3)
             {
-                Vector2 normalisedNext = (nextVertex - currentVertex);
-                normalisedNext.Normalize();
-                Vector2 normalisedPrevious = (previousVertex - currentVertex);
-                normalisedPrevious.Normalize();
-
-                Vector2 drawVertexDifference = normalisedNext + normalisedPrevious;
-                //drawVertexDifference.Normalize();
-
-                double angle = Utils.CalculateAngle(normalisedPrevious, normalisedNext);
-
-                if (angle < 0)
-                    angle = angle + Math.PI * 2;
-
-                // Concave or convex corner
-                if (angle > Math.PI && type == WallType.Outer)
-                    drawVertexDifference = drawVertexDifference * -1;
-                else if (angle < Math.PI && type == WallType.Inner)
-                    drawVertexDifference = drawVertexDifference * -1;
-
-                drawVertexDifference *= _thickness;
-                Vector2 drawVertex = vertices[i] + drawVertexDifference;
-                drawingVertices.Add(drawVertex);
-
-                previousVertex = currentVertex;
-                currentVertex = nextVertex;
-                nextVertex = vertices[(i + 2) % vertices.Count];
+                Console.WriteLine("Too few vertices " + vertices.Count);
+                return;
             }
 
-            return drawingVertices;
+            Vertices drawingVertices = new Vertices(vertices);
+            float scale = _thickness / drawingVertices.GetRadius() + 1;
+            Vector2 scaleVector = new Vector2(scale);
+            Vector2 translation = drawingVertices.GetCentroid();
+            drawingVertices.Translate(-translation);
+            drawingVertices.Scale(ref scaleVector);
+            drawingVertices.Translate(translation);
+
+            _wallVerts = new VertexPositionTexture[vertices.Count * 2 + 2];
+            for (int i = 0; i < vertices.Count; ++i)
+            {
+                int j = i * 2;
+                _wallVerts[j].Position.X = vertices[i].X;
+                _wallVerts[j].Position.Y = vertices[i].Y;
+                _wallVerts[j].Position.Z = 0;
+                _wallVerts[j].TextureCoordinate = vertices[i] / _textureScaling;
+
+                _wallVerts[j + 1].Position.X = drawingVertices[i].X;
+                _wallVerts[j + 1].Position.Y = drawingVertices[i].Y;
+                _wallVerts[j + 1].Position.Z = 0;
+                _wallVerts[j + 1].TextureCoordinate = drawingVertices[i] / _textureScaling;
+
+            }
+            int lastIndex = vertices.Count * 2;
+            _wallVerts[lastIndex].Position.X = vertices[0].X;
+            _wallVerts[lastIndex].Position.Y = vertices[0].Y;
+            _wallVerts[lastIndex].Position.Z = 0;
+            _wallVerts[lastIndex].TextureCoordinate = vertices[0] / _textureScaling;
+
+
+            _wallVerts[lastIndex + 1].Position.X = drawingVertices[0].X;
+            _wallVerts[lastIndex + 1].Position.Y = drawingVertices[0].Y;
+            _wallVerts[lastIndex + 1].Position.Z = 0;
+            _wallVerts[lastIndex + 1].TextureCoordinate = drawingVertices[0] / _textureScaling;
         }
 
         private Vertices VerticesToSimUnits(Vertices vertices)
@@ -184,6 +167,18 @@ namespace SommarFenomen.Objects
                 graphicsDevice.DrawUserPrimitives<VertexPositionTexture>(PrimitiveType.TriangleStrip, _wallVerts, 0, _wallVerts.Length - 2);
                 //graphicsDevice.DrawUserPrimitives<VertexPositionColor>(PrimitiveType.LineStrip, _colorWallVerts, 0, _colorWallVerts.Length - 1);
             }
+        }
+
+        private Vertices DeepClone(Vertices original)
+        {
+            Vertices clone = new Vertices();
+
+            foreach (var item in original)
+            {
+                var copy = item;
+                clone.Add(copy);
+            }
+            return clone;
         }
     }
 }
