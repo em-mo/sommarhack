@@ -30,10 +30,12 @@ namespace SommarFenomen.Objects
         {
             _playWindow = playWindow;
 
-            _thickness = 100.0f;
+            if (vertices.GetRadius() < 100)
+                _thickness = vertices.GetRadius() / 3;
+            else
+                _thickness = 100.0f;
 
             Vertices wallVertices = SimplifyTools.CollinearSimplify(vertices);
-
             _body = BodyFactory.CreateLoopShape(_playWindow.World, VerticesToSimUnits(wallVertices));
             _body.CollisionCategories = Category.All;
             _body.CollidesWith = Category.All;
