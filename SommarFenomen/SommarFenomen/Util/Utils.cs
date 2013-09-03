@@ -132,5 +132,12 @@ namespace SommarFenomen
             center.Y = graphicsDevice.Viewport.Height / 2;
             return center;
         }
+
+        private static readonly double SQRT_2PI = Math.Sqrt(2 * Math.PI);
+        public static double NormalDistribution(double x, double mean, double standardDeviation)
+        {
+            return Math.Exp(-Math.Pow((x - mean), 2) / (2 * Math.Pow(standardDeviation, 2))) /
+                (standardDeviation * SQRT_2PI);
+        }
     }
 }

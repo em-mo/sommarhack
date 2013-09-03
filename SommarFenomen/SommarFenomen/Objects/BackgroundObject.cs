@@ -13,12 +13,22 @@ namespace SommarFenomen.Objects
         private float _rotation;
         private Strategy _strategy;
         public Vector2 Position { get; set; }
-        public BackgroundObject(Texture2D texture, Vector2 position, float rotation, Strategy strategy)
+        public BackgroundObject(Texture2D texture, Vector2 position, float rotation, float size, Strategy strategy)
         {
             _sprite = new Sprite(texture);
             Position = position;
             _sprite.Position = position;
+            _sprite.Scale = new Vector2(size);
+            _sprite.Color = ColorFromSize(size);
             _rotation = rotation;
+            _strategy = strategy;
+        }
+
+        private Color ColorFromSize(float size)
+        {
+            int colorValue = (int)(255 * size);
+            colorValue = (colorValue > 255) ? 255 : colorValue;
+            return new Color(colorValue, colorValue, colorValue, colorValue);
         }
 
         public void Update(Microsoft.Xna.Framework.GameTime gameTime)

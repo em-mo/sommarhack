@@ -19,7 +19,7 @@ namespace SommarFenomen.Objects
         static private List<Texture2D> _mouthTextures = new List<Texture2D>();
         static private List<Texture2D> _eyeTextures = new List<Texture2D>();
         static private List<Texture2D> _allTextureCombinations = new List<Texture2D>();
-        static private List<Texture2D> _happyTextureCombinations = new List<Texture2D>();
+        static public List<Texture2D> _happyTextureCombinations = new List<Texture2D>();
         private Texture2D _happyTexture;
         private Texture2D _sadTexture;
         

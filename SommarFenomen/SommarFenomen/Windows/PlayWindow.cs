@@ -18,6 +18,7 @@ using FarseerPhysics.Common;
 using SommarFenomen.LevelHandling;
 using SommarFenomen.Windows;
 using SommarFenomen.Stats;
+using SommarFenomen.Windows.WindowUtils;
 
 namespace SommarFenomen
 {
@@ -45,6 +46,8 @@ namespace SommarFenomen
         private List<ActiveGameObject> _objectList = new List<ActiveGameObject>();
 
         private List<Wall> _wallList = new List<Wall>();
+
+        private BackgroundObjectsHandler _backgroundObjectsHandler;
 
         private Level _level;
         private LevelParser _levelParser;
@@ -124,7 +127,11 @@ namespace SommarFenomen
 
             _timeStepFactor = 1;
 
+            _backgroundObjectsHandler = new BackgroundObjectsHandler(Camera2D);
+
             _statsHandler.StartSession();
+
+            //Event
             StartingNewGame();
         }
 
@@ -365,6 +372,8 @@ namespace SommarFenomen
             RegisterGameObjects();
             HandleEndConstraints();
 
+            _backgroundObjectsHandler.Update(gameTime);
+
             if (_endTimer.Elapsed.TotalSeconds > END_TIME)
                 EndGame(_winStatus);
 
@@ -385,6 +394,7 @@ namespace SommarFenomen
             //_background2.Draw(_spriteBatch);
             _spriteBatch.Begin(SpriteSortMode.Deferred, null, null, null, null, null, Camera2D.View);
             //GraphicsHandler.DrawSprites(_backgroundSprites, _spriteBatch);
+            _backgroundObjectsHandler.Draw(_spriteBatch);
             GraphicsHandler.DrawSprites(_spriteList, _spriteBatch);
             _player.Draw(_spriteBatch);
 
