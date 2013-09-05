@@ -61,7 +61,7 @@ namespace SommarFenomen.Windows
             position.X = _spriteBatch.GraphicsDevice.Viewport.Width / 2;
             position.Y = _spriteBatch.GraphicsDevice.Viewport.Height / 2;
             part.Position = position;
-            part.LevelFiles.Add(@"levels\smalltest");
+            part.LevelFiles.Add(@"levels\test");
             _bodyParts.Add(part);
         }
 
