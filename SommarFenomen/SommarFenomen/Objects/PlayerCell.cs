@@ -21,11 +21,11 @@ namespace SommarFenomen.Objects
     {
         enum PlayerSprites { Cell, LeftHumerus, LeftUlna, LeftHand, RightHumerus, RightUlna, RightHand };
 
-        private Texture2D _cellTexture;
+        private static Texture2D _cellTexture;
         private Dictionary<PlayerSprites, Sprite> _spriteDict;
         //Eyes open in 0, eyes closed in 1
-        private Texture2D[] _happyTexture = new Texture2D[2];
-        private Texture2D[] _focusedTexture = new Texture2D[2];
+        private static Texture2D[] _happyTexture = new Texture2D[2];
+        private static Texture2D[] _focusedTexture = new Texture2D[2];
         private Texture2D[] _currentStateTexture;
 
         private static readonly double MAX_SPEED = 500;
@@ -48,10 +48,6 @@ namespace SommarFenomen.Objects
 
         private VirusGrabber _leftHandGrabber;
         private VirusGrabber _rightHandGrabber;
-
-        //To avoid calculating twice
-        private Vector2 _leftHandCenter;
-        private Vector2 _rightHandCenter;
 
         public readonly object locker = new object();
 
@@ -91,23 +87,40 @@ namespace SommarFenomen.Objects
             _rightHandGrabber = new VirusGrabber(VirusGrabber.Hand.RIGHT, _spriteDict[PlayerSprites.RightHand], PlayWindow.World, _centerBody);
         }
 
+        private static Texture2D _bodyTexture;
+        private static Texture2D _openEyesTexture;
+        private static Texture2D _closedEyesTexture;
+        private static Texture2D _happyMouthTexture;
+        private static Texture2D _focusedMouthTexture;
+        private static Dictionary<PlayerSprites, Texture2D> _armTextures = new Dictionary<PlayerSprites, Texture2D>();
+
+        public static void LoadContent(GraphicsDevice graphicsDevice)
+        {
+            _bodyTexture = Game1.contentManager.Load<Texture2D>(@"Images\Characters\Hjalte\H_body");
+            _openEyesTexture = Game1.contentManager.Load<Texture2D>(@"Images\Characters\Hjalte\H_eye_o");
+            _closedEyesTexture = Game1.contentManager.Load<Texture2D>(@"Images\Characters\Hjalte\H_eye_c");
+            _happyMouthTexture = Game1.contentManager.Load<Texture2D>(@"Images\Characters\Hjalte\H_mouth_1");
+            _focusedMouthTexture = Game1.contentManager.Load<Texture2D>(@"Images\Characters\Hjalte\H_mouth_2");
+
+            _cellTexture = Utils.MergeTextures(_bodyTexture, _happyMouthTexture, graphicsDevice);
+            _happyTexture[0] = Utils.MergeTextures(_cellTexture, _openEyesTexture, graphicsDevice);
+            _happyTexture[1] = Utils.MergeTextures(_cellTexture, _closedEyesTexture, graphicsDevice);
+
+            _cellTexture = Utils.MergeTextures(_bodyTexture, _focusedMouthTexture, graphicsDevice);
+            _focusedTexture[0] = Utils.MergeTextures(_cellTexture, _openEyesTexture, graphicsDevice);
+            _focusedTexture[1] = Utils.MergeTextures(_cellTexture, _closedEyesTexture, graphicsDevice);
+
+            _armTextures[PlayerSprites.Cell] = _happyTexture[0];
+            _armTextures[PlayerSprites.LeftHumerus]= Game1.contentManager.Load<Texture2D>(@"images\Characters\Hjalte\H_arm_1_l");
+            _armTextures[PlayerSprites.LeftHand] = Game1.contentManager.Load<Texture2D>(@"images\Characters\Hjalte\H_hand_l");
+            _armTextures[PlayerSprites.RightHumerus] = Game1.contentManager.Load<Texture2D>(@"images\Characters\Hjalte\H_arm_1_r");
+            _armTextures[PlayerSprites.RightHand] = Game1.contentManager.Load<Texture2D>(@"images\Characters\Hjalte\H_hand_r");
+            _armTextures[PlayerSprites.LeftUlna] = Game1.contentManager.Load<Texture2D>(@"images\Characters\Hjalte\H_arm_2_l");
+            _armTextures[PlayerSprites.RightUlna] = Game1.contentManager.Load<Texture2D>(@"images\Characters\Hjalte\H_arm_2_r");
+        }
+
         private void InitPlayerSprite()
         {
-            Texture2D body = Game1.contentManager.Load<Texture2D>(@"Images\Characters\Hjalte\H_body");
-            Texture2D openEyes = Game1.contentManager.Load<Texture2D>(@"Images\Characters\Hjalte\H_eye_o");
-            Texture2D closedEyes = Game1.contentManager.Load<Texture2D>(@"Images\Characters\Hjalte\H_eye_c");
-            Texture2D happyMouth = Game1.contentManager.Load<Texture2D>(@"Images\Characters\Hjalte\H_mouth_1");
-            Texture2D focusedMouth = Game1.contentManager.Load<Texture2D>(@"Images\Characters\Hjalte\H_mouth_2");
-
-
-            _cellTexture = Utils.MergeTextures(body, happyMouth, PlayWindow.GraphicsDevice);
-            _happyTexture[0] = Utils.MergeTextures(_cellTexture, openEyes, PlayWindow.GraphicsDevice);
-            _happyTexture[1] = Utils.MergeTextures(_cellTexture, closedEyes, PlayWindow.GraphicsDevice);
-
-            _cellTexture = Utils.MergeTextures(body, focusedMouth, PlayWindow.GraphicsDevice);
-            _focusedTexture[0] = Utils.MergeTextures(_cellTexture, openEyes, PlayWindow.GraphicsDevice);
-            _focusedTexture[1] = Utils.MergeTextures(_cellTexture, closedEyes, PlayWindow.GraphicsDevice);
-
             _cellTexture = _happyTexture[0];
             _currentStateTexture = _happyTexture;
         }
@@ -122,15 +135,8 @@ namespace SommarFenomen.Objects
             foreach (PlayerSprites sprite in Enum.GetValues(typeof(PlayerSprites)))
             {
                 _spriteDict.Add(sprite, new Sprite());
+                _spriteDict[sprite].Texture = _armTextures[sprite];
             }
-
-            _spriteDict[PlayerSprites.Cell].Texture = _cellTexture;
-            _spriteDict[PlayerSprites.LeftHumerus].Texture = Game1.contentManager.Load<Texture2D>(@"images\Characters\Hjalte\H_arm_1_l");
-            _spriteDict[PlayerSprites.LeftHand].Texture = Game1.contentManager.Load<Texture2D>(@"images\Characters\Hjalte\H_hand_l");
-            _spriteDict[PlayerSprites.RightHumerus].Texture = Game1.contentManager.Load<Texture2D>(@"images\Characters\Hjalte\H_arm_1_r");
-            _spriteDict[PlayerSprites.RightHand].Texture = Game1.contentManager.Load<Texture2D>(@"images\Characters\Hjalte\H_hand_r");
-            _spriteDict[PlayerSprites.LeftUlna].Texture = Game1.contentManager.Load<Texture2D>(@"images\Characters\Hjalte\H_arm_2_l");
-            _spriteDict[PlayerSprites.RightUlna].Texture = Game1.contentManager.Load<Texture2D>(@"images\Characters\Hjalte\H_arm_2_r");
 
             _spriteDict[PlayerSprites.Cell].Scale = Vector2.One * CLOUD_SCALE;
             _spriteDict[PlayerSprites.Cell].IsShowing = false;

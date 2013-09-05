@@ -199,6 +199,7 @@ namespace SommarFenomen
 
         static public void LoadContent(GraphicsDevice graphicsDevice)
         {
+            PlayerCell.LoadContent(graphicsDevice);
             GoodCell.LoadContent(graphicsDevice);
             Virus.LoadContent(graphicsDevice);
             BackgroundObjectsHandler.LoadContet();
