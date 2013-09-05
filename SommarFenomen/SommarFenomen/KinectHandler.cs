@@ -304,7 +304,7 @@ namespace SommarFenomen
             public Vector2 AlternateCheckHand(Skeleton currentSkeleton)
             {
                 const int START = 1;
-                const float ALTERNATE_THRESHOLD = 0.03f * 0.03f;
+                const float ALTERNATE_THRESHOLD = 0.03f;
                 Vector2 force = Vector2.Zero;
 
                 // Add new element to array                
@@ -330,24 +330,22 @@ namespace SommarFenomen
                 //Average
                 diffVector /= START;
 
-                //Square it
-                diffVector.X *= (diffVector.X < 0) ? -diffVector.X : diffVector.X;
-                diffVector.Y *= (diffVector.Y < 0) ? -diffVector.Y : diffVector.Y;
-
                 // Check thresholds for X and Y
-                if (diffVector.X < -ALTERNATE_THRESHOLD)
-                    force.X = -ALTERNATE_FORCE * diffVector.X;
-                else if (diffVector.X > ALTERNATE_THRESHOLD)
-                    force.X = -ALTERNATE_FORCE * diffVector.X;
+                if (Math.Abs(diffVector.X) > ALTERNATE_THRESHOLD)
+                    force.X = GetForce(-diffVector.X);
 
-                if (diffVector.Y < -ALTERNATE_THRESHOLD)
-                    force.Y = ALTERNATE_FORCE * diffVector.Y;
-                else if (diffVector.Y > ALTERNATE_THRESHOLD)
-                    force.Y = ALTERNATE_FORCE * diffVector.Y;
+                if (Math.Abs(diffVector.Y) > ALTERNATE_THRESHOLD)
+                    force.Y = GetForce(diffVector.Y);
 
                 handPositionsHead = (handPositionsHead + 1) % BUFFER_LENGTH;
 
                 return force;
+            }
+
+            private float GetForce(float vectorComponent)
+            {
+                vectorComponent *= (vectorComponent < 0) ? -vectorComponent : vectorComponent;
+                return vectorComponent * ALTERNATE_FORCE;
             }
 
             public void UpdateHandPositions(Skeleton currentSkeleton)
