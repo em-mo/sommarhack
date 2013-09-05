@@ -202,6 +202,7 @@ namespace SommarFenomen
             GoodCell.LoadContent(graphicsDevice);
             Virus.LoadContent(graphicsDevice);
             BackgroundObjectsHandler.LoadContet();
+            Wall.LoadContent();
         }
 
         private void InitDebug()

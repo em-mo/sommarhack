@@ -19,6 +19,7 @@ namespace SommarFenomen.Objects
         private float _thickness;
         private VertexPositionTexture[] _wallVerts;
         private int _textureScaling = 100;
+        private static Texture2D _wallTexture;
 
         private PlayWindow _playWindow;
 
@@ -28,6 +29,7 @@ namespace SommarFenomen.Objects
         }
         public Wall(Vertices vertices, WallType type, PlayWindow playWindow)
         {
+
             _playWindow = playWindow;
 
             _thickness = 100.0f;
@@ -39,9 +41,15 @@ namespace SommarFenomen.Objects
 
             _basicEffect = new BasicEffect(_playWindow.GraphicsDevice);
             _basicEffect.TextureEnabled = true;
-            _basicEffect.Texture = Game1.contentManager.Load<Texture2D>(@"Images\Walls\Wall_1");
+            _basicEffect.Texture = _wallTexture;
 
             InitDrawVertices(wallVertices, type);
+
+        }
+
+        public static void LoadContent()
+        {
+            _wallTexture = Game1.contentManager.Load<Texture2D>(@"Images\Walls\Wall_1");
         }
 
         private void InitDrawVertices(Vertices vertices, WallType type)
@@ -54,6 +62,7 @@ namespace SommarFenomen.Objects
 
         private void InitInnerWall(Vertices vertices)
         {
+
             if (vertices.Count < 3)
             {
                 Console.WriteLine("Too few vertices " + vertices.Count);
@@ -88,6 +97,7 @@ namespace SommarFenomen.Objects
             _wallVerts[lastIndex + 1].Position.Y = center.Y;
             _wallVerts[lastIndex + 1].Position.Z = 0;
             _wallVerts[lastIndex + 1].TextureCoordinate = center / _textureScaling;
+
         }
 
         private void InitOuterWall(Vertices vertices)

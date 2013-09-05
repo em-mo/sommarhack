@@ -18,8 +18,8 @@ namespace SommarFenomen.LevelHandling
         private static readonly Color ENEMY_COLOR = new Color(255, 0, 0);
 
         private static readonly Point[] _offsetPoints = new Point[] 
-        {new Point(-1, 0), new Point(1, 0), new Point(0, -1), new Point(0, 1),
-            new Point(-1, -1), new Point(-1, 1), new Point(1, -1), new Point(1, 1)};
+                {new Point(-1, 0), new Point(1, 0), new Point(0, -1), new Point(0, 1),
+                    new Point(-1, -1), new Point(-1, 1), new Point(1, -1), new Point(1, 1)};
 
         #endregion
 
@@ -32,10 +32,8 @@ namespace SommarFenomen.LevelHandling
             PlayWindow = playWindow;
         }
 
-        private Stopwatch watch = new Stopwatch();
         public Level Parse(Texture2D mapImage)
         {
-            watch.Start();
             Level level = new Level();
 
             _levelScaleFactor = 4;
@@ -67,11 +65,8 @@ namespace SommarFenomen.LevelHandling
                         HandleEnemy(position, currentPixel, colorData, level);
                 }
             }
-            watch.Stop();
-            Console.WriteLine("Parse time: " + watch.Elapsed.TotalSeconds);
             return level;
         }
-
         private void HandlePlayer(Point currentPoint, Color dotColor, Color[] colorData, Level level)
         {
             Point position = GetCenterPoint(currentPoint, dotColor, colorData);
@@ -132,6 +127,22 @@ namespace SommarFenomen.LevelHandling
             return found;
         }
 
+        private LinkedList<Point> GetAllAdjacent(Point center, Color wallColor, Color[] colorData)
+        {
+            LinkedList<Point> points = new LinkedList<Point>();
+
+            foreach (var offset in _offsetPoints)
+            {
+                Point currentPoint = AddPoints(center, offset);
+                if (IsInside(currentPoint) && colorData[ToArrayIndex(currentPoint)] == wallColor)
+                {
+                    points.AddFirst(currentPoint);
+                }
+            }
+
+            return points;
+        }
+
         private Point GetCenterPoint(Point firstPoint, Color pointColor, Color[] colorData)
         {
             Stack<Point> points = new Stack<Point>();
@@ -156,10 +167,10 @@ namespace SommarFenomen.LevelHandling
                 else if (currentPoint.Y > lowerRight.Y)
                     lowerRight.Y = currentPoint.Y;
 
-                while (GetAdjacent(currentPoint, pointColor, colorData, ref adjacentPoint))
+                foreach (var point in GetAllAdjacent(currentPoint, pointColor, colorData))
                 {
-                    points.Push(adjacentPoint);
-                    colorData[ToArrayIndex(adjacentPoint)] = Color.White;
+                    points.Push(point);
+                    colorData[ToArrayIndex(point)] = Color.White;
                 }
             }
 
@@ -202,7 +213,7 @@ namespace SommarFenomen.LevelHandling
                 return false;
         }
 
-        private Point AddPoints(Point p1, Point p2)
+        private static Point AddPoints(Point p1, Point p2)
         {
             return new Point(p1.X + p2.X, p1.Y + p2.Y);
         }
