@@ -10,6 +10,7 @@ using Microsoft.Xna.Framework;
 using SommarFenomen.Util;
 using FarseerPhysics.Dynamics;
 using FarseerPhysics.Collision.Shapes;
+using FarseerPhysics.Dynamics.Joints;
 
 namespace SommarFenomen.Objects
 {
@@ -24,8 +25,25 @@ namespace SommarFenomen.Objects
         private int _virusType;
         private float[] _bodyOffsets = new float[2];
 
+        private DistanceJoint _playerBodyJoint;
+
         private GoodCell _targetCell;
-        public bool IsAssimilating { get; set; }
+
+        private enum VirusCellState
+        {
+            Normal,
+            Grabbed,
+            SuckedIn,
+            Consumed,
+            Assimilating
+        }
+        private VirusCellState _state = VirusCellState.Normal;
+
+        public bool IsNormal() { return _state == VirusCellState.Normal; }
+        public bool IsConsumed() { return _state == VirusCellState.Consumed; }
+        public bool IsGrabbed() { return _state == VirusCellState.Grabbed; }
+        public bool IsEntering() { return _state == VirusCellState.SuckedIn; }
+        public bool IsAssimilating() { return _state == VirusCellState.Assimilating; }
 
         public Virus(PlayWindow playWindow) : base(playWindow, new VirusStrategy())
         {
@@ -50,7 +68,6 @@ namespace SommarFenomen.Objects
             Sprite.Scale = new Vector2(0.08f);
             CreateBody();
             Body.UserData = this;
-            IsAssimilating = false;
         }
 
         private void OnChangeSettings()
@@ -61,12 +78,6 @@ namespace SommarFenomen.Objects
 
         private void InitCellTextures()
         {
-            //Texture2D body = _bodyTextures[Shared.Random.Next(6)];
-            //Texture2D eyes = _eyeTextures[Shared.Random.Next(2)];
-            //Texture2D mouth = _mouthTextures[Shared.Random.Next(4)];
-
-            //_virusTexture = Utils.MergeTextures(body, eyes, PlayWindow.GraphicsDevice);
-            //_virusTexture = Utils.MergeTextures(_virusTexture, mouth, PlayWindow.GraphicsDevice);
             _virusTexture = _virusTextureCombinations[Shared.Random.Next(_virusTextureCombinations.Count())];
         }
 
@@ -154,40 +165,50 @@ namespace SommarFenomen.Objects
             Body.UserData = this;
         }
 
-        public bool IsConsumed { get; set; }
-        private Body _consumingBody;
-        public void Consumed(Body centerBody)
+        public void Consumed()
         {
-            Strategy = new StationaryStrategy();
-            IsConsumed = true;
-            _consumingBody = centerBody;
-            Body.Mass = 1;
+            _state = VirusCellState.Consumed;
             Body.CollidesWith = Category.All & ~Category.Cat5;
+            RemovePlayerJoint();
         }
 
 
-        public bool IsGrabbed { get; set; }
         public void Grabbed()
         {
-            IsGrabbed = true;
+            _state = VirusCellState.Grabbed;
             Body.Mass = 0.1f;
         }
+        
 
-        public void EnteringPlayerCell()
+        public void EnteringPlayerCell(Body playerBody)
         {
+            _state = VirusCellState.SuckedIn;
+            Strategy = new StationaryStrategy();
             Body.CollidesWith = Category.All & ~Category.Cat10;
+            Body.Mass = 1;
+            CreatePlayerJoint(playerBody);
+        }
+
+        private void CreatePlayerJoint(Body playerBody)
+        {
+            _playerBodyJoint = JointFactory.CreateDistanceJoint(PlayWindow.World, Body, playerBody, Vector2.Zero, Vector2.Zero);
+            _playerBodyJoint.Frequency = 5.5f;
+            _playerBodyJoint.DampingRatio = 1.5f;
+            _playerBodyJoint.Length = 0.01f;
+            _playerBodyJoint.CollideConnected = true;
+        }
+
+        private void RemovePlayerJoint()
+        {
+            PlayWindow.World.RemoveJoint(_playerBodyJoint);
+            _playerBodyJoint = null;
         }
 
         public void Dropped()
         {
-            IsGrabbed = false;
-            if (IsConsumed)
+            if (IsGrabbed())
             {
-                Body.Mass = 1.0f;
-                Body.CollidesWith = Category.All & ~Category.Cat5;
-            }
-            else
-            {
+                _state = VirusCellState.Normal;
                 Body.Mass = 2.2f;
                 Body.CollidesWith = Category.All;
             }
@@ -255,9 +276,9 @@ namespace SommarFenomen.Objects
                 return true;
 
             // If cell resistance is low enough, enter the cell and go towards the center
-            if (goodCell.VirusCollide(this))
+            if (IsNormal() && goodCell.VirusCollide(this))
             {
-                IsAssimilating = true;
+                _state = VirusCellState.Assimilating;
                 Body.IgnoreCollisionWith(goodCell.Body);
                 _targetCell = goodCell;
                 Strategy = new VirusAssimilateStrategy(goodCell);
@@ -299,7 +320,7 @@ namespace SommarFenomen.Objects
         private double _explodeTimer = 0;
         public override void Update(GameTime gameTime)
         {
-            if (IsAssimilating)
+            if (IsAssimilating())
             {
                 _shrinkTimer += gameTime.ElapsedGameTime.TotalSeconds;
                 _explodeTimer += gameTime.ElapsedGameTime.TotalSeconds;
@@ -316,7 +337,7 @@ namespace SommarFenomen.Objects
                     _targetCell.ExplodeByVirus();
                 }
             }
-            else if (IsConsumed)
+            else if (IsConsumed())
             {
                 FadeOut(gameTime);
             }
