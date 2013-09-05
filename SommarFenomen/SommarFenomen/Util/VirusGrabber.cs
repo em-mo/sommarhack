@@ -22,7 +22,7 @@ namespace SommarFenomen.Util
         private World _world;
         private Body _playerCenterbody;
         
-        private static readonly double OUTER_BODY_CLOSED_TIME = 0.1;
+        private static readonly double OUTER_BODY_CLOSED_TIME = 0.2;
         private Stopwatch _outerBodyWatch = new Stopwatch();
 
 

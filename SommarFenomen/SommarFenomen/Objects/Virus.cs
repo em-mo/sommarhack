@@ -184,7 +184,7 @@ namespace SommarFenomen.Objects
         {
             _state = VirusCellState.SuckedIn;
             Strategy = new StationaryStrategy();
-            Body.CollidesWith = Category.All & ~Category.Cat10;
+            Body.CollidesWith = Category.All & ~Category.Cat10 & ~Category.Cat5;
             Body.Mass = 1;
             CreatePlayerJoint(playerBody);
         }
