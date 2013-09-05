@@ -6,6 +6,7 @@ using System.IO;
 using Microsoft.Kinect;
 using Microsoft.Xna.Framework;
 using System.Diagnostics;
+using SommarFenomen.Util;
 
 namespace SommarFenomen
 {

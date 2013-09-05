@@ -20,6 +20,7 @@ namespace SommarFenomen.Objects
             _sprite.Position = position;
             _sprite.Scale = new Vector2(size);
             _sprite.Color = ColorFromSize(size);
+            _sprite.CenterOrigin();
             _rotation = rotation;
             _strategy = strategy;
         }
@@ -28,6 +29,7 @@ namespace SommarFenomen.Objects
         {
             int colorValue = (int)(255 * size);
             colorValue = (colorValue > 255) ? 255 : colorValue;
+            colorValue = (colorValue < 70) ? 70 : colorValue;
             return new Color(colorValue, colorValue, colorValue, colorValue);
         }
 

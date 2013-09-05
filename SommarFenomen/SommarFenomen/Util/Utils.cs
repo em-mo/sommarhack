@@ -5,8 +5,10 @@ using System.Text;
 using Microsoft.Kinect;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System.IO;
+using Microsoft.Xna.Framework.Content;
 
-namespace SommarFenomen
+namespace SommarFenomen.Util
 {
     enum Arm { Left, Right };
     enum Direction { None, Left, Right, Up, Down};
@@ -46,7 +48,7 @@ namespace SommarFenomen
         }
     }
 
-    class Utils
+    static class Utils
     {
         public static double CalculateAngle(Vector3 vector1, Vector3 vector2)
         {
@@ -138,6 +140,27 @@ namespace SommarFenomen
         {
             return Math.Exp(-Math.Pow((x - mean), 2) / (2 * Math.Pow(standardDeviation, 2))) /
                 (standardDeviation * SQRT_2PI);
+        }
+
+        public static List<T> LoadFiles<T>(this ContentManager contentManager, string contentFolder, string exp)
+        {
+            DirectoryInfo dir = new DirectoryInfo(contentManager.RootDirectory + "/" + contentFolder);
+            if (!dir.Exists)
+                throw new DirectoryNotFoundException();
+            List<T> result = new List<T>();
+
+            FileInfo[] files = dir.GetFiles(exp);
+            foreach (FileInfo file in files)
+            {
+                string key = Path.GetFileNameWithoutExtension(file.Name);
+                result.Add(contentManager.Load<T>(contentFolder + "/" + key));
+            }
+            return result;
+        }
+
+        public static List<T> LoadAllFiles<T>(this ContentManager contentManager, string contentFolder)
+        {
+            return LoadFiles<T>(contentManager, contentFolder, "*.*");
         }
     }
 }
