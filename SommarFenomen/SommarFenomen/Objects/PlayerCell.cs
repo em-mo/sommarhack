@@ -87,8 +87,8 @@ namespace SommarFenomen.Objects
             SetLeftArmRotation((float)Math.PI / 2, (float)Math.PI / 2);
             SetRightArmRotation(-(float)Math.PI / 2, -(float)Math.PI / 2);
 
-            _leftHandGrabber = new VirusGrabber(VirusGrabber.Hand.LEFT, _spriteDict[PlayerSprites.LeftHand], PlayWindow.World);
-            _rightHandGrabber = new VirusGrabber(VirusGrabber.Hand.RIGHT, _spriteDict[PlayerSprites.RightHand], PlayWindow.World);
+            _leftHandGrabber = new VirusGrabber(VirusGrabber.Hand.LEFT, _spriteDict[PlayerSprites.LeftHand], PlayWindow.World, _centerBody);
+            _rightHandGrabber = new VirusGrabber(VirusGrabber.Hand.RIGHT, _spriteDict[PlayerSprites.RightHand], PlayWindow.World, _centerBody);
         }
 
         private void InitPlayerSprite()
@@ -538,21 +538,12 @@ namespace SommarFenomen.Objects
             return true;
         }
 
-        private void IgnoreOuterCollisions(Body ignoreBody)
+        private void SpawnCenterJoint(Virus virus)
         {
-            foreach (var outerBody in _outerBodies)
-            {
-                outerBody.IgnoreCollisionWith(ignoreBody);
-            }
+            
         }
 
-        private void RestoreOuterCollisions(Body ignoreBody)
-        {
-            foreach (var outerBody in _outerBodies)
-            {
-                outerBody.RestoreCollisionWith(ignoreBody);
-            }
-        }
+
 
         public bool OuterBodyObjectCollision(Fixture f1, Fixture f2, Contact contact)
         {
@@ -590,9 +581,9 @@ namespace SommarFenomen.Objects
 
             Vector2 distanceVector = f1.Body.Position - f2.Body.Position;
 
-            if ((distanceVector.Length() < ConvertUnits.ToSimUnits(_bodyRadius) * VIRUS_CENTER_FACTOR))
+            if (virus.IsConsumed() == false && (distanceVector.Length() < ConvertUnits.ToSimUnits(_bodyRadius) * VIRUS_CENTER_FACTOR))
             {
-                virus.Consumed(_centerBody);
+                virus.Consumed();
 
                 if (o2 == _leftHandGrabber.GrabbedVirus())
                 {

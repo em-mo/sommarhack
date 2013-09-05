@@ -20,13 +20,16 @@ namespace SommarFenomen.Util
         private int _handAdjustmentFactor;
         private Sprite _handSprite;
         private World _world;
+        private Body _playerCenterbody;
         
         private static readonly double OUTER_BODY_CLOSED_TIME = 0.1;
         private Stopwatch _outerBodyWatch = new Stopwatch();
 
 
-        public VirusGrabber(Hand hand, Sprite handSprite, World world)
+        public VirusGrabber(Hand hand, Sprite handSprite, World world, Body centerBody)
         {
+            _playerCenterbody = centerBody;
+
             if (hand == Hand.LEFT)
                 _handAdjustmentFactor = -1;
             else
@@ -99,19 +102,13 @@ namespace SommarFenomen.Util
             }
         }
 
-        private static readonly float BREAKING_POINT = 0.7f * 0.7f;
+        private static readonly float BREAKING_POINT = 2.0f * 2.0f;
         public bool HandleVirusSprings()
         {
             bool broken = false;
 
             if (_grabbedVirus != null)
             {
-                if (_grabbedVirus.IsAssimilating)
-                {
-                    DroppedVirus();
-                    return true;
-                }
-
                 for (int i = 0; i < _joints.Count(); i++)
                 {
                     _joints[i].WorldAnchorB = _handCenter + _jointOffsets[i];
@@ -139,7 +136,10 @@ namespace SommarFenomen.Util
         {
             _outerBodyWatch.Start();
             if (_outerBodyWatch.Elapsed.TotalSeconds > OUTER_BODY_CLOSED_TIME)
-                _grabbedVirus.EnteringPlayerCell();
+            {
+                _grabbedVirus.EnteringPlayerCell(_playerCenterbody);
+                DroppedVirus();
+            }
         }
 
         public void CenterCollision()
@@ -155,7 +155,7 @@ namespace SommarFenomen.Util
             {
                 Virus virus = (Virus)o;
 
-                if (virus.IsConsumed == false && virus.IsGrabbed == false)
+                if (virus.IsNormal())
                     _grabbedVirus = (Virus)o;
             }
             return true;
