@@ -59,7 +59,6 @@ namespace SommarFenomen.Objects
         {
             int randomNumber = Shared.Random.Next(_allTextureCombinations.Count());
             int happyNumber = randomNumber / ((_mouthTextures.Count() - 1) * (_eyeTextures.Count() - 1));
-            Console.WriteLine("Sad " + randomNumber + " Happy " + happyNumber);
             _happyTexture = _happyTextureCombinations[happyNumber];
             _sadTexture = _allTextureCombinations[randomNumber];
         }

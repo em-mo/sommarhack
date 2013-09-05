@@ -90,13 +90,13 @@ namespace SommarFenomen
             _background2 = new Background(@"Images\Gradient", this);
 
             //TestInit();
-            LoadLevel(@"levels\smalltest");
-
-            Camera2D.Position = _player.Position;
-            Camera2D.Jump2Target();
-            Camera2D.EnableTracking = true;
-            Camera2D.TrackingBody = _player.Body;
-            Camera2D.Zoom = 0.75f;
+            //LoadLevel(@"levels\smalltest");
+            //
+            //Camera2D.Position = _player.Position;
+            //Camera2D.Jump2Target();
+            //Camera2D.EnableTracking = true;
+            //Camera2D.TrackingBody = _player.Body;
+            //Camera2D.Zoom = 0.75f;
 
             _endTimer.Reset();
         }

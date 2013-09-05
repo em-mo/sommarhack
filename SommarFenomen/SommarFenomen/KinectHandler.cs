@@ -31,7 +31,7 @@ namespace SommarFenomen
         {
             game = owner;
             game.StartingNewGame += OnNewGame;
-            kinectStrategy = (KinectStrategy)game.Player.Strategy;
+            //kinectStrategy = (KinectStrategy)game.Player.Strategy;
             leftHandChecker = new HandChecker(Arm.Left, JointType.HandLeft);
             rightHandChecker = new HandChecker(Arm.Right, JointType.HandRight);
 

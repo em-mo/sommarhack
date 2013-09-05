@@ -6,6 +6,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using SommarFenomen.Objects;
 using FarseerPhysics.Common;
+using System.Diagnostics;
 
 namespace SommarFenomen.LevelHandling
 {
@@ -31,8 +32,10 @@ namespace SommarFenomen.LevelHandling
             PlayWindow = playWindow;
         }
 
+        private Stopwatch watch = new Stopwatch();
         public Level Parse(Texture2D mapImage)
         {
+            watch.Start();
             Level level = new Level();
 
             _levelScaleFactor = 4;
@@ -64,7 +67,8 @@ namespace SommarFenomen.LevelHandling
                         HandleEnemy(position, currentPixel, colorData, level);
                 }
             }
-
+            watch.Stop();
+            Console.WriteLine("Parse time: " + watch.Elapsed.TotalSeconds);
             return level;
         }
 
