@@ -52,15 +52,36 @@ namespace SommarFenomen.Windows
             _dot.Color = Color.DarkRed;
 
             _spriteList.Add(_background);
+
+            Vector2 imageScaledSize = _background.ScaledSize / 2;
+
+            HEART_POSITION = Utils.GetScreenCenter(graphicsDevice);
+            KNEE_POSITION = Utils.GetScreenCenter(graphicsDevice);
+            NECK_POSITION = Utils.GetScreenCenter(graphicsDevice);
+            BRAIN_POSITION = Utils.GetScreenCenter(graphicsDevice);
+
+            HEART_POSITION.X += imageScaledSize.X * -0.005f;
+            HEART_POSITION.Y += imageScaledSize.Y * -0.41f;
+
+            KNEE_POSITION.X += imageScaledSize.X * 0.06f;
+            KNEE_POSITION.Y += imageScaledSize.Y * 0.43f;
+
+            NECK_POSITION.X += imageScaledSize.X * -0.01f;
+            NECK_POSITION.Y += imageScaledSize.Y * -0.65f;
+
+            BRAIN_POSITION.X += imageScaledSize.X * -0.01f;
+            BRAIN_POSITION.Y += imageScaledSize.Y * -0.85f;
         }
+
+        private static Vector2 HEART_POSITION;
+        private static Vector2 BRAIN_POSITION;
+        private static Vector2 NECK_POSITION;
+        private static Vector2 KNEE_POSITION;
 
         public void Initialize()
         {
             LevelBodyPart part = new LevelBodyPart();
-            Vector2 position;
-            position.X = _spriteBatch.GraphicsDevice.Viewport.Width / 2;
-            position.Y = _spriteBatch.GraphicsDevice.Viewport.Height / 2;
-            part.Position = position;
+            part.Position = BRAIN_POSITION;
             part.LevelFiles.Add(@"levels\test");
             _bodyParts.Add(part);
         }
@@ -113,7 +134,8 @@ namespace SommarFenomen.Windows
 
         public void Draw(Microsoft.Xna.Framework.GameTime gameTime)
         {
-            _spriteBatch.GraphicsDevice.Clear(Color.CornflowerBlue);
+            Color color = new Color(247, 118, 97);
+            _spriteBatch.GraphicsDevice.Clear(color);
             _spriteBatch.Begin(SpriteSortMode.Deferred, null, null, null, null, null, _camera.View);
             GraphicsHandler.DrawSprites(_spriteList, _spriteBatch);
             _spriteBatch.End();
