@@ -23,6 +23,7 @@ namespace SommarFenomen.Windows
         private Stopwatch _bodyPartPickTimer = new Stopwatch();
         private Stopwatch _zoomTimer = new Stopwatch();
         private Stopwatch _startGameTimer = new Stopwatch();
+        private Dictionary<BodyPartType, Vector2> BodyPartPositions = new Dictionary<BodyPartType, Vector2>();
         private List<LevelBodyPart> _bodyParts = new List<LevelBodyPart>();
         private LevelBodyPart _chosenBodyPart;
         private static readonly float START_ZOOM = 0.25F;
@@ -71,6 +72,12 @@ namespace SommarFenomen.Windows
 
             BRAIN_POSITION.X += imageScaledSize.X * -0.01f;
             BRAIN_POSITION.Y += imageScaledSize.Y * -0.85f;
+
+            BodyPartPositions[BodyPartType.BRAIN] = BRAIN_POSITION;
+            BodyPartPositions[BodyPartType.HEART] = HEART_POSITION;
+            BodyPartPositions[BodyPartType.NECK] = NECK_POSITION;
+            BodyPartPositions[BodyPartType.KNEE] = KNEE_POSITION;
+            
         }
 
         private static Vector2 HEART_POSITION;
@@ -78,12 +85,14 @@ namespace SommarFenomen.Windows
         private static Vector2 NECK_POSITION;
         private static Vector2 KNEE_POSITION;
 
+
         public void Initialize()
         {
-            LevelBodyPart part = new LevelBodyPart();
-            part.Position = BRAIN_POSITION;
-            part.LevelFiles.Add(@"levels\test");
-            _bodyParts.Add(part);
+            //LevelBodyPart part = new LevelBodyPart();
+            //part.Position = BodyPartType.BRAIN;
+            //part.LevelFiles.Add(@"levels\test");
+            //_bodyParts.Add(part);
+            _bodyParts = LevelBodyPart.LoadAllParts();
         }
 
         private LevelBodyPart ChooseHealthyBodyPart()
@@ -116,12 +125,12 @@ namespace SommarFenomen.Windows
             {
                 _bodyPartPickTimer.Reset();
                 _zoomTimer.Start();
-                _dot.Position = _chosenBodyPart.Position;
+                _dot.Position = BodyPartPositions[_chosenBodyPart.Position];
                 _spriteList.Add(_dot);
             }
             else if (_zoomTimer.Elapsed.TotalSeconds > ZOOM_TIME)
             {
-                _camera.Position = _chosenBodyPart.Position;
+                _camera.Position = BodyPartPositions[_chosenBodyPart.Position];
                 _camera.Zoom *= ZOOM_FACTOR;
             }
             

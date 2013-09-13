@@ -4,12 +4,13 @@ using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
 using System.IO;
+using SommarFenomen.Util;
 
 namespace SommarFenomen.Windows.WindowUtils
 {
     class LevelBodyPart
     {
-        public Vector2 Position { get; set; }
+        public BodyPartType Position { get; set; }
         public List<string> LevelFiles { get; set; }
         public bool Dead = false;
 
@@ -26,7 +27,7 @@ namespace SommarFenomen.Windows.WindowUtils
         public static List<LevelBodyPart> LoadAllParts()
         {
             List<LevelBodyPart> parts = new List<LevelBodyPart>();
-            string levelDir = "/levels/";
+            string levelDir = "levels/";
             DirectoryInfo dir = new DirectoryInfo(levelDir);
             if (!dir.Exists)
                 throw new DirectoryNotFoundException();
@@ -35,7 +36,6 @@ namespace SommarFenomen.Windows.WindowUtils
             foreach (FileInfo file in files)
             {
                 LevelBodyPart bodyPart = new LevelBodyPart();
-                string pngName = Path.GetFileNameWithoutExtension(file.Name) + ".png";
                 
                 using (StreamReader readFileStream = new StreamReader(file.FullName))
                 {
@@ -46,9 +46,16 @@ namespace SommarFenomen.Windows.WindowUtils
 			        {
                         if (words[i] == "Position")
                         {
-                            int x = int.Parse(words[++i]);
-                            int y = int.Parse(words[++i]);
-                            bodyPart.Position = new Vector2(x, y);
+                            i++;
+                            foreach (var part in Enum.GetValues(typeof(BodyPartType)))
+                            {
+                                if (Enum.GetName(typeof(BodyPartType), part).Equals(words[i], StringComparison.CurrentCultureIgnoreCase))
+                                {
+                                    bodyPart.Position = (BodyPartType)part;
+                                    break;
+                                }
+                            }
+
                         }
                         else if (words[i] == "Level")
                         {
@@ -62,6 +69,7 @@ namespace SommarFenomen.Windows.WindowUtils
                 {
                     bodyPart.AddLevel(map.FullName);
                 }
+                parts.Add(bodyPart);
             }
 
             return parts;

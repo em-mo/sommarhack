@@ -19,6 +19,7 @@ using SommarFenomen.LevelHandling;
 using SommarFenomen.Windows;
 using SommarFenomen.Stats;
 using SommarFenomen.Windows.WindowUtils;
+using System.IO;
 
 namespace SommarFenomen
 {
@@ -177,7 +178,7 @@ namespace SommarFenomen
             GoodCellList.Clear();
             VirusList.Clear();
 
-            _level = _levelParser.Parse(Game1.contentManager.Load<Texture2D>(file));
+            _level = _levelParser.Parse(Texture2D.FromStream(Game1.graphics.GraphicsDevice, new FileStream(file, FileMode.Open)));
             _wallList = _level.GetWalls();
 
 

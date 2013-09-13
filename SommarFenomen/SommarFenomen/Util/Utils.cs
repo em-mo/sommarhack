@@ -12,7 +12,7 @@ namespace SommarFenomen.Util
 {
     enum Arm { Left, Right };
     enum Direction { None, Left, Right, Up, Down};
-
+    enum BodyPartType { HEART, BRAIN, NECK, KNEE };
     // Angle in radians
     class WindPuffMessage
     {
