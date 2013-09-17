@@ -24,8 +24,8 @@ namespace SommarFenomen.Windows
         private Stopwatch _zoomTimer = new Stopwatch();
         private Stopwatch _startGameTimer = new Stopwatch();
         private Dictionary<BodyPartType, Vector2> BodyPartPositions = new Dictionary<BodyPartType, Vector2>();
-        private List<LevelBodyPart> _bodyParts = new List<LevelBodyPart>();
-        private LevelBodyPart _chosenBodyPart;
+        protected List<LevelBodyPart> _bodyParts = new List<LevelBodyPart>();
+        protected LevelBodyPart _chosenBodyPart;
         private static readonly float START_ZOOM = 0.25F;
         private static readonly float ZOOM_FACTOR = 1.02f;
         private static readonly double PICK_TIME = 1;
@@ -95,7 +95,7 @@ namespace SommarFenomen.Windows
             _bodyParts = LevelBodyPart.LoadAllParts();
         }
 
-        private LevelBodyPart ChooseHealthyBodyPart()
+        private virtual LevelBodyPart ChooseHealthyBodyPart()
         {
             List<LevelBodyPart> healthyBodyParts = new List<LevelBodyPart>();
             foreach (var bodyPart in _bodyParts)
@@ -150,7 +150,7 @@ namespace SommarFenomen.Windows
             _spriteBatch.End();
         }
 
-        public void OnChange(Object o)
+        public virtual void OnChange(Object o)
         {
             _camera.ResetCamera();
             _camera.Zoom = START_ZOOM;
@@ -158,6 +158,11 @@ namespace SommarFenomen.Windows
             _camera.Jump2Target();
 
             _chosenBodyPart = ChooseHealthyBodyPart();
+            ResetTimers();
+        }
+
+        protected void ResetTimers()
+        {
             _bodyPartPickTimer.Restart();
             _zoomTimer.Reset();
             _startGameTimer.Restart();

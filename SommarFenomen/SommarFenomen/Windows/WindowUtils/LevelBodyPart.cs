@@ -13,6 +13,7 @@ namespace SommarFenomen.Windows.WindowUtils
         public BodyPartType Position { get; set; }
         public List<string> LevelFiles { get; set; }
         public bool Dead = false;
+        public int LevelNumber { get; set; }
 
         public LevelBodyPart()
         {
@@ -57,9 +58,9 @@ namespace SommarFenomen.Windows.WindowUtils
                             }
 
                         }
-                        else if (words[i] == "Level")
+                        else if (words[i] == "LevelNumber")
                         {
-
+                            bodyPart.LevelNumber = int.Parse(words[++i]);
                         }
                     }
                 }

@@ -105,7 +105,7 @@ namespace SommarFenomen
         public void EndGame(bool winLoss)
         {
             _statsHandler.EndSession(winLoss);
-            _windowHandler.ChangeWindow(_windowHandler.LevelSelectWindow, null);
+            _windowHandler.ChangeWindow(_windowHandler.LevelSelectWindow, winLoss);
         }
 
         public void OnChange(Object o)
