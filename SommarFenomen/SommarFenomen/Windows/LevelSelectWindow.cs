@@ -26,6 +26,7 @@ namespace SommarFenomen.Windows
         private Dictionary<BodyPartType, Vector2> BodyPartPositions = new Dictionary<BodyPartType, Vector2>();
         protected List<LevelBodyPart> _bodyParts = new List<LevelBodyPart>();
         protected LevelBodyPart _chosenBodyPart;
+
         private static readonly float START_ZOOM = 0.25F;
         private static readonly float ZOOM_FACTOR = 1.02f;
         private static readonly double PICK_TIME = 1;
@@ -95,7 +96,7 @@ namespace SommarFenomen.Windows
             _bodyParts = LevelBodyPart.LoadAllParts();
         }
 
-        private virtual LevelBodyPart ChooseHealthyBodyPart()
+        public virtual LevelBodyPart ChooseNextBodyPart()
         {
             List<LevelBodyPart> healthyBodyParts = new List<LevelBodyPart>();
             foreach (var bodyPart in _bodyParts)
@@ -157,7 +158,7 @@ namespace SommarFenomen.Windows
             _camera.Position = Utils.GetScreenCenter(_spriteBatch.GraphicsDevice);
             _camera.Jump2Target();
 
-            _chosenBodyPart = ChooseHealthyBodyPart();
+            _chosenBodyPart = ChooseNextBodyPart();
             ResetTimers();
         }
 
