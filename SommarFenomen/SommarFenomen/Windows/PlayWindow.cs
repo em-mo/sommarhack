@@ -60,6 +60,7 @@ namespace SommarFenomen
 
         // Chooses algorithm for hand movement
         private bool _movementType = false;
+        public bool GameRunning { get; set; }
 
         private PlayerCell _player;
 
@@ -70,7 +71,7 @@ namespace SommarFenomen
             VirusList = new List<Virus>();
             _levelParser = new LevelParser(this);
             _statsHandler = new StatsHandler();
-
+            
             mouseWatch.Start();
         }
 
@@ -104,6 +105,7 @@ namespace SommarFenomen
 
         public void EndGame(bool winLoss)
         {
+            GameRunning = false;
             _statsHandler.EndSession(winLoss);
             _windowHandler.ChangeWindow(_windowHandler.LevelSelectWindow, winLoss);
         }
@@ -134,6 +136,7 @@ namespace SommarFenomen
 
             //Event
             StartingNewGame();
+            GameRunning = true;
         }
 
         private void TestInit()

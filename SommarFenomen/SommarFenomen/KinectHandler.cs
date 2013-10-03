@@ -42,7 +42,7 @@ namespace SommarFenomen
         {
             while (running)
             {
-                if (sensor != null)
+                if (sensor != null && game.GameRunning)
                     ProcessSkeletonFrame();
                 else
                 {
