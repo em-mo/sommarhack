@@ -243,11 +243,9 @@ namespace SommarFenomen
         /// </summary>
         private class HandChecker
         {
-            private const float FORCE_FACTOR = 50;
-            private const float ALTERNATE_FORCE = 1000;
             private const int BUFFER_LENGTH = 6;
             private readonly int START_POINT_OFFSET = 1;
-            private const float MOVEMENT_THRESHOLD = 0.1f;
+
 
             private Arm arm;
             private JointType joint;
@@ -269,6 +267,8 @@ namespace SommarFenomen
                 }
             }
 
+            private const float MOVEMENT_THRESHOLD = 0.08f;
+            private const float FORCE_FACTOR = 190;
             public Vector2 CheckHand(Skeleton currentSkeleton)
             {
                 
@@ -288,24 +288,21 @@ namespace SommarFenomen
 
                 Vector2 movemetVector = new Vector2(endPoint.X - startPoint.X, endPoint.Y - startPoint.Y);
                 // Check thresholds for X and Y
-                if (movemetVector.X < -MOVEMENT_THRESHOLD)
-                    force.X = FORCE_FACTOR;
-                else if (movemetVector.X > MOVEMENT_THRESHOLD)
-                    force.X = -FORCE_FACTOR;
-                if (movemetVector.Y < -MOVEMENT_THRESHOLD)
-                    force.Y = -FORCE_FACTOR;
-                else if (movemetVector.Y > MOVEMENT_THRESHOLD)
-                    force.Y = FORCE_FACTOR;
+                if (Math.Abs(movemetVector.X) > MOVEMENT_THRESHOLD)
+                    force.X = GetForce(-movemetVector.X);
+                if (Math.Abs(movemetVector.Y) > MOVEMENT_THRESHOLD)
+                    force.Y = GetForce(movemetVector.Y);
 
                 handPositionsHead = (handPositionsHead + 1) % BUFFER_LENGTH;
 
                 return force;
             }
 
+            private const float ALTERNATE_FORCE = 1200;
             public Vector2 AlternateCheckHand(Skeleton currentSkeleton)
             {
                 const int START = 1;
-                const float ALTERNATE_THRESHOLD = 0.03f;
+                const float ALTERNATE_THRESHOLD = 0.3f * 0.3f;
                 Vector2 force = Vector2.Zero;
 
                 // Add new element to array                
@@ -316,27 +313,23 @@ namespace SommarFenomen
                 if (handStart < 0)
                     handStart = BUFFER_LENGTH + handStart;
 
-                int handEnd = (handStart + 1) % BUFFER_LENGTH;
-                // Sum the latest differences and take the average
-                for (int i = 1; i <= START; i++)
-                {
-                    diffVector.X += handPositions[handEnd].X;
-                    diffVector.Y += handPositions[handEnd].Y;
-                    diffVector.X -= handPositions[handStart].X;
-                    diffVector.Y -= handPositions[handStart].Y;
+                int handEnd = handPositionsHead;
 
-                    handStart = (handStart + 1) % BUFFER_LENGTH;
-                    handEnd = (handEnd + 1) % BUFFER_LENGTH;
-                }
+                // Sum the latest differences and take the average
+                diffVector.X += handPositions[handEnd].X;
+                diffVector.Y += handPositions[handEnd].Y;
+                diffVector.X -= handPositions[handStart].X;
+                diffVector.Y -= handPositions[handStart].Y;
+
                 //Average
                 diffVector /= START;
 
                 // Check thresholds for X and Y
                 if (Math.Abs(diffVector.X) > ALTERNATE_THRESHOLD)
-                    force.X = GetForce(-diffVector.X);
+                    force.X = GetAlternateForce(-diffVector.X);
 
                 if (Math.Abs(diffVector.Y) > ALTERNATE_THRESHOLD)
-                    force.Y = GetForce(diffVector.Y);
+                    force.Y = GetAlternateForce(diffVector.Y);
 
                 handPositionsHead = (handPositionsHead + 1) % BUFFER_LENGTH;
 
@@ -344,6 +337,11 @@ namespace SommarFenomen
             }
 
             private float GetForce(float vectorComponent)
+            {
+                return vectorComponent * FORCE_FACTOR;
+            }
+
+            private float GetAlternateForce(float vectorComponent)
             {
                 vectorComponent *= (vectorComponent < 0) ? -vectorComponent : vectorComponent;
                 return vectorComponent * ALTERNATE_FORCE;

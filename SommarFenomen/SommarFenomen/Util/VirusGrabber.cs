@@ -102,7 +102,7 @@ namespace SommarFenomen.Util
             }
         }
 
-        private static readonly float BREAKING_POINT = 2.0f * 2.0f;
+        private static readonly float BREAKING_POINT = 3.0f * 3.0f;
         public bool HandleVirusSprings()
         {
             bool broken = false;

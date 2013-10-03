@@ -59,7 +59,7 @@ namespace SommarFenomen
         public event Action StartingNewGame;
 
         // Chooses algorithm for hand movement
-        private bool _movementType = false;
+        private bool _movementType = true;
         public bool GameRunning { get; set; }
 
         private PlayerCell _player;
