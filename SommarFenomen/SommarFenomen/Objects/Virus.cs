@@ -200,8 +200,11 @@ namespace SommarFenomen.Objects
 
         private void RemovePlayerJoint()
         {
-            PlayWindow.World.RemoveJoint(_playerBodyJoint);
-            _playerBodyJoint = null;
+            if (_playerBodyJoint != null)
+            {
+                PlayWindow.World.RemoveJoint(_playerBodyJoint);
+                _playerBodyJoint = null;
+            }
         }
 
         public void Dropped()

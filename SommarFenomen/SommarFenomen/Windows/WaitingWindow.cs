@@ -34,7 +34,7 @@ namespace SommarFenomen.Windows
         private double startTimer;
         public void Update(Microsoft.Xna.Framework.GameTime gameTime)
         {
-            if (!_kinectHandler.HasSkeleton())
+            if (_kinectHandler.HasSkeleton() || true)
             {
                 startTimer += gameTime.ElapsedGameTime.TotalSeconds;
                 if (startTimer > START_TIME)

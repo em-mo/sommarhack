@@ -97,8 +97,11 @@ namespace SommarFenomen.Util
         {
             for (int i = 0; i < _joints.Count(); i++)
             {
-                _world.RemoveJoint(_joints[i]);
-                _joints[i] = null;
+                if (_joints[i] != null)
+                {
+                    _world.RemoveJoint(_joints[i]);
+                    _joints[i] = null;
+                }
             }
         }
 

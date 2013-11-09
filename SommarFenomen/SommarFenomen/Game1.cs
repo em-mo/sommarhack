@@ -38,9 +38,12 @@ namespace SommarFenomen
             _windowHandler = new WindowHandler(this);
 
             this.TargetElapsedTime = TimeSpan.FromSeconds(1 / FPS);
-
             graphics.PreferredBackBufferWidth = 1280;//GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width *3 / 4;
             graphics.PreferredBackBufferHeight = 720; // GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height * 3 / 4;
+
+            graphics.PreferredBackBufferWidth = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width;
+            graphics.PreferredBackBufferHeight = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height;
+            //graphics.IsFullScreen = true;
 
             this.IsMouseVisible = true;
         }

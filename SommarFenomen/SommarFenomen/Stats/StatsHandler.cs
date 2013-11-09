@@ -5,6 +5,7 @@ using System.Text;
 using System.Xml.Serialization;
 using System.IO;
 using SommarFenomen.Objects;
+using System.Diagnostics;
 
 namespace SommarFenomen.Stats
 {
@@ -15,6 +16,7 @@ namespace SommarFenomen.Stats
             public int EnemyKills = 0;
             public int FriendliesLost = 0;
             public bool Win = false;
+            public TimeSpan Time = TimeSpan.MinValue;
         }
 
         private class DailyStats
@@ -30,17 +32,20 @@ namespace SommarFenomen.Stats
             public int EnemyKills = 0;
             public int FriendliesLost = 0;
             public int Wins = 0;
+            public Highscore Scores;
         }
 
         private SessionStats _sessionStats;
         private DailyStats _dailyStats;
         private GlobalStats _globalStats;
 
+        private Stopwatch _sessionTimer;
         private string _globalStatsPath = @"stats.xml";
         public StatsHandler()
         {
             _globalStats = ReadFromFile(_globalStatsPath);
             _dailyStats = new DailyStats();
+            _sessionTimer = new Stopwatch();
         }
 
         public void RegisterDeath(Type type)
@@ -63,10 +68,13 @@ namespace SommarFenomen.Stats
         public void StartSession()
         {
             _sessionStats = new SessionStats();
+            _sessionTimer.Restart();
         }
 
         public void EndSession(bool winLoss)
         {
+            _sessionTimer.Stop();
+            _sessionStats.Time = _sessionTimer.Elapsed;
             _sessionStats.Win = winLoss;
             AddSessionStats();
             SaveToFile(_globalStatsPath, _globalStats);
@@ -81,16 +89,28 @@ namespace SommarFenomen.Stats
             _globalStats.FriendliesLost += _sessionStats.FriendliesLost;
             _dailyStats.FriendliesLost += _sessionStats.FriendliesLost;
 
+            _globalStats.Scores.InsertScore(_sessionStats.Time.Ticks);
+            Console.WriteLine("Scores ");
+            foreach (Score score in _globalStats.Scores._scores)
+                Console.WriteLine(new TimeSpan(score.TimeTicks));
             if (_sessionStats.Win)
             {
                 _dailyStats.Wins++;
                 _globalStats.Wins++;
             }
         }
+        
+        private XmlSerializer GetSerializer()
+        {
+            Type[] types = new Type[2];
+            types[0] = typeof(Highscore);
+            types[1] = typeof(Score);
+            return new XmlSerializer(typeof(GlobalStats), types);
+        }
 
         private GlobalStats ReadFromFile(string filePath)
         {
-            XmlSerializer formatter = new XmlSerializer(typeof(GlobalStats));
+            XmlSerializer formatter = GetSerializer();
             GlobalStats loadedStats;
             try
             {
@@ -104,11 +124,14 @@ namespace SommarFenomen.Stats
                 loadedStats = new GlobalStats();
             }
 
+            if (loadedStats.Scores == null)
+                loadedStats.Scores = new Highscore();
+
             return loadedStats;
         }
         private void SaveToFile(string filePath, Object o)
         {
-            XmlSerializer formatter = new XmlSerializer(typeof(GlobalStats));
+            XmlSerializer formatter = GetSerializer();
 
             using (TextWriter writeFileStream = new StreamWriter(filePath))
             {
