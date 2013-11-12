@@ -76,20 +76,27 @@ namespace SommarFenomen.Stats
             _sessionTimer.Stop();
             _sessionStats.Time = _sessionTimer.Elapsed;
             _sessionStats.Win = winLoss;
-            AddSessionStats();
+            AddSessionStats(winLoss);
             SaveToFile(_globalStatsPath, _globalStats);
 
             _sessionStats = new SessionStats();
         }
 
-        private void AddSessionStats()
+        public void Save()
+        {
+            SaveToFile(_globalStatsPath, _globalStats);
+        }
+
+        private void AddSessionStats(bool winLoss)
         {
             _globalStats.EnemyKills += _sessionStats.EnemyKills;
             _dailyStats.EnemyKills += _sessionStats.EnemyKills;
             _globalStats.FriendliesLost += _sessionStats.FriendliesLost;
             _dailyStats.FriendliesLost += _sessionStats.FriendliesLost;
 
-            _globalStats.Scores.InsertScore(_sessionStats.Time.Ticks);
+            if (winLoss)
+                _globalStats.Scores.InsertScore(_sessionStats.Time.Ticks);
+            
             Console.WriteLine("Scores ");
             foreach (Score score in _globalStats.Scores._scores)
                 Console.WriteLine(new TimeSpan(score.TimeTicks));
@@ -98,6 +105,11 @@ namespace SommarFenomen.Stats
                 _dailyStats.Wins++;
                 _globalStats.Wins++;
             }
+        }
+
+        public Highscore GetHighscores()
+        {
+            return _globalStats.Scores;
         }
         
         private XmlSerializer GetSerializer()
@@ -129,6 +141,7 @@ namespace SommarFenomen.Stats
 
             return loadedStats;
         }
+
         private void SaveToFile(string filePath, Object o)
         {
             XmlSerializer formatter = GetSerializer();

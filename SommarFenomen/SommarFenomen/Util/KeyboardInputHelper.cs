@@ -35,10 +35,22 @@ namespace SommarFenomen.Util
             return currentState.IsKeyUp(key);
         }
 
+        public Keys[] GetKeyDowns()
+        {
+            return _keyDowns;
+        }
+
+        Keys[] _keyDowns;
+
         public void update()
         {
             previousState = currentState;
             currentState = Keyboard.GetState();
+
+            Keys[] previousKeys = previousState.GetPressedKeys();
+            Keys[] currentKeys = currentState.GetPressedKeys();
+
+            _keyDowns = currentKeys.Except(previousKeys).ToArray();
         }
     }
 }

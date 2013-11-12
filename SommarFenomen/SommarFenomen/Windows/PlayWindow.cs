@@ -70,7 +70,7 @@ namespace SommarFenomen
             GoodCellList = new List<GoodCell>();
             VirusList = new List<Virus>();
             _levelParser = new LevelParser(this);
-            _statsHandler = new StatsHandler();
+            _statsHandler = Shared.StatsHandler;
             
             mouseWatch.Start();
         }
@@ -107,7 +107,7 @@ namespace SommarFenomen
         {
             GameRunning = false;
             _statsHandler.EndSession(winLoss);
-            _windowHandler.ChangeWindow(_windowHandler.LevelSelectWindow, winLoss);
+            _windowHandler.ChangeWindow(_windowHandler.ScoreWindow, winLoss);
         }
 
         public void OnChange(Object o)
@@ -339,7 +339,7 @@ namespace SommarFenomen
         private float _timeStepFactor = 1;
         public Vector2 LastGoodCellPosition { get; set; }
         private Stopwatch _endTimer = new Stopwatch();
-        private static readonly double END_TIME = 5;
+        private static readonly double END_TIME = 3;
         private bool _winStatus;
         private void HandleEndConstraints()
         {

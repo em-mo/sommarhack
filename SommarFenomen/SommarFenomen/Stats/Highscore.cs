@@ -29,14 +29,14 @@ namespace SommarFenomen.Stats
     {
         private static int NUMBER_OF_SCORES = 10;
         public List<Score> _scores;
-        private Score _latestScore;
+        private int _latestScore;
  
         public Highscore()
         {
             _scores = new List<Score>();
         }
 
-        public bool InsertScore(long value, string name = "noname")
+        public bool InsertScore(long value, string name = "")
         {
             int i;
             bool inserted = false;
@@ -47,7 +47,7 @@ namespace SommarFenomen.Stats
             {
                 if (_scores[i].TimeTicks > item.TimeTicks)
                 {
-                    _latestScore = item;
+                    _latestScore = i;
                     _scores.Insert(i, item);
                     inserted = true;
                     break;
@@ -57,7 +57,7 @@ namespace SommarFenomen.Stats
             if (inserted == false)
             {
                 _scores.Add(item);
-                _latestScore = item;
+                _latestScore = i;
             }
 
             if (_scores.Count > NUMBER_OF_SCORES)
@@ -72,6 +72,11 @@ namespace SommarFenomen.Stats
         }
 
         public Score GetLatestScore()
+        {
+            return GetScore(_latestScore);
+        }
+
+        public int GetLatestScoreIndex()
         {
             return _latestScore;
         }

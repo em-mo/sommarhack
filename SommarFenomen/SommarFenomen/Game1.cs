@@ -12,6 +12,7 @@ using Microsoft.Xna.Framework.Media;
 using System.Diagnostics;
 using SommarFenomen.Util;
 using SommarFenomen.Windows;
+using SommarFenomen.Stats;
 
 namespace SommarFenomen
 {
@@ -84,10 +85,12 @@ namespace SommarFenomen
             waitingWindow.Initialize();
             LevelSelectWindow levelSelectWindow = new LevelSelectWindow(_windowHandler);
             levelSelectWindow.Initialize();
+            ScoreWindow scoreWindow = new ScoreWindow(_windowHandler);
 
             _windowHandler.PlayWindow = playWindow;
             _windowHandler.LevelSelectWindow = levelSelectWindow;
             _windowHandler.WaitingWindow = waitingWindow;
+            _windowHandler.ScoreWindow = scoreWindow;
 
             _windowHandler.ChangeWindow(waitingWindow, null);
         }
@@ -151,12 +154,10 @@ namespace SommarFenomen
             return false;
         }
     }
-    
-
 
     static class Shared
     {
         public static readonly Random Random = new Random();
-
+        public static readonly StatsHandler StatsHandler = new StatsHandler();
     }
 }

@@ -14,6 +14,7 @@ namespace SommarFenomen
         public PlayWindow PlayWindow { get; set; }
         public WaitingWindow WaitingWindow { get; set; }
         public LevelSelectWindow LevelSelectWindow { get; set; }
+        public ScoreWindow ScoreWindow { get; set; }
 
         private Window _currentWindow;
         public Game1 Game { get; set; }
